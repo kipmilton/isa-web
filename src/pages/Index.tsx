@@ -5,17 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { TryFreeDialog } from "@/components/TryFreeDialog";
-import { Auth } from "@supabase/ui";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import TryFreeDialog from "@/components/TryFreeDialog";
 import { Link } from "react-router-dom";
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [showTryFreeDialog, setShowTryFreeDialog] = useState(false);
-  const supabaseClient = useSupabaseClient();
-  const user = useUser();
 
   const handleThemeToggle = () => {
     setIsDarkTheme(!isDarkTheme);
@@ -25,6 +21,10 @@ const Index = () => {
   const handleTryFree = () => {
     // Navigate to chat page instead of opening dialog
     window.location.href = '/chat';
+  };
+
+  const handleSignIn = () => {
+    toast.info("Sign in functionality will be implemented soon!");
   };
 
   return (
@@ -41,7 +41,7 @@ const Index = () => {
               <Link to="/chat" className="text-gray-600 hover:text-orange-600 transition-colors">Ask ISA</Link>
               <a href="#features" className="text-gray-600 hover:text-orange-600 transition-colors">Features</a>
               <a href="#about" className="text-gray-600 hover:text-orange-600 transition-colors">About</a>
-              <Button onClick={() => setShowAuth(true)} variant="outline" className="border-orange-500 text-orange-600 hover:bg-orange-50">
+              <Button onClick={handleSignIn} variant="outline" className="border-orange-500 text-orange-600 hover:bg-orange-50">
                 Sign In
               </Button>
             </div>
@@ -71,7 +71,7 @@ const Index = () => {
               size="lg" 
               variant="outline" 
               className="border-orange-500 text-orange-600 hover:bg-orange-50 px-8 py-3"
-              onClick={() => setShowAuth(true)}
+              onClick={handleSignIn}
             >
               Sign Up Free
             </Button>
@@ -194,19 +194,14 @@ const Index = () => {
       <Dialog open={showAuth} onOpenChange={setShowAuth}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>
-              {user ? "Your Account" : "Authentication"}
-            </DialogTitle>
+            <DialogTitle>Authentication</DialogTitle>
           </DialogHeader>
-          <Auth
-            supabaseClient={supabaseClient}
-            appearance={{ theme: { default: isDarkTheme ? "dark" : "default" } }}
-            theme="default"
-            providers={[]}
-          />
           <div className="py-4">
-            <Label htmlFor="theme">Dark Mode</Label>
-            <Switch id="theme" checked={isDarkTheme} onCheckedChange={handleThemeToggle} />
+            <p className="text-gray-600 mb-4">Authentication will be implemented soon!</p>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="theme">Dark Mode</Label>
+              <Switch id="theme" checked={isDarkTheme} onCheckedChange={handleThemeToggle} />
+            </div>
           </div>
         </DialogContent>
       </Dialog>
