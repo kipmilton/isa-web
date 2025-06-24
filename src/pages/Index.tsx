@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import TryFreeDialog from "@/components/TryFreeDialog";
 import { Link } from "react-router-dom";
+import { MessageCircle, Search, ShoppingBag, Smartphone, Apple, Play, Quote } from "lucide-react";
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
@@ -20,7 +21,6 @@ const Index = () => {
   };
 
   const handleTryFree = () => {
-    // Navigate to chat page instead of opening dialog
     window.location.href = '/chat';
   };
 
@@ -40,8 +40,8 @@ const Index = () => {
             </div>
             <div className="hidden md:flex items-center space-x-6">
               <Link to="/chat" className="text-gray-600 hover:text-orange-600 transition-colors">Ask ISA</Link>
-              <a href="#features" className="text-gray-600 hover:text-orange-600 transition-colors">Features</a>
-              <a href="#about" className="text-gray-600 hover:text-orange-600 transition-colors">About</a>
+              <a href="#how-it-works" className="text-gray-600 hover:text-orange-600 transition-colors">How it Works</a>
+              <a href="#trending" className="text-gray-600 hover:text-orange-600 transition-colors">Trending</a>
               <Button onClick={handleSignIn} variant="outline" className="border-orange-500 text-orange-600 hover:bg-orange-50">
                 Sign In
               </Button>
@@ -83,111 +83,177 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="bg-gray-50 py-16">
+      {/* Mobile App Promotion */}
+      <section className="bg-gradient-to-r from-orange-500 to-yellow-500 py-12">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex justify-center mb-4">
+            <Smartphone className="h-12 w-12 text-white" />
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-4">Shop on the Go</h2>
+          <p className="text-white/90 mb-6 max-w-xl mx-auto">
+            Download our mobile app for iOS and Android. Get personalized recommendations anywhere, anytime.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button variant="outline" className="bg-white text-orange-600 hover:bg-gray-50 border-0">
+              <Apple className="h-5 w-5 mr-2" />
+              Download for iOS
+            </Button>
+            <Button variant="outline" className="bg-white text-orange-600 hover:bg-gray-50 border-0">
+              <Play className="h-5 w-5 mr-2" />
+              Get on Android
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* How ISA Works */}
+      <section id="how-it-works" className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-            Explore Our Features
+            How ISA Works for You
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                AI-Powered Recommendations
-              </h3>
-              <p className="text-gray-600">
-                Get personalized product suggestions based on your unique style and preferences.
-              </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageCircle className="h-8 w-8 text-orange-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">1. Ask us anything</h3>
+              <p className="text-gray-600">WhatsApp-style chat interface. Tell us what you're looking for, your style, and budget.</p>
             </div>
-
-            {/* Feature 2 */}
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Price Comparison
-              </h3>
-              <p className="text-gray-600">
-                Find the best deals by comparing prices from multiple vendors in real-time.
-              </p>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="h-8 w-8 text-orange-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">2. Get personalized results</h3>
+              <p className="text-gray-600">Our AI finds the best products & deals based on your style, preferences, and budget.</p>
             </div>
-
-            {/* Feature 3 */}
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Curated Product Selection
-              </h3>
-              <p className="text-gray-600">
-                Discover high-quality products handpicked by our AI from trusted sources.
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Fashion & Lifestyle Insights
-              </h3>
-              <p className="text-gray-600">
-                Stay up-to-date with the latest trends and insights in fashion and lifestyle.
-              </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Personalized Shopping Lists
-              </h3>
-              <p className="text-gray-600">
-                Create and manage your shopping lists with AI-powered assistance.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Vendor Recommendations
-              </h3>
-              <p className="text-gray-600">
-                Find reputable vendors and brands that align with your values and preferences.
-              </p>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShoppingBag className="h-8 w-8 text-orange-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">3. Buy easily</h3>
+              <p className="text-gray-600">Purchase directly from top brands & platforms with confidence and security.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-16">
+      {/* Founders' Words */}
+      <section className="bg-gray-50 py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            {/* Image */}
-            <div>
-              <img
-                src="https://images.unsplash.com/photo-1556740758-90de96635814?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-                alt="About ISA"
-                className="rounded-lg shadow-md"
-              />
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
+            A Word from Our Founders
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-lg p-6 shadow-md">
+              <Quote className="h-8 w-8 text-orange-500 mb-4" />
+              <p className="text-gray-600 mb-4 italic">
+                "We're building ISA to make quality products accessible to everyone in Africa. Our AI doesn't just recommend products—it understands your unique style and budget to find exactly what you need."
+              </p>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center mr-4">
+                  <span className="text-orange-700 font-bold">NK</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-800">Neema Kinoti</h4>
+                  <p className="text-gray-500 text-sm">CEO & Co-founder</p>
+                </div>
+              </div>
             </div>
-
-            {/* Text Content */}
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                About ISA
-              </h2>
-              <p className="text-gray-600 mb-4">
-                ISA is your AI-powered shopping assistant designed to make your online shopping experience smarter and more enjoyable. We leverage cutting-edge artificial intelligence to provide personalized recommendations, price comparisons, and curated product selections.
+            <div className="bg-white rounded-lg p-6 shadow-md">
+              <Quote className="h-8 w-8 text-orange-500 mb-4" />
+              <p className="text-gray-600 mb-4 italic">
+                "Technology should simplify life, not complicate it. We've designed ISA to be as intuitive as chatting with a friend who happens to know everything about shopping and style."
               </p>
-              <p className="text-gray-600">
-                Our mission is to empower shoppers with the tools and insights they need to make informed purchasing decisions. Whether you're looking for the latest fashion trends or essential lifestyle products, ISA is here to help you shop smarter and buy better.
-              </p>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center mr-4">
+                  <span className="text-orange-700 font-bold">MK</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-800">Milton Kiprop</h4>
+                  <p className="text-gray-500 text-sm">CTO & Co-founder</p>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Featured Products / Trending */}
+      <section id="trending" className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
+            What's Trending
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg p-6 hover:shadow-lg transition-shadow">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Top Picks Under KES 5,000</h3>
+              <p className="text-gray-600 mb-4">Affordable fashion and lifestyle essentials that don't compromise on quality.</p>
+              <Link to="/chat">
+                <Button variant="outline" className="border-pink-500 text-pink-600 hover:bg-pink-50">
+                  Explore Collection
+                </Button>
+              </Link>
+            </div>
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 hover:shadow-lg transition-shadow">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Sustainable Fashion</h3>
+              <p className="text-gray-600 mb-4">Eco-friendly brands and products that care for our planet and communities.</p>
+              <Link to="/chat">
+                <Button variant="outline" className="border-green-500 text-green-600 hover:bg-green-50">
+                  Shop Sustainable
+                </Button>
+              </Link>
+            </div>
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 hover:shadow-lg transition-shadow">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Local African Brands</h3>
+              <p className="text-gray-600 mb-4">Support homegrown talent with unique products made right here in Africa.</p>
+              <Link to="/chat">
+                <Button variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-50">
+                  Discover Local
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Soft Brand Mention */}
+      <section className="bg-gray-50 py-12">
+        <div className="container mx-auto px-4 text-center">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+            ✨ Trusted by select African & global brands
+          </h3>
+          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+            We're working with a curated group of ethical, sustainable and local vendors to bring you the best products at the best prices.
+          </p>
+          <Link to="/vendors">
+            <Button variant="outline" className="border-gray-400 text-gray-600 hover:bg-gray-100">
+              Want to become a vendor? Apply here
+            </Button>
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="bg-white py-8 border-t">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-500 text-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center space-x-3 mb-4 md:mb-0">
+              <img src="/lovable-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-8 w-8" />
+              <span className="text-xl font-bold text-gray-800">ISA</span>
+            </div>
+            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-sm text-gray-500">
+              <Link to="/vendors" className="hover:text-orange-600 transition-colors">
+                Become a Vendor
+              </Link>
+              <a href="#" className="hover:text-orange-600 transition-colors">Contact us</a>
+              <a href="#" className="hover:text-orange-600 transition-colors">Privacy</a>
+              <a href="#" className="hover:text-orange-600 transition-colors">Terms</a>
+            </div>
+          </div>
+          <div className="text-center text-gray-500 text-xs mt-4">
             &copy; {new Date().getFullYear()} ISA. All rights reserved.
-          </p>
+          </div>
         </div>
       </footer>
 
