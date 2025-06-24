@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -435,7 +434,7 @@ const Index = () => {
 
       <TryFreeDialog open={showTryFreeDialog} onOpenChange={setShowTryFreeDialog} />
 
-      <style jsx>{`
+      <style>{`
         @keyframes scroll {
           0% {
             transform: translateX(0);
