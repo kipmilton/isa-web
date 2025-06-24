@@ -8,9 +8,11 @@ import { toast } from "sonner";
 import TryFreeDialog from "@/components/TryFreeDialog";
 import { Link } from "react-router-dom";
 import { MessageCircle, Search, ShoppingBag, Smartphone, Apple, Play, Quote, Star } from "lucide-react";
+import AuthDialog from "@/components/auth/AuthDialog";
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
+  const [authType, setAuthType] = useState<'customer' | 'vendor'>('customer');
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [showTryFreeDialog, setShowTryFreeDialog] = useState(false);
   const vendorsRef = useRef<HTMLElement>(null);
@@ -25,7 +27,13 @@ const Index = () => {
   };
 
   const handleSignIn = () => {
-    toast.info("Sign in functionality will be implemented soon!");
+    setAuthType('customer');
+    setShowAuth(true);
+  };
+
+  const handleVendorSignUp = () => {
+    setAuthType('vendor');
+    setShowAuth(true);
   };
 
   const scrollToVendors = () => {
@@ -385,11 +393,21 @@ const Index = () => {
           <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
             We're working with a curated group of ethical, sustainable and local vendors to bring you the best products at the best prices.
           </p>
-          <Link to="/vendors">
-            <Button variant="outline" className="border-gray-400 text-gray-600 hover:bg-gray-100 hover-scale">
-              Want to become a vendor? Apply here
-            </Button>
-          </Link>
+          <div className="space-y-3">
+            <Link to="/vendors">
+              <Button variant="outline" className="border-gray-400 text-gray-600 hover:bg-gray-100 hover-scale">
+                Want to become a vendor? Apply here
+              </Button>
+            </Link>
+            <div>
+              <Button 
+                onClick={handleVendorSignUp}
+                className="bg-green-500 hover:bg-green-600 text-white hover-scale"
+              >
+                Join as Vendor Now
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -416,21 +434,12 @@ const Index = () => {
         </div>
       </footer>
 
-      {/* Auth Modal */}
-      <Dialog open={showAuth} onOpenChange={setShowAuth}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Authentication</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-gray-600 mb-4">Authentication will be implemented soon!</p>
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="theme">Dark Mode</Label>
-              <Switch id="theme" checked={isDarkTheme} onCheckedChange={handleThemeToggle} />
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Auth Dialog */}
+      <AuthDialog 
+        open={showAuth} 
+        onOpenChange={setShowAuth} 
+        type={authType}
+      />
 
       <TryFreeDialog open={showTryFreeDialog} onOpenChange={setShowTryFreeDialog} />
 
