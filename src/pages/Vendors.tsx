@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,15 +5,25 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Users, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useVendor } from "@/contexts/VendorContext";
 
 const Vendors = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const { setIsVendor, setVendorStatus } = useVendor();
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormSubmitted(true);
+    setIsVendor(true);
+    setVendorStatus('pending');
     toast.success("Application submitted! We'll review and get back within 72 hours.");
+    
+    // Redirect to vendor status page after 2 seconds
+    setTimeout(() => {
+      navigate('/vendor-status');
+    }, 2000);
   };
 
   if (formSubmitted) {
@@ -31,12 +40,9 @@ const Vendors = () => {
             <p className="text-gray-600">
               Thank you for your interest in partnering with ISA. We review all applications and will get back to you within 72 hours.
             </p>
-            <Link to="/">
-              <Button className="w-full">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Homepage
-              </Button>
-            </Link>
+            <p className="text-sm text-gray-500">
+              Redirecting to your vendor status page...
+            </p>
           </CardContent>
         </Card>
       </div>

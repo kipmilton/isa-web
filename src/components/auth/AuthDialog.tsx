@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useVendor } from "@/contexts/VendorContext";
+import { useNavigate } from "react-router-dom";
 
 interface AuthDialogProps {
   open: boolean;
@@ -15,11 +16,44 @@ interface AuthDialogProps {
 
 const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const { setIsVendor, setVendorStatus } = useVendor();
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(isSignUp ? "Account created successfully!" : "Signed in successfully!");
-    onOpenChange(false);
+    
+    if (isSignUp && type === 'vendor') {
+      // Vendor sign up - redirect to vendor application
+      toast.success("Account created! Redirecting to vendor application...");
+      onOpenChange(false);
+      setTimeout(() => {
+        navigate('/vendors');
+      }, 1000);
+    } else if (!isSignUp && type === 'vendor') {
+      // Vendor sign in - check status and redirect accordingly
+      setIsVendor(true);
+      // Simulate different vendor statuses for demo
+      const statuses = ['pending', 'approved', 'rejected'];
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)] as any;
+      setVendorStatus(randomStatus);
+      
+      toast.success("Signed in successfully!");
+      onOpenChange(false);
+      setTimeout(() => {
+        if (randomStatus === 'approved') {
+          navigate('/vendor-dashboard');
+        } else {
+          navigate('/vendor-status');
+        }
+      }, 1000);
+    } else {
+      // Customer flow - redirect to chat
+      toast.success(isSignUp ? "Account created successfully!" : "Signed in successfully!");
+      onOpenChange(false);
+      setTimeout(() => {
+        navigate('/chat');
+      }, 1000);
+    }
   };
 
   return (
@@ -63,18 +97,20 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
                 
                 <TabsContent value="signup">
                   <form onSubmit={handleSubmit} className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input id="firstName" required className="mt-1" />
+                      </div>
+                      <div>
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input id="lastName" required className="mt-1" />
+                      </div>
+                    </div>
+                    
                     {type === 'customer' ? (
                       <>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label htmlFor="firstName">First Name</Label>
-                            <Input id="firstName" required className="mt-1" />
-                          </div>
-                          <div>
-                            <Label htmlFor="lastName">Last Name</Label>
-                            <Input id="lastName" required className="mt-1" />
-                          </div>
-                        </div>
                         <div>
                           <Label htmlFor="phone">Phone Number</Label>
                           <Input id="phone" type="tel" required className="mt-1" />
@@ -99,16 +135,6 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
                       </>
                     ) : (
                       <>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label htmlFor="firstName">First Name</Label>
-                            <Input id="firstName" required className="mt-1" />
-                          </div>
-                          <div>
-                            <Label htmlFor="lastName">Last Name</Label>
-                            <Input id="lastName" required className="mt-1" />
-                          </div>
-                        </div>
                         <div>
                           <Label htmlFor="company">Company</Label>
                           <Input id="company" required className="mt-1" />
@@ -143,6 +169,7 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
 
           {/* Right Side - Branding */}
           <div className="flex-1 bg-gradient-to-br from-orange-500 to-yellow-500 p-8 flex flex-col justify-center items-center text-white">
+            
             <div className="text-center max-w-sm">
               <img 
                 src="/lovable-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" 
