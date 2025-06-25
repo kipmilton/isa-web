@@ -37,6 +37,11 @@ const Index = () => {
     setShowAuth(true);
   };
 
+  const handleVendorSignIn = () => {
+    setAuthType('vendor');
+    setShowAuth(true);
+  };
+
   const scrollToVendors = () => {
     vendorsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -397,23 +402,27 @@ const Index = () => {
       <section ref={vendorsRef} className="bg-gray-50 py-12">
         <div className="container mx-auto px-4 text-center">
           <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-            ✨ Trusted by select African & global brands
+            ✨ Trusted by select African Brands
           </h3>
           <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
             We're working with a curated group of ethical, sustainable and local vendors to bring you the best products at the best prices.
           </p>
           <div className="space-y-3">
-            <Link to="/vendors">
-              <Button variant="outline" className="border-gray-400 text-gray-600 hover:bg-gray-100 hover-scale">
-                Want to become a vendor? Apply here
-              </Button>
-            </Link>
             <div>
               <Button 
                 onClick={handleVendorSignUp}
+                variant="outline" 
+                className="border-gray-400 text-gray-600 hover:bg-gray-100 hover-scale"
+              >
+                Want to become a vendor? Apply here
+              </Button>
+            </div>
+            <div>
+              <Button 
+                onClick={handleVendorSignIn}
                 className="bg-green-500 hover:bg-green-600 text-white hover-scale"
               >
-                Join as Vendor Now
+                Sign in as a vendor
               </Button>
             </div>
           </div>
