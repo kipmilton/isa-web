@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ShoppingBag, Search, ShieldCheck, Users } from "lucide-react";
-import AuthDialog from "@/components/auth/AuthDialog";
-import TryFreeDialog from "@/components/TryFreeDialog";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { TryFreeDialog } from "@/components/TryFreeDialog";
 
 const Index = () => {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
