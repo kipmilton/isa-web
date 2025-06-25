@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Gift, Heart, Sparkles, ArrowLeft } from "lucide-react";
+import { Gift as GiftIcon, Heart, Sparkles, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -92,7 +92,7 @@ const Gift = () => {
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
             <div className="relative">
-              <Gift className="h-20 w-20 text-pink-500" />
+              <GiftIcon className="h-20 w-20 text-pink-500" />
               <Sparkles className="h-8 w-8 text-yellow-400 absolute -top-2 -right-2 animate-pulse" />
             </div>
           </div>
@@ -215,7 +215,7 @@ const Gift = () => {
             
             {suggestions.length === 0 && (
               <div className="text-center py-12 text-gray-500">
-                <Gift className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                <GiftIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
                 <p>Fill in the form and let ISA find amazing gifts!</p>
               </div>
             )}
