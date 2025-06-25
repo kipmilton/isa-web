@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -23,32 +22,35 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isSignUp && type === 'vendor') {
-      // Vendor sign up - redirect to vendor application
-      toast.success("Account created! Redirecting to vendor application...");
-      onOpenChange(false);
-      setTimeout(() => {
-        navigate('/vendors');
-      }, 1000);
-    } else if (!isSignUp && type === 'vendor') {
-      // Vendor sign in - check status and redirect accordingly
+    if (type === 'vendor') {
       setIsVendor(true);
-      // Simulate different vendor statuses for demo
-      const statuses = ['pending', 'approved', 'rejected'];
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)] as any;
-      setVendorStatus(randomStatus);
       
-      toast.success("Signed in successfully!");
-      onOpenChange(false);
-      setTimeout(() => {
-        if (randomStatus === 'approved') {
-          navigate('/vendor-dashboard');
-        } else {
-          navigate('/vendor-status');
-        }
-      }, 1000);
+      if (isSignUp) {
+        // New vendor signup - redirect to application
+        toast.success("Account created! Please complete your vendor application.");
+        onOpenChange(false);
+        setTimeout(() => {
+          navigate('/vendors');
+        }, 1000);
+      } else {
+        // Existing vendor signin - simulate different statuses
+        const statuses = ['pending', 'approved', 'rejected'];
+        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)] as any;
+        setVendorStatus(randomStatus);
+        
+        toast.success("Signed in successfully!");
+        onOpenChange(false);
+        setTimeout(() => {
+          if (randomStatus === 'approved') {
+            navigate('/vendor-dashboard');
+          } else {
+            navigate('/vendor-status');
+          }
+        }, 1000);
+      }
     } else {
-      // Customer flow - redirect to chat
+      // Customer flow - redirect to chat (Ask ISA)
+      setIsVendor(false);
       toast.success(isSignUp ? "Account created successfully!" : "Signed in successfully!");
       onOpenChange(false);
       setTimeout(() => {
@@ -179,25 +181,51 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
               />
               <h3 className="text-3xl font-bold mb-4">Welcome to ISA</h3>
               <p className="text-lg mb-6 opacity-90">
-                Your AI-powered shopping companion that understands your style, budget, and preferences.
+                {type === 'customer' 
+                  ? "Your AI-powered shopping companion that understands your style, budget, and preferences."
+                  : "Join our vendor community and grow your business with AI-powered recommendations."
+                }
               </p>
               <div className="space-y-3 text-left">
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                  <span className="text-sm">Personalized product recommendations</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                  <span className="text-sm">Access to quality African & global brands</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                  <span className="text-sm">WhatsApp-style shopping experience</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                  <span className="text-sm">Secure and trusted platform</span>
-                </div>
+                {type === 'customer' ? (
+                  <>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-sm">Personalized product recommendations</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-sm">Access to quality African & global brands</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-sm">WhatsApp-style shopping experience</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-sm">Secure and trusted platform</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-sm">Reach thousands of potential customers</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-sm">AI-powered product recommendations</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-sm">Easy product management tools</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-sm">Secure payment processing</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
