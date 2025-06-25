@@ -8,6 +8,7 @@ import { VendorProvider } from "@/contexts/VendorContext";
 import Index from "./pages/Index";
 import Vendors from "./pages/Vendors";
 import Chat from "./pages/Chat";
+import Gift from "./pages/Gift";
 import VendorDashboard from "./components/vendor/VendorDashboard";
 import VendorStatus from "./components/vendor/VendorStatus";
 import NotFound from "./pages/NotFound";
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/vendors" element={<Vendors />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/gift" element={<Gift />} />
             <Route path="/vendor-dashboard" element={<VendorDashboard />} />
             <Route path="/vendor-status" element={<VendorStatus />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
