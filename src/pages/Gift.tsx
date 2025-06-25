@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Gift as GiftIcon, Heart, Sparkles, ArrowLeft } from "lucide-react";
+import { GiftIcon, Heart, Sparkles, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -34,22 +34,22 @@ const Gift = () => {
 
     setIsLoading(true);
     
-    // Simulate API call with mock data
+    // Simulate API call with mock data using realistic images
     setTimeout(() => {
       const mockSuggestions = [
         {
           id: 1,
           name: "Wireless Bluetooth Headphones",
           price: "KES 4,500",
-          image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=300&fit=crop",
+          image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop",
           description: "Perfect for music lovers and tech enthusiasts",
           rating: 4.8
         },
         {
           id: 2,
-          name: "Artisan Coffee Set",
+          name: "Premium Coffee Beans Set",
           price: "KES 3,200",
-          image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=400&h=300&fit=crop",
+          image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=300&fit=crop",
           description: "Ideal for coffee connoisseurs and morning ritual lovers",
           rating: 4.6
         },
@@ -57,9 +57,25 @@ const Gift = () => {
           id: 3,
           name: "Cozy Reading Blanket",
           price: "KES 2,800",
-          image: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=300&fit=crop",
+          image: "https://images.unsplash.com/photo-1586985564150-0f5b0e03e8c5?w=400&h=300&fit=crop",
           description: "Perfect for book lovers and comfort seekers",
           rating: 4.9
+        },
+        {
+          id: 4,
+          name: "Skincare Gift Set",
+          price: "KES 5,200",
+          image: "https://images.unsplash.com/photo-1556228578-dd6d3dcbc96d?w=400&h=300&fit=crop",
+          description: "Great for skincare enthusiasts and self-care lovers",
+          rating: 4.7
+        },
+        {
+          id: 5,
+          name: "Leather Wallet",
+          price: "KES 3,500",
+          image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=300&fit=crop",
+          description: "Stylish and practical for everyday use",
+          rating: 4.5
         }
       ];
       
@@ -220,39 +236,41 @@ const Gift = () => {
               </div>
             )}
 
-            {suggestions.map((suggestion) => (
-              <Card key={suggestion.id} className="shadow-md hover:shadow-lg transition-shadow bg-white">
-                <div className="flex">
-                  <img
-                    src={suggestion.image}
-                    alt={suggestion.name}
-                    className="w-24 h-24 object-cover rounded-l-lg"
-                  />
-                  <CardContent className="flex-1 p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-gray-800">{suggestion.name}</h3>
-                      <span className="font-bold text-orange-600">{suggestion.price}</span>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3">{suggestion.description}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="flex text-yellow-400">
-                          {[...Array(5)].map((_, i) => (
-                            <span key={i} className={i < Math.floor(suggestion.rating) ? "★" : "☆"}>
-                              ★
-                            </span>
-                          ))}
-                        </div>
-                        <span className="text-sm text-gray-500 ml-2">({suggestion.rating})</span>
+            <div className="max-h-96 overflow-y-auto space-y-4">
+              {suggestions.map((suggestion) => (
+                <Card key={suggestion.id} className="shadow-md hover:shadow-lg transition-shadow bg-white">
+                  <div className="flex">
+                    <img
+                      src={suggestion.image}
+                      alt={suggestion.name}
+                      className="w-24 h-24 object-cover rounded-l-lg"
+                    />
+                    <CardContent className="flex-1 p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-semibold text-gray-800">{suggestion.name}</h3>
+                        <span className="font-bold text-orange-600">{suggestion.price}</span>
                       </div>
-                      <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
-                        View Details
-                      </Button>
-                    </div>
-                  </CardContent>
-                </div>
-              </Card>
-            ))}
+                      <p className="text-sm text-gray-600 mb-3">{suggestion.description}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="flex text-yellow-400">
+                            {[...Array(5)].map((_, i) => (
+                              <span key={i} className={i < Math.floor(suggestion.rating) ? "★" : "☆"}>
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-500 ml-2">({suggestion.rating})</span>
+                        </div>
+                        <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
+                          View Details
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </div>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </div>

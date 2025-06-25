@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,35 +90,36 @@ const Vendors = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <Label htmlFor="company">Company/Business Name *</Label>
+                  <Input id="company" required />
+                </div>
+                
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName">Designated Company Rep First Name *</Label>
                     <Input id="firstName" required />
                   </div>
                   <div>
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="lastName">Designated Company Rep Last Name *</Label>
                     <Input id="lastName" required />
                   </div>
                 </div>
                 
                 <div>
-                  <Label htmlFor="company">Company/Business Name</Label>
-                  <Input id="company" required />
-                </div>
-                
-                <div>
-                  <Label htmlFor="businessType">Type of Business/Products</Label>
+                  <Label htmlFor="businessType">Type of Business/Products *</Label>
                   <Input id="businessType" placeholder="e.g., Fashion, Electronics, Home goods" required />
                 </div>
                 
-                <div>
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" required />
-                </div>
-                
-                <div>
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" required />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="email">Email Address *</Label>
+                    <Input id="email" type="email" required />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Input id="phone" type="tel" placeholder="+254..." required />
+                  </div>
                 </div>
                 
                 <div>
@@ -126,7 +128,7 @@ const Vendors = () => {
                 </div>
                 
                 <div>
-                  <Label htmlFor="description">Brief Description of Your Business</Label>
+                  <Label htmlFor="description">Brief Description of Your Business *</Label>
                   <textarea 
                     id="description" 
                     className="w-full p-3 border border-gray-300 rounded-md h-24 resize-none"
