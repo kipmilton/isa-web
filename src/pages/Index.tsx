@@ -1,276 +1,382 @@
-
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ShoppingBag, Search, ShieldCheck, Users, Star, Quote } from "lucide-react";
-import AuthDialog from "@/components/auth/AuthDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 import TryFreeDialog from "@/components/TryFreeDialog";
+import { Link } from "react-router-dom";
+import { MessageCircle, Search, ShoppingBag, Smartphone, Apple, Play, Quote, Star } from "lucide-react";
+import AuthDialog from "@/components/auth/AuthDialog";
 
 const Index = () => {
-  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
   const [authType, setAuthType] = useState<'customer' | 'vendor'>('customer');
-  const [tryFreeDialogOpen, setTryFreeDialogOpen] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const [showTryFreeDialog, setShowTryFreeDialog] = useState(false);
+  const vendorsRef = useRef<HTMLElement>(null);
 
-  const handleVendorClick = () => {
+  const handleThemeToggle = () => {
+    setIsDarkTheme(!isDarkTheme);
+    document.documentElement.classList.toggle("dark");
+  };
+
+  const handleTryFree = () => {
+    window.location.href = '/chat';
+  };
+
+  const handleSignIn = () => {
+    setAuthType('customer');
+    setShowAuth(true);
+  };
+
+  const handleVendorSignUp = () => {
     setAuthType('vendor');
-    setAuthDialogOpen(true);
+    setShowAuth(true);
   };
 
-  const scrollToVendorSection = () => {
-    document.getElementById('vendor-section')?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToVendors = () => {
+    vendorsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const trendingProducts = [
+  const reviews = [
     {
-      name: "African Print Dress",
-      price: "$45",
-      image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=300&h=300&fit=crop",
-      vendor: "Adaora Fashion"
-    },
-    {
-      name: "Handcrafted Jewelry",
-      price: "$28",
-      image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop",
-      vendor: "Golden Touch"
-    },
-    {
-      name: "Organic Skincare Set",
-      price: "$35",
-      image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=300&h=300&fit=crop",
-      vendor: "Natural Glow"
-    },
-    {
-      name: "Traditional Fabric",
-      price: "$22",
-      image: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=300&h=300&fit=crop",
-      vendor: "Heritage Textiles"
-    }
-  ];
-
-  const testimonials = [
-    {
-      text: "ISA helped me find the perfect African print dresses for my boutique. The quality is amazing!",
-      author: "Sarah M.",
-      role: "Customer",
+      name: "Sarah Mwangi",
+      role: "Fashion Enthusiast",
+      type: "customer",
+      text: "ISA helped me find the perfect dress for my graduation at half the price I expected!",
       rating: 5
     },
     {
-      text: "As a vendor, ISA has increased my sales by 300%. The AI recommendations bring the right customers to my products.",
-      author: "Kwame A.",
-      role: "Vendor",
+      name: "David Ochieng",
+      role: "Small Business Owner",
+      type: "vendor",
+      text: "Since joining ISA, my sales have increased by 300%. The AI matching is incredible!",
       rating: 5
     },
     {
-      text: "I love how ISA understands my style preferences. Every recommendation is spot on!",
-      author: "Amina K.",
-      role: "Customer",
+      name: "Grace Wanjiku",
+      role: "University Student",
+      type: "customer",
+      text: "Finally, a shopping assistant that understands my budget and style. Love it!",
       rating: 5
     },
     {
-      text: "The platform is so easy to use. I've been able to grow my jewelry business significantly.",
-      author: "Grace O.",
-      role: "Vendor",
+      name: "Michael Kiprotich",
+      role: "Local Designer",
+      type: "vendor",
+      text: "ISA connects me with customers who truly appreciate handmade African fashion.",
       rating: 5
     },
     {
-      text: "ISA's chat feature makes shopping feel personal. It's like having a friend help you shop!",
-      author: "David L.",
-      role: "Customer",
+      name: "Amina Hassan",
+      role: "Working Mom",
+      type: "customer",
+      text: "Shopping with ISA is like having a personal stylist who knows exactly what I need.",
       rating: 5
     },
     {
-      text: "Finally, a platform that showcases authentic African brands. My customers love the quality.",
-      author: "Fatima S.",
-      role: "Vendor",
+      name: "John Muthomi",
+      role: "Electronics Vendor",
+      type: "vendor",
+      text: "The quality of customers ISA brings is amazing. They know what they want!",
       rating: 5
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-gray-50">
-      {/* Header */}
-      <nav className="bg-white/80 backdrop-blur-sm border-b sticky top-0 z-50">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-2">
-              <img src="/lovable-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="w-8 h-8" />
-              <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-green-500 bg-clip-text text-transparent">ISA</span>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <img src="/lovable-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-10 w-10" />
+              <span className="text-2xl font-bold text-gray-800">ISA</span>
             </div>
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-600 hover:text-orange-500 transition-colors">Features</a>
-              <a href="#how-it-works" className="text-gray-600 hover:text-orange-500 transition-colors">How It Works</a>
-              <a href="#trending" className="text-gray-600 hover:text-orange-500 transition-colors">Trending</a>
+            <div className="hidden md:flex items-center space-x-6">
+              <Link to="/chat" className="text-gray-600 hover:text-orange-600 transition-colors">Ask ISA</Link>
+              <a href="#how-it-works" className="text-gray-600 hover:text-orange-600 transition-colors">How it Works</a>
+              <a href="#trending" className="text-gray-600 hover:text-orange-600 transition-colors">Trending</a>
               <Button 
-                variant="ghost" 
-                className="text-gray-600 hover:text-orange-500"
-                onClick={scrollToVendorSection}
+                onClick={scrollToVendors} 
+                variant="outline" 
+                className="border-green-500 text-green-600 hover:bg-green-50"
               >
                 Join as Vendor
               </Button>
-              <Button 
-                onClick={() => setTryFreeDialogOpen(true)}
-                className="bg-orange-500 hover:bg-orange-600 text-white"
-              >
-                Try ISA Free
+              <Button onClick={handleSignIn} variant="outline" className="border-orange-500 text-orange-600 hover:bg-orange-50">
+                Sign In
               </Button>
             </div>
-            <Button className="md:hidden">Menu</Button>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="py-24">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold mb-8 bg-gradient-to-r from-orange-500 to-green-500 bg-clip-text text-transparent animate-fade-in">
-            Your AI Shopping Assistant
+      <section className="py-20 px-4">
+        <div className="container mx-auto text-center">
+          <div className="flex justify-center mb-6 animate-fade-in">
+            <img src="/lovable-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-20 w-20" />
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-fade-in">
+            Shop Smarter, Buy Better
           </h1>
-          <p className="text-2xl text-gray-600 mb-12 animate-fade-in">
-            Discover a smarter way to shop with personalized recommendations, unbeatable prices, and a seamless experience.
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto animate-fade-in">
+            Discover fashion, lifestyle & essentials curated just for you — powered by AI.
           </p>
-          <div className="flex justify-center">
-            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-lg font-semibold hover-scale">
-              Get Started <ArrowRight className="ml-2" />
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
+            <Link to="/chat">
+              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 hover-scale">
+                Start Shopping
+              </Button>
+            </Link>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-orange-500 text-orange-600 hover:bg-orange-50 px-8 py-3 hover-scale"
+              onClick={handleSignIn}
+            >
+              Sign Up Free
+            </Button>
+          </div>
+          <p className="text-sm text-gray-500 mt-4 animate-fade-in">
+            Powered by AI. Designed for Trust. Built for Africa.
+          </p>
+        </div>
+      </section>
+
+      {/* Mobile App Promotion */}
+      <section className="bg-gradient-to-r from-orange-500 to-yellow-500 py-12">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex justify-center mb-4 animate-scale-in">
+            <Smartphone className="h-12 w-12 text-white" />
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-4">Shop on the Go</h2>
+          <p className="text-white/90 mb-6 max-w-xl mx-auto">
+            Download our mobile app for iOS and Android. Get personalized recommendations anywhere, anytime.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button variant="outline" className="bg-white text-orange-600 hover:bg-gray-50 border-0 hover-scale">
+              <Apple className="h-5 w-5 mr-2" />
+              Download for iOS
+            </Button>
+            <Button variant="outline" className="bg-white text-orange-600 hover:bg-gray-50 border-0 hover-scale">
+              <Play className="h-5 w-5 mr-2" />
+              Get on Android
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-16 bg-gray-50">
+      {/* How ISA Works */}
+      <section id="how-it-works" className="py-20 bg-white overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Explore Our Key Features</h2>
-            <p className="text-gray-600 text-xl">Unlock a world of possibilities with our AI-powered shopping platform.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300 hover-scale">
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
-                <ShoppingBag className="text-orange-500" />
+          <h2 className="text-4xl font-bold text-gray-900 text-center mb-16 animate-fade-in">
+            How ISA Works for You
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="text-center group animate-fade-in">
+              <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <MessageCircle className="h-10 w-10 text-orange-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Personalized Recommendations</h3>
-              <p className="text-gray-500">Get tailored product suggestions based on your unique style and preferences.</p>
+              <div className="relative">
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-lg font-bold">
+                  1
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Ask us anything</h3>
+              </div>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                WhatsApp-style chat interface. Tell us what you're looking for, your style, and budget.
+              </p>
+              <div className="mt-4 p-3 bg-orange-50 rounded-lg border border-orange-100">
+                <p className="text-sm text-orange-700 italic">"Show me trendy dresses under KES 3,000"</p>
+              </div>
             </div>
-            {/* Feature 2 */}
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300 hover-scale">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <Search className="text-green-500" />
+            <div className="text-center group animate-fade-in" style={{animationDelay: '0.2s'}}>
+              <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Search className="h-10 w-10 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Smart Search & Comparison</h3>
-              <p className="text-gray-500">Easily compare products, prices, and features to make informed decisions.</p>
+              <div className="relative">
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-lg font-bold">
+                  2
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Get personalized results</h3>
+              </div>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                Our AI finds the best products & deals based on your style, preferences, and budget.
+              </p>
+              <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-100">
+                <p className="text-sm text-green-700 italic">✨ 5 perfect matches found!</p>
+              </div>
             </div>
-            {/* Feature 3 */}
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300 hover-scale">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <ShieldCheck className="text-blue-500" />
+            <div className="text-center group animate-fade-in" style={{animationDelay: '0.4s'}}>
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <ShoppingBag className="h-10 w-10 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Secure & Trusted Platform</h3>
-              <p className="text-gray-500">Shop with confidence knowing your data is protected with top-notch security measures.</p>
+              <div className="relative">
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-lg font-bold">
+                  3
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Buy easily</h3>
+              </div>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                Purchase directly from top brands & platforms with confidence and security.
+              </p>
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <p className="text-sm text-blue-700 italic">🛒 Secure checkout in 2 clicks</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works Section - Enhanced with Animations */}
-      <section id="how-it-works" className="py-16">
+      {/* Founders' Words */}
+      <section className="bg-gray-50 py-16">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">How It Works</h2>
-            <p className="text-gray-600 text-xl">Experience the future of shopping in just a few simple steps.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Step 1 */}
-            <div className="text-center group">
-              <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-3xl font-bold text-orange-500">1</span>
-              </div>
-              <div className="h-1 w-16 bg-orange-200 mx-auto mb-4 relative overflow-hidden">
-                <div className="h-full bg-orange-500 w-0 group-hover:w-full transition-all duration-1000"></div>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Sign Up & Personalize</h3>
-              <p className="text-gray-500">Create your account and tell us about your preferences and shopping goals.</p>
-            </div>
-            {/* Step 2 */}
-            <div className="text-center group">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-3xl font-bold text-green-500">2</span>
-              </div>
-              <div className="h-1 w-16 bg-green-200 mx-auto mb-4 relative overflow-hidden">
-                <div className="h-full bg-green-500 w-0 group-hover:w-full transition-all duration-1000 delay-200"></div>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Explore Recommendations</h3>
-              <p className="text-gray-500">Browse personalized product suggestions tailored just for you.</p>
-            </div>
-            {/* Step 3 */}
-            <div className="text-center group">
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-3xl font-bold text-blue-500">3</span>
-              </div>
-              <div className="h-1 w-16 bg-blue-200 mx-auto mb-4 relative overflow-hidden">
-                <div className="h-full bg-blue-500 w-0 group-hover:w-full transition-all duration-1000 delay-400"></div>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Shop & Save</h3>
-              <p className="text-gray-500">Enjoy a seamless shopping experience with unbeatable prices and exclusive deals.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trending Section */}
-      <section id="trending" className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Trending Now</h2>
-            <p className="text-gray-600 text-xl">Discover what's popular with our community</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {trendingProducts.map((product, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 hover-scale">
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
-                  <p className="text-gray-500 text-sm mb-2">by {product.vendor}</p>
-                  <p className="text-orange-500 font-bold text-xl">{product.price}</p>
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
+            A Word from Our Founders
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-lg p-6 shadow-md hover-scale">
+              <Quote className="h-8 w-8 text-orange-500 mb-4" />
+              <p className="text-gray-600 mb-4 italic">
+                "We're building ISA to make quality products accessible to everyone in Africa. Our AI doesn't just recommend products—it understands your unique style and budget to find exactly what you need."
+              </p>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center mr-4">
+                  <span className="text-orange-700 font-bold">NK</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-800">Neema Kinoti</h4>
+                  <p className="text-gray-500 text-sm">CEO & Co-founder</p>
                 </div>
               </div>
-            ))}
+            </div>
+            <div className="bg-white rounded-lg p-6 shadow-md hover-scale">
+              <Quote className="h-8 w-8 text-orange-500 mb-4" />
+              <p className="text-gray-600 mb-4 italic">
+                "Technology should simplify life, not complicate it. We've designed ISA to be as intuitive as chatting with a friend who happens to know everything about shopping and style."
+              </p>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center mr-4">
+                  <span className="text-orange-700 font-bold">MK</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-800">Milton Kiprop</h4>
+                  <p className="text-gray-500 text-sm">CTO & Co-founder</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-16 bg-white overflow-hidden">
+      {/* Featured Products / Trending */}
+      <section id="trending" className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">What People Say About ISA</h2>
-            <p className="text-gray-600 text-xl">Real reviews from our amazing community</p>
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
+            What's Trending
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg overflow-hidden hover:shadow-lg transition-shadow hover-scale">
+              <div className="h-48 bg-gradient-to-br from-pink-200 to-pink-300 flex items-center justify-center">
+                <img 
+                  src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=300&fit=crop&crop=center" 
+                  alt="Affordable fashion items"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Top Picks Under KES 5,000</h3>
+                <p className="text-gray-600 mb-4">Affordable fashion and lifestyle essentials that don't compromise on quality.</p>
+                <Link to="/chat">
+                  <Button variant="outline" className="border-pink-500 text-pink-600 hover:bg-pink-50">
+                    Explore Collection
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg overflow-hidden hover:shadow-lg transition-shadow hover-scale">
+              <div className="h-48 bg-gradient-to-br from-green-200 to-green-300 flex items-center justify-center">
+                <img 
+                  src="https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=300&fit=crop&crop=center" 
+                  alt="Sustainable fashion"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Sustainable Fashion</h3>
+                <p className="text-gray-600 mb-4">Eco-friendly brands and products that care for our planet and communities.</p>
+                <Link to="/chat">
+                  <Button variant="outline" className="border-green-500 text-green-600 hover:bg-green-50">
+                    Shop Sustainable
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg overflow-hidden hover:shadow-lg transition-shadow hover-scale">
+              <div className="h-48 bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center">
+                <img 
+                  src="https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=400&h=300&fit=crop&crop=center" 
+                  alt="Local African brands"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Local African Brands</h3>
+                <p className="text-gray-600 mb-4">Support homegrown talent with unique products made right here in Africa.</p>
+                <Link to="/chat">
+                  <Button variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-50">
+                    Discover Local
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* What People Say About ISA */}
+      <section className="py-16 bg-gradient-to-r from-orange-50 to-yellow-50 overflow-hidden">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
+            What People Say About ISA
+          </h2>
           <div className="relative">
-            <div className="flex animate-slide-right space-x-6" style={{
-              animation: 'slide-right 30s linear infinite',
-              width: 'calc(300px * 12)' // 6 testimonials * 2 for seamless loop
+            <div className="flex animate-scroll space-x-6" style={{
+              animation: 'scroll 30s linear infinite',
+              width: 'calc(300px * 12)'
             }}>
-              {[...testimonials, ...testimonials].map((testimonial, index) => (
-                <div key={index} className="bg-gray-50 rounded-lg p-6 shadow-md min-w-[300px] flex-shrink-0">
+              {[...reviews, ...reviews].map((review, index) => (
+                <div key={index} className="flex-shrink-0 w-80 bg-white rounded-lg p-6 shadow-md">
                   <div className="flex items-center mb-4">
-                    <Quote className="w-6 h-6 text-orange-500 mr-2" />
-                    <div className="flex">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                      ))}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
+                      review.type === 'customer' ? 'bg-blue-100' : 'bg-green-100'
+                    }`}>
+                      <span className={`text-sm font-bold ${
+                        review.type === 'customer' ? 'text-blue-600' : 'text-green-600'
+                      }`}>
+                        {review.name.split(' ').map(n => n[0]).join('')}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-800 text-sm">{review.name}</h4>
+                      <p className="text-gray-500 text-xs">{review.role}</p>
+                    </div>
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      review.type === 'customer' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'
+                    }`}>
+                      {review.type}
                     </div>
                   </div>
-                  <p className="text-gray-700 mb-4 italic">"{testimonial.text}"</p>
-                  <div className="flex items-center">
-                    <div>
-                      <p className="font-semibold">{testimonial.author}</p>
-                      <p className="text-sm text-gray-500">{testimonial.role}</p>
-                    </div>
+                  <div className="flex mb-2">
+                    {[...Array(review.rating)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                    ))}
                   </div>
+                  <p className="text-gray-600 text-sm italic">"{review.text}"</p>
                 </div>
               ))}
             </div>
@@ -278,79 +384,67 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Vendor Section */}
-      <section id="vendor-section" className="py-16 bg-gradient-to-r from-orange-100 to-yellow-100">
+      {/* Soft Brand Mention */}
+      <section ref={vendorsRef} className="bg-gray-50 py-12">
         <div className="container mx-auto px-4 text-center">
-          <div className="max-w-3xl mx-auto">
-            <Users className="w-16 h-16 text-orange-500 mx-auto mb-6" />
-            <h2 className="text-3xl font-bold mb-4">Ready to Become a Vendor?</h2>
-            <p className="text-xl text-gray-700 mb-8">
-              Join thousands of successful vendors who are growing their businesses with ISA. 
-              We're currently onboarding selected brands focused on quality, affordability, and African innovation.
-            </p>
-            <Button 
-              size="lg" 
-              className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-lg font-semibold"
-              onClick={handleVendorClick}
-            >
-              Apply as Vendor
-            </Button>
-            <p className="text-gray-600 text-sm mt-4">We review all applications and get back within 72 hours</p>
+          <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+            ✨ Trusted by select African & global brands
+          </h3>
+          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+            We're working with a curated group of ethical, sustainable and local vendors to bring you the best products at the best prices.
+          </p>
+          <div className="space-y-3">
+            <Link to="/vendors">
+              <Button variant="outline" className="border-gray-400 text-gray-600 hover:bg-gray-100 hover-scale">
+                Want to become a vendor? Apply here
+              </Button>
+            </Link>
+            <div>
+              <Button 
+                onClick={handleVendorSignUp}
+                className="bg-green-500 hover:bg-green-600 text-white hover-scale"
+              >
+                Join as Vendor Now
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-orange-500 to-yellow-500">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">Ready to Transform Your Shopping Experience?</h2>
-          <p className="text-xl text-white/90 mb-8">Join thousands of satisfied customers who've discovered the future of shopping</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
-              size="lg" 
-              className="bg-white text-orange-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
-              onClick={() => setTryFreeDialogOpen(true)}
-            >
-              Try ISA Free
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-white text-white hover:bg-white hover:text-orange-600 px-8 py-4 text-lg font-semibold"
-              onClick={() => {
-                setAuthType('customer');
-                setAuthDialogOpen(true);
-              }}
-            >
-              Sign Up Now
-            </Button>
-          </div>
-          <p className="text-white/80 text-sm mt-4">Try 5 questions free • No credit card required</p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 bg-gray-100 border-t">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-500 text-sm">
+      <footer className="bg-white py-8 border-t">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center space-x-3 mb-4 md:mb-0">
+              <img src="/lovable-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-8 w-8" />
+              <span className="text-xl font-bold text-gray-800">ISA</span>
+            </div>
+            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-sm text-gray-500">
+              <Link to="/vendors" className="hover:text-orange-600 transition-colors">
+                Become a Vendor
+              </Link>
+              <a href="#" className="hover:text-orange-600 transition-colors">Contact us</a>
+              <a href="#" className="hover:text-orange-600 transition-colors">Privacy</a>
+              <a href="#" className="hover:text-orange-600 transition-colors">Terms</a>
+            </div>
+          </div>
+          <div className="text-center text-gray-500 text-xs mt-4">
             &copy; {new Date().getFullYear()} ISA. All rights reserved.
-          </p>
+          </div>
         </div>
       </footer>
 
+      {/* Auth Dialog */}
       <AuthDialog 
-        open={authDialogOpen} 
-        onOpenChange={setAuthDialogOpen}
+        open={showAuth} 
+        onOpenChange={setShowAuth} 
         type={authType}
       />
-      
-      <TryFreeDialog 
-        open={tryFreeDialogOpen}
-        onOpenChange={setTryFreeDialogOpen}
-      />
 
-      <style jsx>{`
-        @keyframes slide-right {
+      <TryFreeDialog open={showTryFreeDialog} onOpenChange={setShowTryFreeDialog} />
+
+      <style>{`
+        @keyframes scroll {
           0% {
             transform: translateX(0);
           }
@@ -359,16 +453,46 @@ const Index = () => {
           }
         }
         
-        .animate-slide-right {
-          animation: slide-right 30s linear infinite;
+        .animate-scroll {
+          animation: scroll 30s linear infinite;
         }
-        
+
         .hover-scale {
-          transition: transform 0.2s ease;
+          transition: transform 0.2s ease-in-out;
         }
         
         .hover-scale:hover {
           transform: scale(1.05);
+        }
+
+        .animate-fade-in {
+          animation: fadeIn 0.6s ease-out;
+        }
+
+        .animate-scale-in {
+          animation: scaleIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
         }
       `}</style>
     </div>
