@@ -1,10 +1,10 @@
-
 import { useState } from "react";
-import { Brain, Send, Plus, History, Menu } from "lucide-react";
+import { Brain, Send, Plus, History, Menu, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
+import { Link } from "react-router-dom";
 
 interface Message {
   id: number;
@@ -177,7 +177,7 @@ const Chat = () => {
                     Your AI Shopping Assistant is here to help you discover amazing products, 
                     compare prices, and find exactly what you're looking for!
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mb-8">
                     <div className="p-4 bg-white rounded-lg border border-gray-200 hover:border-orange-200 cursor-pointer transition-colors">
                       <h3 className="font-medium text-gray-800 mb-2">🛍️ Find Products</h3>
                       <p className="text-sm text-gray-600">Search for items across multiple stores and platforms</p>
@@ -195,6 +195,12 @@ const Chat = () => {
                       <p className="text-sm text-gray-600">Access detailed reviews and ratings</p>
                     </div>
                   </div>
+                  <Link to="/">
+                    <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 hover:scale-105 transition-transform flex items-center">
+                      <Home className="h-5 w-5 mr-2" />
+                      Back Home
+                    </Button>
+                  </Link>
                 </div>
               ) : (
                 <div className="space-y-4 max-w-4xl mx-auto">

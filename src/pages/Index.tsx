@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -238,14 +237,6 @@ const Index = () => {
                 <p className="text-sm text-blue-700 italic">🛒 Secure checkout in 2 clicks</p>
               </div>
             </div>
-          </div>
-          <div className="text-center mt-12">
-            <Link to="/chat">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 hover-scale flex items-center mx-auto">
-                <Home className="h-5 w-5 mr-2" />
-                Back Home
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
