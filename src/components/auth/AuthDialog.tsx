@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -167,8 +168,8 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
             </div>
           </div>
 
-          {/* Right Side - Branding */}
-          <div className="flex-1 bg-gradient-to-br from-orange-500 to-yellow-500 p-8 flex flex-col justify-center items-center text-white">
+          {/* Right Side - Branding (Hidden on mobile) */}
+          <div className="hidden md:flex flex-1 bg-gradient-to-br from-orange-500 to-yellow-500 p-8 flex-col justify-center items-center text-white">
             
             <div className="text-center max-w-sm">
               <img 
@@ -191,7 +192,7 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
                 </div>
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                  <span className="text-sm">WhatsApp-style shopping experience</span>
+                  <span className="text-sm">ISA can suggest gifts for your loved ones</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
