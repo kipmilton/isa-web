@@ -1,4 +1,5 @@
 
+
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -99,13 +100,24 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
                 <TabsContent value="signup">
                   <form onSubmit={handleSubmit} className="space-y-4 max-h-96 overflow-y-auto pr-2">
                     
+                    {type === 'vendor' && (
+                      <div>
+                        <Label htmlFor="company">Company Name</Label>
+                        <Input id="company" required className="mt-1" />
+                      </div>
+                    )}
+                    
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label htmlFor="firstName">First Name</Label>
+                        <Label htmlFor="firstName">
+                          {type === 'vendor' ? 'Designated Company Rep 1st Name' : 'First Name'}
+                        </Label>
                         <Input id="firstName" required className="mt-1" />
                       </div>
                       <div>
-                        <Label htmlFor="lastName">Last Name</Label>
+                        <Label htmlFor="lastName">
+                          {type === 'vendor' ? 'Designated Company Rep 2nd Name' : 'Last Name'}
+                        </Label>
                         <Input id="lastName" required className="mt-1" />
                       </div>
                     </div>
@@ -135,16 +147,10 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
                         </div>
                       </>
                     ) : (
-                      <>
-                        <div>
-                          <Label htmlFor="company">Company</Label>
-                          <Input id="company" required className="mt-1" />
-                        </div>
-                        <div>
-                          <Label htmlFor="businessType">Type of Business/Products</Label>
-                          <Input id="businessType" required className="mt-1" />
-                        </div>
-                      </>
+                      <div>
+                        <Label htmlFor="businessType">Type of Business/Products</Label>
+                        <Input id="businessType" required className="mt-1" />
+                      </div>
                     )}
                     
                     <div>
@@ -208,3 +214,4 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
 };
 
 export default AuthDialog;
+
