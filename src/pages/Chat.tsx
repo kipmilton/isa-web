@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { Brain, Send, Plus, History, Menu, Home } from "lucide-react";
+import { Send, Plus, History, Menu, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -106,7 +107,7 @@ const Chat = () => {
         <Sidebar className="border-r border-gray-200">
           <SidebarHeader className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
-              <Brain className="h-6 w-6 text-orange-500" />
+              <img src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-6 w-6" />
               <span className="font-semibold text-gray-800">ISA Chat</span>
             </div>
             <Button 
@@ -156,12 +157,20 @@ const Chat = () => {
               <div className="flex items-center space-x-3">
                 <SidebarTrigger />
                 <div className="flex items-center space-x-2">
-                  <Brain className="h-6 w-6 text-orange-500" />
+                  <img src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-6 w-6" />
                   <h1 className="text-xl font-semibold text-gray-800">Ask ISA</h1>
                 </div>
               </div>
-              <div className="text-sm text-gray-500">
-                Your AI Shopping Assistant
+              <div className="flex items-center space-x-4">
+                <div className="text-sm text-gray-500">
+                  Your AI Shopping Assistant
+                </div>
+                <Link to="/">
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 hover:scale-105 transition-transform flex items-center">
+                    <Home className="h-4 w-4 mr-2" />
+                    Back Home
+                  </Button>
+                </Link>
               </div>
             </div>
 
@@ -169,7 +178,7 @@ const Chat = () => {
             <ScrollArea className="flex-1 p-4">
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <Brain className="h-16 w-16 text-orange-500 mb-4" />
+                  <img src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-16 w-16 mb-4" />
                   <h2 className="text-2xl font-semibold text-gray-800 mb-2">
                     Hi! I'm ISA 👋
                   </h2>
@@ -177,7 +186,7 @@ const Chat = () => {
                     Your AI Shopping Assistant is here to help you discover amazing products, 
                     compare prices, and find exactly what you're looking for!
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mb-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
                     <div className="p-4 bg-white rounded-lg border border-gray-200 hover:border-orange-200 cursor-pointer transition-colors">
                       <h3 className="font-medium text-gray-800 mb-2">🛍️ Find Products</h3>
                       <p className="text-sm text-gray-600">Search for items across multiple stores and platforms</p>
@@ -191,16 +200,10 @@ const Chat = () => {
                       <p className="text-sm text-gray-600">Personalized suggestions based on your preferences</p>
                     </div>
                     <div className="p-4 bg-white rounded-lg border border-gray-200 hover:border-orange-200 cursor-pointer transition-colors">
-                      <h3 className="font-medium text-gray-800 mb-2">🔍 Product Reviews</h3>
-                      <p className="text-sm text-gray-600">Access detailed reviews and ratings</p>
+                      <h3 className="font-medium text-gray-800 mb-2">🎁 Suggest gifts for loved one</h3>
+                      <p className="text-sm text-gray-600">Get thoughtful gift ideas for special occasions</p>
                     </div>
                   </div>
-                  <Link to="/">
-                    <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 hover:scale-105 transition-transform flex items-center">
-                      <Home className="h-5 w-5 mr-2" />
-                      Back Home
-                    </Button>
-                  </Link>
                 </div>
               ) : (
                 <div className="space-y-4 max-w-4xl mx-auto">
@@ -218,7 +221,7 @@ const Chat = () => {
                       >
                         {message.type === 'isa' && (
                           <div className="flex items-center space-x-2 mb-2">
-                            <Brain className="h-4 w-4 text-orange-500" />
+                            <img src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-4 w-4" />
                             <span className="text-xs font-medium text-orange-600">ISA</span>
                           </div>
                         )}
