@@ -165,9 +165,9 @@ const VendorDashboard = () => {
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Fashion">Fashion</SelectItem>
                         <SelectItem value="Electronics">Electronics</SelectItem>
-                        <SelectItem value="Home & Garden">Home & Garden</SelectItem>
+                        <SelectItem value="Fashion">Fashion</SelectItem>
+                        <SelectItem value="Home">Home</SelectItem>
                         <SelectItem value="Beauty">Beauty</SelectItem>
                         <SelectItem value="Sports">Sports</SelectItem>
                         <SelectItem value="Books">Books</SelectItem>

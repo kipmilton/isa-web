@@ -354,11 +354,12 @@ const Admin = () => {
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Vegetables">Vegetables</SelectItem>
-                            <SelectItem value="Fruits">Fruits</SelectItem>
-                            <SelectItem value="Grains">Grains</SelectItem>
-                            <SelectItem value="Dairy">Dairy</SelectItem>
-                            <SelectItem value="Meat">Meat</SelectItem>
+                            <SelectItem value="Electronics">Electronics</SelectItem>
+                            <SelectItem value="Fashion">Fashion</SelectItem>
+                            <SelectItem value="Home">Home</SelectItem>
+                            <SelectItem value="Beauty">Beauty</SelectItem>
+                            <SelectItem value="Sports">Sports</SelectItem>
+                            <SelectItem value="Books">Books</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
