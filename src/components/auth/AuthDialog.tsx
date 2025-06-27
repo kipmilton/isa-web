@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useVendor } from "@/contexts/VendorContext";
 import { useNavigate } from "react-router-dom";
+import LocationSelect from "./LocationSelect";
 
 interface AuthDialogProps {
   open: boolean;
@@ -18,8 +17,13 @@ interface AuthDialogProps {
 
 const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [location, setLocation] = useState({ county: "", constituency: "" });
   const { setIsVendor, setVendorStatus } = useVendor();
   const navigate = useNavigate();
+
+  const handleLocationChange = (county: string, constituency: string) => {
+    setLocation({ county, constituency });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,16 +145,16 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
                             <option value="other">Other</option>
                           </select>
                         </div>
-                        <div>
-                          <Label htmlFor="location">Location</Label>
-                          <Input id="location" required className="mt-1" />
-                        </div>
+                        <LocationSelect onLocationChange={handleLocationChange} required />
                       </>
                     ) : (
-                      <div>
-                        <Label htmlFor="businessType">Type of Business/Products</Label>
-                        <Input id="businessType" required className="mt-1" />
-                      </div>
+                      <>
+                        <div>
+                          <Label htmlFor="businessType">Type of Business/Products</Label>
+                          <Input id="businessType" required className="mt-1" />
+                        </div>
+                        <LocationSelect onLocationChange={handleLocationChange} required />
+                      </>
                     )}
                     
                     <div>
@@ -214,4 +218,3 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
 };
 
 export default AuthDialog;
-
