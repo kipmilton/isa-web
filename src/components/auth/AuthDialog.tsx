@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useVendor } from "@/contexts/VendorContext";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +21,8 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [location, setLocation] = useState({ county: "", constituency: "" });
   const [isLoading, setIsLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsDialog, setShowTermsDialog] = useState(false);
   const { setIsVendor, setVendorStatus } = useVendor();
   const navigate = useNavigate();
 
@@ -79,6 +82,13 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
 
     try {
       if (isSignUp) {
+        // Check if terms are accepted for signup
+        if (!acceptedTerms) {
+          toast.error("Please accept the terms and conditions to continue");
+          setIsLoading(false);
+          return;
+        }
+
         // Sign up flow
         const data = type === 'vendor' ? vendorData : customerData;
         
@@ -464,7 +474,32 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
                       </>
                     )}
                     
-                    <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600" disabled={isLoading}>
+                    {/* Terms and Conditions */}
+                    <div className="flex items-start space-x-2">
+                      <Checkbox 
+                        id="terms" 
+                        checked={acceptedTerms} 
+                        onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                      />
+                      <div className="text-sm">
+                        <label htmlFor="terms" className="text-gray-700">
+                          I agree to the{" "}
+                          <button 
+                            type="button"
+                            onClick={() => setShowTermsDialog(true)}
+                            className="text-blue-600 hover:underline"
+                          >
+                            Terms and Conditions
+                          </button>
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-orange-500 hover:bg-orange-600" 
+                      disabled={isLoading || !acceptedTerms}
+                    >
                       {isLoading ? 'Creating Account...' : 'Create Account'}
                     </Button>
                   </form>
@@ -508,6 +543,141 @@ const AuthDialog = ({ open, onOpenChange, type }: AuthDialogProps) => {
           </div>
         </div>
       </DialogContent>
+
+      {/* Terms and Conditions Dialog */}
+      <Dialog open={showTermsDialog} onOpenChange={setShowTermsDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <div className="p-6">
+            <h2 className="text-2xl font-bold mb-4">
+              {type === 'customer' ? 'Terms and Conditions' : 'ISA AI Shopping Assistant - Vendor Terms & Conditions'}
+            </h2>
+            
+            {type === 'customer' ? (
+              <div className="text-center py-8">
+                <p className="text-lg text-gray-600">Coming Soon</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Customer terms and conditions are being finalized and will be available soon.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4 text-sm leading-relaxed">
+                <div>
+                  <p><strong>Effective Date:</strong> 7/17/2025</p>
+                  <p><strong>Version:</strong> 1.0</p>
+                </div>
+                
+                <p>
+                  These Terms and Conditions ("Agreement") govern the participation of vendors ("Vendor", "You", or "Your") on the ISA AI Shopping Assistant platform ("ISA", "we", "us", or "our"), operated by ISA AI Shopping Assistant Ltd., a company registered in Kenya. By listing your products or services on ISA or engaging with the ISA team, you agree to abide by these Terms in full.
+                </p>
+
+                <h3 className="text-lg font-semibold mt-6">1. DEFINITIONS</h3>
+                <p>
+                  "ISA Platform" – The AI-powered mobile and web platform, application interface, API systems, databases, and related services used by customers for smart shopping assistance.
+                </p>
+                <p>
+                  "Vendor Account" – The registered profile ISA creates or grants access to for managing listings and commercial activity.
+                </p>
+                <p>
+                  "Product" – Any goods, services, or offers listed by a Vendor.
+                </p>
+                <p>
+                  "Customer" – End-users or shoppers who use ISA to browse, compare, and purchase Products.
+                </p>
+                <p>
+                  "Commission" – A percentage fee retained by ISA from sales, unless otherwise negotiated.
+                </p>
+                <p>
+                  "Listing" – A product's profile including description, pricing, images, stock info, and delivery options.
+                </p>
+
+                <h3 className="text-lg font-semibold mt-6">2. ELIGIBILITY & ONBOARDING</h3>
+                <p><strong>2.1 Vendor Approval:</strong> Vendors must complete the ISA onboarding process and be approved by ISA before listing any Products.</p>
+                <p><strong>2.2 Accurate Information:</strong> All information provided during onboarding (including business details, contact info, product categories, etc.) must be truthful and regularly updated.</p>
+                <p><strong>2.3 Legal Status:</strong> Vendors must be legally registered businesses or individuals eligible to operate and sell products in their respective jurisdiction.</p>
+
+                <h3 className="text-lg font-semibold mt-6">3. PRODUCT LISTINGS & CONTENT</h3>
+                <p><strong>3.1 Responsibility:</strong> Vendors are solely responsible for ensuring all listed Products comply with applicable laws, are accurately described, safe, and meet quality standards.</p>
+                <p><strong>3.2 Accuracy:</strong> Product names, descriptions, prices, images, shipping timelines, stock levels, and variations must be complete and truthful. Misleading content may result in removal.</p>
+                <p><strong>3.3 Intellectual Property:</strong> Vendors must not use copyrighted content, trademarks, or logos without permission. You agree to indemnify ISA against claims related to IP violations.</p>
+                <p><strong>3.4 Restricted Items:</strong> Vendors may not list illegal products, counterfeit goods, expired items, or anything ISA deems unsafe or unethical (e.g., weapons, hate merchandise, etc.).</p>
+
+                <h3 className="text-lg font-semibold mt-6">4. ORDER FULFILMENT & CUSTOMER SERVICE</h3>
+                <p><strong>4.1 Timeliness:</strong> Vendors must fulfill orders within the agreed timeline. Delays must be communicated to ISA and customers in real time.</p>
+                <p><strong>4.2 Delivery:</strong> Where Vendors manage logistics, clear shipping policies and delivery schedules must be defined. Vendors are liable for damaged or undelivered goods if using third-party couriers.</p>
+                <p><strong>4.3 Returns & Refunds:</strong> Vendors must adhere to ISA's refund/return policy or provide an equivalent policy approved during onboarding.</p>
+                <p><strong>4.4 Customer Complaints:</strong> Vendors are expected to respond to any customer-related complaint or inquiry referred by ISA within 24–48 hours.</p>
+
+                <h3 className="text-lg font-semibold mt-6">5. COMMISSIONS, PAYMENTS & FEES</h3>
+                <p><strong>5.1 Commission Structure:</strong> ISA retains a commission on each sale, as agreed upon during onboarding or updated periodically with notice. This may vary by category or volume.</p>
+                <p><strong>5.2 Payouts:</strong> Net revenue (after commissions and applicable charges) will be remitted to the Vendor on a [weekly/bi-weekly/monthly] basis, depending on the payout schedule.</p>
+                <p><strong>5.3 Deductions:</strong> ISA reserves the right to deduct amounts for:</p>
+                <ul className="list-disc ml-6">
+                  <li>Refunds or chargebacks</li>
+                  <li>Promotional discounts</li>
+                  <li>Platform service fees</li>
+                  <li>Regulatory deductions (e.g., taxes or levies)</li>
+                </ul>
+                <p><strong>5.4 Taxes:</strong> Vendors are responsible for declaring and remitting their own taxes (e.g., VAT, income tax) to the relevant authorities.</p>
+
+                <h3 className="text-lg font-semibold mt-6">6. PROMOTIONS & MARKETING</h3>
+                <p><strong>6.1 Platform Campaigns:</strong> ISA may run promotional campaigns involving Vendor products. Participation may be voluntary or opt-in unless included in partnership agreements.</p>
+                <p><strong>6.2 Use of Vendor Content:</strong> Vendors authorize ISA to use their brand name, product images, and offers for platform promotion, newsletters, or AI-generated recommendations.</p>
+
+                <h3 className="text-lg font-semibold mt-6">7. DATA USE & PRIVACY</h3>
+                <p><strong>7.1 Confidentiality:</strong> Any commercial terms, internal data, or proprietary insights exchanged between the Vendor and ISA are strictly confidential.</p>
+                <p><strong>7.2 Data Ownership:</strong> Customer data (emails, browsing behavior, purchase patterns) collected by ISA remains the property of ISA and may be used in accordance with its Privacy Policy.</p>
+                <p><strong>7.3 AI Personalization:</strong> Vendors acknowledge that their product data may be used to train recommendation systems or improve AI user experience.</p>
+
+                <h3 className="text-lg font-semibold mt-6">8. INTELLECTUAL PROPERTY (IP)</h3>
+                <p><strong>8.1</strong> Vendors retain ownership of their own IP, including logos, product designs, and branded assets.</p>
+                <p><strong>8.2</strong> Any technology, code, AI system, or platform developed by ISA (including interface logic, chatbot systems, or analytics dashboards) remains ISA's exclusive IP.</p>
+                <p><strong>8.3</strong> Vendors may not reverse engineer, replicate, or commercialize ISA's platform or proprietary features.</p>
+
+                <h3 className="text-lg font-semibold mt-6">9. SUSPENSION & TERMINATION</h3>
+                <p><strong>9.1</strong> ISA reserves the right to suspend or terminate a Vendor account at any time, with or without notice, if the Vendor:</p>
+                <ul className="list-disc ml-6">
+                  <li>Breaches these Terms</li>
+                  <li>Provides false or harmful listings</li>
+                  <li>Damages ISA's brand or user trust</li>
+                  <li>Violates laws or ethical guidelines</li>
+                </ul>
+                <p><strong>9.2</strong> Upon termination:</p>
+                <ul className="list-disc ml-6">
+                  <li>All listings are removed from the platform;</li>
+                  <li>Outstanding dues will be settled after accounting for refunds, claims, and disputes.</li>
+                </ul>
+
+                <h3 className="text-lg font-semibold mt-6">10. LIABILITY & INDEMNITY</h3>
+                <p><strong>10.1</strong> Vendors agree to indemnify and hold harmless ISA, its officers, and agents from any claims, damages, or liabilities resulting from:</p>
+                <ul className="list-disc ml-6">
+                  <li>Product defects, misinformation, or regulatory violations</li>
+                  <li>Intellectual property disputes</li>
+                  <li>Loss or injury related to delivered goods</li>
+                </ul>
+                <p><strong>10.2</strong> ISA is not liable for:</p>
+                <ul className="list-disc ml-6">
+                  <li>Vendor-side delivery failures</li>
+                  <li>Third-party payment gateway interruptions</li>
+                  <li>Technical downtime beyond its control</li>
+                </ul>
+
+                <h3 className="text-lg font-semibold mt-6">11. RELATIONSHIP</h3>
+                <p>These Terms do not create any partnership, joint venture, or employment relationship. Vendors act as independent parties.</p>
+
+                <h3 className="text-lg font-semibold mt-6">12. MODIFICATIONS</h3>
+                <p>ISA may update these Terms from time to time. Vendors will be notified of major changes via email or platform notice. Continued use of the platform constitutes acceptance.</p>
+
+                <h3 className="text-lg font-semibold mt-6">13. GOVERNING LAW & DISPUTES</h3>
+                <p>These Terms are governed by the laws of Kenya. Any disputes shall be subject to the exclusive jurisdiction of the courts of Kenya.</p>
+              </div>
+            )}
+            
+            <div className="mt-6 flex justify-end">
+              <Button onClick={() => setShowTermsDialog(false)}>Close</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };
