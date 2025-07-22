@@ -6,6 +6,8 @@ export interface Product {
   original_price?: number;
   category: string;
   subcategory?: string;
+  main_category?: string;
+  sub_subcategory?: string;
   brand?: string;
   sku?: string;
   main_image?: string;
@@ -18,9 +20,15 @@ export interface Product {
   vendor_id?: string;
   pickup_location?: string;
   pickup_phone_number?: string;
+  pickup_phone?: string;
   currency?: string;
   specifications?: any;
   tags?: string[];
+  commission_percentage?: number;
+  ram?: string;
+  storage?: string;
+  processor?: string;
+  display_size?: string;
   created_at?: string;
   updated_at?: string;
 }

@@ -10,6 +10,27 @@ export class ProductService {
       .order('created_at', { ascending: false });
   }
 
+  static async getProducts() {
+    return await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
+  }
+
+  static async getCategories() {
+    const { data, error } = await supabase
+      .from('product_categories')
+      .select('name')
+      .eq('is_active', true)
+      .order('name');
+    
+    if (error) {
+      return { data: [], error };
+    }
+    
+    return { data: data?.map(cat => cat.name) || [], error: null };
+  }
+
   static async createProduct(product: Omit<Product, 'id'>) {
     return await supabase
       .from('products')
@@ -17,12 +38,17 @@ export class ProductService {
       .select();
   }
 
-  static async updateProduct(id: string, updates: Partial<Product>) {
-    return await supabase
+  static async updateProduct(id: string, updates: Partial<Product>, vendorId?: string) {
+    let query = supabase
       .from('products')
       .update(updates)
-      .eq('id', id)
-      .select();
+      .eq('id', id);
+    
+    if (vendorId) {
+      query = query.eq('vendor_id', vendorId);
+    }
+    
+    return await query.select();
   }
 
   static async deleteProduct(id: string) {
