@@ -10,7 +10,7 @@ import Vendors from "./pages/Vendors";
 import Chat from "./pages/Chat";
 import Gift from "./pages/Gift";
 import Admin from "./pages/Admin";
-import VendorDashboard from "./components/vendor/VendorDashboard";
+import VendorDashboard from "./pages/VendorDashboard";
 import VendorStatus from "./components/vendor/VendorStatus";
 import NotFound from "./pages/NotFound";
 
