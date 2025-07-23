@@ -5,12 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, ShoppingCart, Search, LogOut, Menu, Star, MessageCircle, User, Gift, Sparkles, Filter, TrendingUp } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
+import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye } from "lucide-react";
 import { ProductService } from "@/services/productService";
 import { OrderService } from "@/services/orderService";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AuthDialog from "@/components/auth/AuthDialog";
 import CartModal from "@/components/CartModal";
 import { useNavigate, Link } from "react-router-dom";
@@ -23,12 +25,18 @@ const ShopDashboard = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [showCart, setShowCart] = useState(false);
   const [showLikedItems, setShowLikedItems] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState<any[]>([]);
   const [productLoading, setProductLoading] = useState(false);
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [likedItems, setLikedItems] = useState<any[]>([]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
+  const [showProductReviews, setShowProductReviews] = useState<string | null>(null);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [productReviews, setProductReviews] = useState<any[]>([]);
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
   const [showAskIsaDialog, setShowAskIsaDialog] = useState(true);
@@ -45,7 +53,13 @@ const ShopDashboard = () => {
 
   const loadProducts = async () => {
     setProductLoading(true);
-    const data = await ProductService.getProductsFiltered(selectedCategory, searchQuery);
+    let data = await ProductService.getProductsFiltered(selectedCategory, searchQuery);
+    
+    // Apply price range filter
+    data = data.filter((product: any) => 
+      product.price >= priceRange[0] && product.price <= priceRange[1]
+    );
+    
     setProducts(data);
     setProductLoading(false);
   };
@@ -62,6 +76,61 @@ const ShopDashboard = () => {
     setLikedItems(data);
   };
 
+  const loadProductReviews = async (productId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('product_reviews')
+        .select(`
+          *,
+          profiles!inner (
+            first_name,
+            last_name
+          )
+        `)
+        .eq('product_id', productId)
+        .order('created_at', { ascending: false });
+
+      if (!error) {
+        setProductReviews(data || []);
+      }
+    } catch (error) {
+      console.error('Error loading reviews:', error);
+    }
+  };
+
+  const submitReview = async (productId: string) => {
+    if (!user?.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('product_reviews')
+        .insert({
+          product_id: productId,
+          user_id: user.id,
+          rating: reviewRating,
+          comment: reviewText,
+          title: `${reviewRating} star review`
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Review submitted!",
+        description: "Thank you for your feedback."
+      });
+
+      setReviewText("");
+      setReviewRating(5);
+      loadProductReviews(productId);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit review",
+        variant: "destructive"
+      });
+    }
+  };
+
   useEffect(() => {
     if (user?.id) {
       loadCart();
@@ -71,7 +140,7 @@ const ShopDashboard = () => {
 
   useEffect(() => {
     loadProducts();
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, priceRange]);
 
   const handleAddToCart = async (product: any) => {
     if (!user?.id) return;
@@ -149,16 +218,16 @@ const ShopDashboard = () => {
             {/* Navigation Icons */}
             <div className="flex items-center space-x-2 lg:space-x-3">
               <Link to="/chat">
-                <Button variant="ghost" size="icon" className="text-blue-600 hover:bg-blue-50 hover:text-blue-700 relative group">
+                <Button variant="ghost" size="icon" className="relative group bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg">
                   <MessageCircle className="w-5 h-5" />
-                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Ask ISA</span>
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Ask ISA</span>
                 </Button>
               </Link>
               
               <Link to="/gift">
-                <Button variant="ghost" size="icon" className="text-purple-600 hover:bg-purple-50 hover:text-purple-700 relative group">
+                <Button variant="ghost" size="icon" className="relative group bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-lg">
                   <Gift className="w-5 h-5" />
-                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Gift</span>
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Gift Someone</span>
                 </Button>
               </Link>
               
@@ -216,29 +285,43 @@ const ShopDashboard = () => {
           </div>
         </div>
       </header>
+      
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
-        {/* Welcome Banner */}
-        <div className="bg-gradient-to-r from-orange-400 to-pink-400 rounded-2xl p-6 mb-8 text-white shadow-xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome to ISA Shop! 🛍️</h2>
-              <p className="text-white/90 text-sm sm:text-base">Discover amazing products curated just for you</p>
-            </div>
-            <div className="hidden sm:block">
-              <Sparkles className="w-16 h-16 text-white/80" />
-            </div>
-          </div>
-        </div>
-
         {/* Categories and Search */}
         <div className="mb-6 sm:mb-8 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-800">Shop by Category</h3>
-            <Button variant="outline" size="sm" className="text-gray-600">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-gray-600"
+              onClick={() => setShowFilters(!showFilters)}
+            >
               <Filter className="w-4 h-4 mr-2" />
               Filters
             </Button>
           </div>
+          
+          {/* Price Range Filter */}
+          {showFilters && (
+            <Card className="p-4 bg-white/70 backdrop-blur-sm">
+              <h4 className="font-medium mb-3">Price Range</h4>
+              <div className="space-y-3">
+                <Slider
+                  value={priceRange}
+                  onValueChange={(value) => setPriceRange(value as [number, number])}
+                  max={100000}
+                  min={0}
+                  step={500}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>KES {priceRange[0].toLocaleString()}</span>
+                  <span>KES {priceRange[1].toLocaleString()}</span>
+                </div>
+              </div>
+            </Card>
+          )}
           
           <div className="flex flex-wrap gap-2 sm:gap-3">
             {categories.map((category) => (
@@ -272,6 +355,7 @@ const ShopDashboard = () => {
             </Button>
           </div>
         </div>
+        
         {/* Products Grid */}
         {productLoading ? (
           <div className="flex flex-col items-center justify-center py-16">
@@ -332,9 +416,22 @@ const ShopDashboard = () => {
                         <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
                       </Button>
                       
+                      {/* View Reviews Button */}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => {
+                          setShowProductReviews(product.id);
+                          loadProductReviews(product.id);
+                        }}
+                        className="absolute top-3 left-3 w-8 h-8 rounded-full shadow-md bg-white/80 text-gray-600 hover:bg-white"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      
                       {/* Product badge */}
                       {product.is_featured && (
-                        <Badge className="absolute top-3 left-3 bg-orange-500 text-white">
+                        <Badge className="absolute bottom-3 left-3 bg-orange-500 text-white">
                           Featured
                         </Badge>
                       )}
@@ -364,12 +461,14 @@ const ShopDashboard = () => {
                         <div className="flex items-center gap-1 text-xs text-gray-600">
                           <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                           <span>{product.rating?.toFixed(1) || '4.5'}</span>
+                          <span className="text-gray-400">({product.review_count || 0})</span>
                         </div>
                       </div>
                       
                       <Button 
                         onClick={() => handleAddToCart(product)}
-                        className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium rounded-lg transition-all duration-200 hover:shadow-lg"
+                        className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 font-medium rounded-lg transition-all duration-200 hover:shadow-md"
+                        variant="outline"
                       >
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         Add to Cart
@@ -382,7 +481,80 @@ const ShopDashboard = () => {
           </>
         )}
       </div>
-      {/* Modals Placeholders */}
+
+      {/* Product Reviews Modal */}
+      {showProductReviews && (
+        <Dialog open={!!showProductReviews} onOpenChange={() => setShowProductReviews(null)}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Product Reviews & Ratings</DialogTitle>
+            </DialogHeader>
+            
+            {user && (
+              <div className="space-y-4 border-b pb-4 mb-4">
+                <h4 className="font-semibold">Write a Review</h4>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Rating:</span>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map(rating => (
+                      <Button
+                        key={rating}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setReviewRating(rating)}
+                        className="p-1"
+                      >
+                        <Star className={`w-4 h-4 ${rating <= reviewRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <Textarea
+                  placeholder="Share your thoughts about this product..."
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  rows={3}
+                />
+                <Button 
+                  onClick={() => submitReview(showProductReviews)}
+                  disabled={!reviewText.trim()}
+                  className="w-full"
+                >
+                  Submit Review
+                </Button>
+              </div>
+            )}
+            
+            <div className="space-y-4">
+              <h4 className="font-semibold">Customer Reviews ({productReviews.length})</h4>
+              {productReviews.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No reviews yet. Be the first to review!</p>
+              ) : (
+                productReviews.map((review) => (
+                  <div key={review.id} className="border rounded-lg p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{review.profiles?.first_name || 'Anonymous'}</span>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map(rating => (
+                            <Star key={rating} className={`w-3 h-3 ${rating <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                          ))}
+                        </div>
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        {new Date(review.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-gray-700">{review.comment}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Profile Modal */}
       {showProfile && (
         <Dialog open={showProfile} onOpenChange={setShowProfile}>
           <DialogContent>
@@ -393,6 +565,8 @@ const ShopDashboard = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Cart Modal */}
       <CartModal
         isOpen={showCart}
         onClose={() => setShowCart(false)}
@@ -400,8 +574,9 @@ const ShopDashboard = () => {
         cartItems={cartItems}
         onRemoveFromCart={() => {}}
         onUpdateQuantity={() => {}}
-        onCartUpdate={loadCart}
       />
+
+      {/* Wishlist Modal */}
       {showLikedItems && (
         <Dialog open={showLikedItems} onOpenChange={setShowLikedItems}>
           <DialogContent>
@@ -419,7 +594,6 @@ const ShopDashboard = () => {
                     </div>
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" onClick={async () => {
-                        // Try to find the product in the loaded products for price/name
                         const product = products.find((p: any) => p.id === item.product_id);
                         if (product) {
                           await handleAddToCart(product);
@@ -441,7 +615,8 @@ const ShopDashboard = () => {
           </DialogContent>
         </Dialog>
       )}
-      {/* Ask ISA Chatbot Info Dialog */}
+
+      {/* Ask ISA Welcome Dialog */}
       <Dialog open={showAskIsaDialog} onOpenChange={setShowAskIsaDialog}>
         <DialogContent className="max-w-md text-center">
           <div className="flex flex-col items-center gap-4 p-2">
@@ -465,7 +640,7 @@ const ShopDashboard = () => {
   );
 };
 
-export default ShopDashboard; 
+export default ShopDashboard;
 
 function ProfileForm({ user, onClose }: { user: any, onClose: () => void }) {
   const [profile, setProfile] = useState<any>(null);
@@ -555,4 +730,4 @@ function ProfileForm({ user, onClose }: { user: any, onClose: () => void }) {
       </div>
     </form>
   );
-} 
+}

@@ -50,7 +50,17 @@ export class OrderService {
   static async getCartItems(userId: string) {
     const { data, error } = await supabase
       .from('user_cart_items')
-      .select('*')
+      .select(`
+        *,
+        products!inner (
+          id,
+          name,
+          price,
+          main_image,
+          category,
+          stock_quantity
+        )
+      `)
       .eq('user_id', userId)
       .is('removed_at', null)
       .order('added_at', { ascending: false });
@@ -58,7 +68,16 @@ export class OrderService {
       console.error('Error fetching cart items:', error);
       return [];
     }
-    return data || [];
+    
+    // Transform to match CartItemWithProduct type
+    return (data || []).map(item => ({
+      id: item.id,
+      user_id: item.user_id,
+      product_id: item.product_id,
+      quantity: item.quantity,
+      added_at: item.added_at,
+      product: Array.isArray(item.products) ? item.products[0] : item.products
+    }));
   }
 
   static async addToCart(userId: string, item: { product_id: string; product_name?: string; product_category?: string; quantity?: number; price?: number; }) {
