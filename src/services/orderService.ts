@@ -2,6 +2,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { OrderWithDetails } from "@/types/order";
 
 export class OrderService {
+  static async createOrder(userId: string, orderData: any) {
+    // Simulate order creation
+    return {
+      id: `order_${Date.now()}`,
+      order_number: `OR${Date.now()}`,
+      user_id: userId,
+      ...orderData
+    };
+  }
   static async getVendorOrders(vendorId: string): Promise<OrderWithDetails[]> {
     try {
       // Get orders that contain products from this vendor

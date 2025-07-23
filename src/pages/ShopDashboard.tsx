@@ -5,14 +5,15 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, ShoppingCart, Search, LogOut, Menu, Star, MessageCircle, User, Moon, Sun, Gift, Sparkles } from "lucide-react";
+import { Heart, ShoppingCart, Search, LogOut, Menu, Star, MessageCircle, User, Gift, Sparkles, Filter, TrendingUp } from "lucide-react";
 import { ProductService } from "@/services/productService";
 import { OrderService } from "@/services/orderService";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { useNavigate } from "react-router-dom";
+import CartModal from "@/components/CartModal";
+import { useNavigate, Link } from "react-router-dom";
 
 const categories = ["All", "Electronics", "Fashion", "Home", "Beauty", "Sports", "Books"];
 
@@ -127,105 +128,258 @@ const ShopDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
       {/* Header */}
-      <header className="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-40">
+      <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-orange-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo and Title */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            <Link to="/" className="flex items-center space-x-2 sm:space-x-4 hover:scale-105 transition-transform">
               <img 
                 src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" 
                 alt="ISA Logo" 
-                className="w-6 h-6 sm:w-8 sm:h-8"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-md"
               />
-              <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">ISA</h1>
-            </div>
-            {/* Placeholder for actions */}
-            <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
-              <Button variant="ghost" size="icon"><Moon className="w-5 h-5" /></Button>
-              <Button variant="ghost" size="icon"><MessageCircle className="w-5 h-5" /></Button>
-              <Button variant="ghost" size="icon"><Gift className="w-5 h-5" /></Button>
-              <Button variant="ghost" size="icon" onClick={() => setShowLikedItems(true)}><Heart className="w-5 h-5" /></Button>
-              <Button variant="ghost" size="icon" onClick={() => setShowCart(true)}><ShoppingCart className="w-5 h-5" /></Button>
-              <Button variant="ghost" className="flex items-center space-x-2" onClick={() => setShowProfile(true)}>
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src={user?.avatar_url} />
-                  <AvatarFallback>{user?.email?.charAt(0) || 'U'}</AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium hidden lg:inline">{user?.email || 'User'}</span>
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold text-orange-600">ISA Shop</h1>
+                <p className="text-xs text-gray-500 hidden sm:block">Smart Shopping Assistant</p>
+              </div>
+            </Link>
+            
+            {/* Navigation Icons */}
+            <div className="flex items-center space-x-2 lg:space-x-3">
+              <Link to="/chat">
+                <Button variant="ghost" size="icon" className="text-blue-600 hover:bg-blue-50 hover:text-blue-700 relative group">
+                  <MessageCircle className="w-5 h-5" />
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Ask ISA</span>
+                </Button>
+              </Link>
+              
+              <Link to="/gift">
+                <Button variant="ghost" size="icon" className="text-purple-600 hover:bg-purple-50 hover:text-purple-700 relative group">
+                  <Gift className="w-5 h-5" />
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Gift</span>
+                </Button>
+              </Link>
+              
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowLikedItems(true)}
+                className="text-red-500 hover:bg-red-50 hover:text-red-600 relative group"
+              >
+                <Heart className="w-5 h-5" />
+                {likedItems.length > 0 && (
+                  <Badge className="absolute -top-1 -right-1 w-5 h-5 rounded-full p-0 text-xs bg-red-500">
+                    {likedItems.length}
+                  </Badge>
+                )}
+                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Wishlist</span>
               </Button>
-              <Button variant="ghost" size="icon"><LogOut className="w-4 h-4" /></Button>
+              
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowCart(true)}
+                className="text-green-600 hover:bg-green-50 hover:text-green-700 relative group"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {cartItems.length > 0 && (
+                  <Badge className="absolute -top-1 -right-1 w-5 h-5 rounded-full p-0 text-xs bg-green-500">
+                    {cartItems.length}
+                  </Badge>
+                )}
+                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Cart</span>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="flex items-center space-x-2 text-gray-700 hover:bg-gray-50" 
+                onClick={() => setShowProfile(true)}
+              >
+                <Avatar className="w-8 h-8 border-2 border-orange-200">
+                  <AvatarImage src={user?.avatar_url} />
+                  <AvatarFallback className="bg-orange-100 text-orange-600">{user?.email?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium hidden lg:inline">{user?.email?.split('@')[0] || 'User'}</span>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => supabase.auth.signOut()}
+                className="text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         </div>
       </header>
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
+        {/* Welcome Banner */}
+        <div className="bg-gradient-to-r from-orange-400 to-pink-400 rounded-2xl p-6 mb-8 text-white shadow-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome to ISA Shop! 🛍️</h2>
+              <p className="text-white/90 text-sm sm:text-base">Discover amazing products curated just for you</p>
+            </div>
+            <div className="hidden sm:block">
+              <Sparkles className="w-16 h-16 text-white/80" />
+            </div>
+          </div>
+        </div>
+
         {/* Categories and Search */}
-        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-6 sm:mb-8 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-800">Shop by Category</h3>
+            <Button variant="outline" size="sm" className="text-gray-600">
+              <Filter className="w-4 h-4 mr-2" />
+              Filters
+            </Button>
+          </div>
+          
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {categories.map((category) => (
               <Button
                 key={category}
                 variant={selectedCategory === category ? "default" : "outline"}
                 onClick={() => setSelectedCategory(category)}
                 size="sm"
-                className={`rounded-full text-xs sm:text-sm ${selectedCategory === category ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
+                className={`rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
+                  selectedCategory === category 
+                    ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg hover:shadow-xl scale-105' 
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:scale-105'
+                }`}
               >
                 {category}
               </Button>
             ))}
           </div>
-          <div className="flex items-center gap-2">
+          
+          <div className="flex items-center gap-2 bg-white rounded-full shadow-md p-2 max-w-md">
+            <Search className="w-5 h-5 text-gray-400 ml-2" />
             <Input
               type="text"
-              placeholder="Search products..."
+              placeholder="Search for products, brands, categories..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-64"
+              className="border-0 bg-transparent focus:ring-0 text-sm"
             />
-            <Button onClick={loadProducts} variant="outline" size="sm"><Search className="w-4 h-4" /></Button>
+            <Button onClick={loadProducts} size="sm" className="rounded-full bg-orange-500 hover:bg-orange-600">
+              Search
+            </Button>
           </div>
         </div>
         {/* Products Grid */}
         {productLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <span>Loading products...</span>
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <span className="text-gray-600 text-lg">Finding amazing products for you...</span>
           </div>
         ) : products.length === 0 ? (
-          <div className="flex items-center justify-center py-12">
-            <span className="text-gray-500">No products found.</span>
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4">
+              <Search className="w-12 h-12 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">No products found</h3>
+            <p className="text-gray-600 mb-4">Try adjusting your search or browse different categories</p>
+            <Button onClick={() => setSelectedCategory("All")} className="bg-orange-500 hover:bg-orange-600">
+              Browse All Products
+            </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.map(product => {
-              const liked = likedItems.some((item: any) => item.product_id === product.id);
-              return (
-                <Card key={product.id} className="flex flex-col">
-                  <div className="h-48 bg-gray-100 flex items-center justify-center">
-                    {product.main_image ? (
-                      <img src={product.main_image} alt={product.name} className="h-full w-full object-contain" />
-                    ) : (
-                      <span className="text-gray-400">No Image</span>
-                    )}
-                  </div>
-                  <CardContent className="flex-1 flex flex-col p-4">
-                    <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-                    <div className="text-gray-600 text-sm mb-2">{product.category}</div>
-                    <div className="font-bold text-xl mb-2">KES {product.price}</div>
-                    <div className="flex gap-2 mt-auto">
-                      <Button size="sm" variant="outline" onClick={() => handleAddToCart(product)}>
-                        <ShoppingCart className="w-4 h-4 mr-1" /> Add to Cart
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-800">
+                {selectedCategory === "All" ? "All Products" : selectedCategory} 
+                <span className="text-gray-500 ml-2">({products.length} items)</span>
+              </h3>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <TrendingUp className="w-4 h-4" />
+                <span>Popular items first</span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map(product => {
+                const liked = likedItems.some((item: any) => item.product_id === product.id);
+                return (
+                  <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white rounded-xl overflow-hidden border-0 shadow-md">
+                    <div className="relative h-48 overflow-hidden">
+                      {product.main_image ? (
+                        <img 
+                          src={product.main_image} 
+                          alt={product.name} 
+                          className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300" 
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                          <span className="text-gray-400 text-sm">No Image</span>
+                        </div>
+                      )}
+                      
+                      {/* Floating heart button */}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleToggleLike(product)}
+                        className={`absolute top-3 right-3 w-8 h-8 rounded-full shadow-md transition-colors ${
+                          liked ? 'bg-red-50 text-red-500 hover:bg-red-100' : 'bg-white/80 text-gray-600 hover:bg-white'
+                        }`}
+                      >
+                        <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
                       </Button>
-                      <Button size="sm" variant={liked ? "default" : "outline"} onClick={() => handleToggleLike(product)}>
-                        <Heart className={`w-4 h-4 mr-1 ${liked ? 'text-red-500' : ''}`} /> {liked ? 'Liked' : 'Like'}
-                      </Button>
+                      
+                      {/* Product badge */}
+                      {product.is_featured && (
+                        <Badge className="absolute top-3 left-3 bg-orange-500 text-white">
+                          Featured
+                        </Badge>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                    
+                    <CardContent className="p-4 space-y-3">
+                      <div className="space-y-1">
+                        <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
+                          {product.category}
+                        </Badge>
+                        <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-orange-600 transition-colors">
+                          {product.name}
+                        </h3>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <div className="text-2xl font-bold text-gray-900">
+                            KES {product.price?.toLocaleString()}
+                          </div>
+                          {product.original_price && product.original_price > product.price && (
+                            <div className="text-sm text-gray-500 line-through">
+                              KES {product.original_price.toLocaleString()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                          <span>{product.rating?.toFixed(1) || '4.5'}</span>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        onClick={() => handleAddToCart(product)}
+                        className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium rounded-lg transition-all duration-200 hover:shadow-lg"
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        Add to Cart
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
       {/* Modals Placeholders */}
@@ -239,46 +393,15 @@ const ShopDashboard = () => {
           </DialogContent>
         </Dialog>
       )}
-      {showCart && (
-        <Dialog open={showCart} onOpenChange={setShowCart}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Your Cart</DialogTitle>
-            </DialogHeader>
-            {cartItems.length === 0 ? (
-              <div className="text-gray-500 py-8 text-center">Your cart is empty.</div>
-            ) : (
-              <div className="space-y-4">
-                {cartItems.map((item: any) => (
-                  <div key={item.id} className="flex items-center justify-between gap-2 border-b pb-2">
-                    <div>
-                      <div className="font-semibold">{item.product_name}</div>
-                      <div className="text-sm text-gray-500">Qty: 
-                        <input
-                          type="number"
-                          min={1}
-                          value={item.quantity}
-                          onChange={async (e) => {
-                            const qty = parseInt(e.target.value);
-                            if (qty > 0) {
-                              await OrderService.updateCartItem(item.id, qty);
-                              await loadCart();
-                            }
-                          }}
-                          className="w-12 ml-2 border rounded px-1 text-center"
-                        />
-                      </div>
-                      <div className="text-sm text-gray-500">KES {item.price}</div>
-                    </div>
-                    <Button size="sm" variant="outline" onClick={async () => { await OrderService.removeFromCart(item.id); await loadCart(); }}>Remove</Button>
-                  </div>
-                ))}
-                <div className="font-bold text-right pt-4">Total: KES {cartItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0)}</div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-      )}
+      <CartModal
+        isOpen={showCart}
+        onClose={() => setShowCart(false)}
+        user={user}
+        cartItems={cartItems}
+        onRemoveFromCart={() => {}}
+        onUpdateQuantity={() => {}}
+        onCartUpdate={loadCart}
+      />
       {showLikedItems && (
         <Dialog open={showLikedItems} onOpenChange={setShowLikedItems}>
           <DialogContent>

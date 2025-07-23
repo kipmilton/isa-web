@@ -42,3 +42,38 @@ export interface Order {
 export interface OrderWithDetails extends Order {
   order_items?: OrderItem[];
 }
+
+export interface CartItemWithProduct {
+  id: string;
+  user_id: string;
+  product_id: string;
+  quantity: number;
+  added_at: string;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    main_image?: string;
+    category: string;
+    stock_quantity: number;
+  };
+}
+
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+}
+
+export interface PaymentMethod {
+  type: 'mpesa' | 'airtel_money';
+  phoneNumber: string;
+}
+
+export interface DeliveryDetails {
+  method: 'pickup' | 'delivery';
+  address?: Address;
+  fee: number;
+}
