@@ -207,6 +207,8 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
   const [categories, setCategories] = useState<string[]>([]);
   const { toast } = useToast();
   const { user: authUser } = useAuth();
+  const [banReasonDialogOpen, setBanReasonDialogOpen] = useState(false);
+  const [banReasonText, setBanReasonText] = useState("");
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
@@ -615,6 +617,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                       variant="secondary"
                       className="w-8 h-8 bg-white/90 hover:bg-white"
                       onClick={() => handleEdit(product)}
+                      disabled={product.banned}
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -623,6 +626,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                       variant="destructive"
                       className="w-8 h-8 bg-red-500/90 hover:bg-red-500"
                       onClick={() => handleDelete(product.id)}
+                      disabled={product.banned}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -633,6 +637,9 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                     )}
                     {!product.is_active && (
                       <Badge variant="destructive">Inactive</Badge>
+                    )}
+                    {product.banned && (
+                      <Badge className="bg-red-600 text-white">Banned by ISA team</Badge>
                     )}
                   </div>
                 </div>
@@ -653,6 +660,21 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                       <span>{(product.rating || 0).toFixed(1)} ({product.review_count || 0})</span>
                     </div>
                   </div>
+                  {product.banned && product.banned_reason && (
+                    <div className="mt-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 border-red-400 hover:bg-red-50"
+                        onClick={() => {
+                          setBanReasonText(product.banned_reason || "");
+                          setBanReasonDialogOpen(true);
+                        }}
+                      >
+                        View Ban Reason
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -986,6 +1008,19 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={banReasonDialogOpen} onOpenChange={setBanReasonDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ban Reason</DialogTitle>
+          </DialogHeader>
+          <div className="py-2 text-red-700 whitespace-pre-line">
+            {banReasonText}
+          </div>
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setBanReasonDialogOpen(false)}>Close</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

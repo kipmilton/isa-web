@@ -31,4 +31,6 @@ export interface Product {
   display_size?: string;
   created_at?: string;
   updated_at?: string;
+  banned?: boolean;
+  banned_reason?: string | null;
 }
