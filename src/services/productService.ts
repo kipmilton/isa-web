@@ -65,4 +65,23 @@ export class ProductService {
       .eq('id', id)
       .single();
   }
+
+  static async getProductsFiltered(category?: string, search?: string) {
+    let query = supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (category && category !== 'All') {
+      query = query.eq('category', category);
+    }
+    if (search && search.trim() !== '') {
+      query = query.ilike('name', `%${search.trim()}%`);
+    }
+    const { data, error } = await query;
+    if (error) {
+      console.error('Error fetching filtered products:', error);
+      return [];
+    }
+    return data || [];
+  }
 }

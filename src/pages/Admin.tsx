@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users, ShoppingCart, Store, Package, CheckCircle, XCircle, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 // Mock data - in a real app, this would come from your backend
 const mockUserStats = [
@@ -84,25 +85,45 @@ const mockProducts = [
 ];
 
 const Admin = () => {
-  const [vendorApplications, setVendorApplications] = useState(mockVendorApplications);
+  const [vendorApplications, setVendorApplications] = useState<any[]>([]);
   const [products, setProducts] = useState(mockProducts);
   const [orders] = useState(mockOrders);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleVendorAction = (vendorId: number, action: 'approve' | 'decline') => {
-    setVendorApplications(prev => 
-      prev.map(vendor => 
-        vendor.id === vendorId 
-          ? { ...vendor, status: action === 'approve' ? 'approved' : 'rejected' }
-          : vendor
-      )
-    );
-    
+  useEffect(() => {
+    fetchVendors();
+  }, []);
+
+  const fetchVendors = async () => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_type', 'vendor');
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to fetch vendors', variant: 'destructive' });
+      return;
+    }
+    setVendorApplications(data || []);
+  };
+
+  const handleVendorAction = async (vendorId: string, action: 'approve' | 'decline', email: string) => {
+    const newStatus = action === 'approve' ? 'approved' : 'rejected';
+    const { error } = await supabase
+      .from('profiles')
+      .update({ status: newStatus })
+      .eq('id', vendorId);
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to update vendor status', variant: 'destructive' });
+      return;
+    }
     toast({
-      title: action === 'approve' ? "Vendor Approved" : "Vendor Declined",
+      title: action === 'approve' ? 'Vendor Approved' : 'Vendor Declined',
       description: `Vendor application has been ${action === 'approve' ? 'approved' : 'declined'} successfully.`,
     });
+    // Placeholder: Send email notification to vendor
+    // await sendStatusEmail(email, newStatus);
+    fetchVendors();
   };
 
   const handleAddProduct = (event: React.FormEvent<HTMLFormElement>) => {
@@ -247,10 +268,10 @@ const Admin = () => {
                   <TableBody>
                     {vendorApplications.map((vendor) => (
                       <TableRow key={vendor.id}>
-                        <TableCell className="font-medium">{vendor.companyName}</TableCell>
-                        <TableCell>{vendor.repName}</TableCell>
-                        <TableCell>{vendor.constituency}, {vendor.county}</TableCell>
-                        <TableCell>{vendor.appliedDate}</TableCell>
+                        <TableCell className="font-medium">{vendor.company || '-'}</TableCell>
+                        <TableCell>{vendor.first_name} {vendor.last_name}</TableCell>
+                        <TableCell>{vendor.location || '-'}</TableCell>
+                        <TableCell>{vendor.created_at ? new Date(vendor.created_at).toLocaleDateString() : '-'}</TableCell>
                         <TableCell>
                           <Badge variant={
                             vendor.status === 'approved' ? 'default' : 
@@ -264,7 +285,7 @@ const Admin = () => {
                             <div className="flex gap-2">
                               <Button
                                 size="sm"
-                                onClick={() => handleVendorAction(vendor.id, 'approve')}
+                                onClick={() => handleVendorAction(vendor.id, 'approve', vendor.email)}
                                 className="bg-green-600 hover:bg-green-700"
                               >
                                 <CheckCircle className="h-4 w-4 mr-1" />
@@ -273,7 +294,7 @@ const Admin = () => {
                               <Button
                                 size="sm"
                                 variant="destructive"
-                                onClick={() => handleVendorAction(vendor.id, 'decline')}
+                                onClick={() => handleVendorAction(vendor.id, 'decline', vendor.email)}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
                                 Decline
