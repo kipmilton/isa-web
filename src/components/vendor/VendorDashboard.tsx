@@ -3,6 +3,11 @@ import { useState } from "react";
 import VendorSidebar from "./VendorSidebar";
 import VendorHome from "./sections/VendorHome";
 import VendorProductManagement from "./VendorProductManagement";
+import VendorOrders from "./sections/VendorOrders";
+import VendorReviews from "./sections/VendorReviews";
+import VendorPayments from "./sections/VendorPayments";
+import VendorWallet from "./sections/VendorWallet";
+import VendorSettings from "./sections/VendorSettings";
 
 interface VendorDashboardProps {
   user: any;
@@ -24,12 +29,7 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
           </div>
         );
       case "orders":
-        return (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Orders</h1>
-            <p className="text-gray-600">Orders management coming soon...</p>
-          </div>
-        );
+        return <VendorOrders vendorId={user.id} />;
       case "store":
         return (
           <div>
@@ -38,33 +38,13 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
           </div>
         );
       case "payments":
-        return (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Customer Payments</h1>
-            <p className="text-gray-600">Payment tracking coming soon...</p>
-          </div>
-        );
+        return <VendorPayments vendorId={user.id} />;
       case "reviews":
-        return (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Customer Reviews</h1>
-            <p className="text-gray-600">Reviews management coming soon...</p>
-          </div>
-        );
+        return <VendorReviews vendorId={user.id} />;
       case "wallet":
-        return (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Wallet</h1>
-            <p className="text-gray-600">Wallet management coming soon...</p>
-          </div>
-        );
+        return <VendorWallet vendorId={user.id} />;
       case "settings":
-        return (
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
-            <p className="text-gray-600">Settings management coming soon...</p>
-          </div>
-        );
+        return <VendorSettings vendorId={user.id} />;
       default:
         return <VendorHome vendorId={user.id} />;
     }
