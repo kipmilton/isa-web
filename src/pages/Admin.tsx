@@ -154,7 +154,11 @@ const Admin = () => {
     if (!selectedProduct) return;
     const { error } = await supabase
       .from('products')
-      .update({ banned: true, banned_reason: banReason })
+      .update({ 
+        banned: true, 
+        banned_reason: banReason,
+        is_active: false 
+      })
       .eq('id', selectedProduct.id);
     if (error) {
       toast({ title: 'Error', description: 'Failed to ban product', variant: 'destructive' });
