@@ -5,9 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface VendorHomeProps {
   vendorId: string;
+  plan?: string;
+  planExpiry?: string | null;
+  productCount?: number;
+  onUpgrade?: () => void;
 }
 
-const VendorHome = ({ vendorId }: VendorHomeProps) => {
+const VendorHome = ({ vendorId, plan, planExpiry, productCount, onUpgrade }: VendorHomeProps) => {
   const [stats, setStats] = useState({
     totalSales: 0,
     totalProducts: 0,

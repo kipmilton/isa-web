@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Wallet, DollarSign, Clock, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Withdrawal {
   id: string;
@@ -24,49 +25,88 @@ interface VendorWalletProps {
 }
 
 const VendorWallet = ({ vendorId }: VendorWalletProps) => {
-  const [balance, setBalance] = useState({ available: 5420.50, pending: 1250.00 });
+  const [balance, setBalance] = useState({ available: 0, pending: 0 });
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [mpesaNumber, setMpesaNumber] = useState("");
   const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
+  const [payoutLastUpdated, setPayoutLastUpdated] = useState<string | null>(null);
   const { toast } = useToast();
+  const [canWithdraw, setCanWithdraw] = useState(true);
 
   useEffect(() => {
     fetchWalletData();
     fetchWithdrawals();
+    fetchPayoutInfo();
   }, [vendorId]);
 
   const fetchWalletData = async () => {
-    // In a real app, this would fetch from your backend
-    // For now, using mock data
-    setBalance({ available: 5420.50, pending: 1250.00 });
+    // Fetch all orders for this vendor
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select(`*, order_items(*, products!inner(vendor_id))`)
+      .eq('order_items.products.vendor_id', vendorId);
+    if (error) {
+      setBalance({ available: 0, pending: 0 });
+      return;
+    }
+    // Calculate available and pending balances
+    let available = 0;
+    let pending = 0;
+    const COMMISSION = 0.1; // 10% for free plan, adjust as needed
+    for (const order of orders || []) {
+      // Only count orders for this vendor
+      const vendorOrderItems = (order.order_items || []).filter((item: any) => item.products?.vendor_id === vendorId);
+      const total = vendorOrderItems.reduce((sum: number, item: any) => sum + (item.total_price || 0), 0);
+      if (order.status === 'completed') {
+        // TODO: Subtract withdrawn amounts if you have a withdrawals table
+        available += total * (1 - COMMISSION);
+      } else {
+        pending += total * (1 - COMMISSION);
+      }
+    }
+    setBalance({ available, pending });
   };
 
   const fetchWithdrawals = async () => {
-    // Mock withdrawal data
-    const mockWithdrawals: Withdrawal[] = [
-      {
-        id: '1',
-        amount: 2500.00,
-        status: 'completed',
-        mpesa_number: '254712345678',
-        created_at: '2024-01-15T10:30:00Z',
-        processed_at: '2024-01-15T11:45:00Z'
-      },
-      {
-        id: '2',
-        amount: 1800.00,
-        status: 'pending',
-        mpesa_number: '254712345678',
-        created_at: '2024-01-20T14:20:00Z'
-      }
-    ];
-    setWithdrawals(mockWithdrawals);
+    // Fetch real withdrawal history from withdrawals table
+    const { data, error } = await supabase
+      .from('withdrawals')
+      .select('*')
+      .eq('vendor_id', vendorId)
+      .order('created_at', { ascending: false });
+    if (error) {
+      setWithdrawals([]);
+      return;
+    }
+    setWithdrawals(data || []);
+  };
+
+  const fetchPayoutInfo = async () => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('preferences')
+      .eq('id', vendorId)
+      .single();
+    let preferences = data?.preferences;
+    if (typeof preferences === 'string') {
+      try { preferences = JSON.parse(preferences); } catch { preferences = {}; }
+    }
+    const payout = preferences?.payout || {};
+    setMpesaNumber(payout.mpesa_number || '');
+    setPayoutLastUpdated(payout.last_updated || null);
+    // Enforce 24hr rule
+    if (payout.last_updated) {
+      const last = new Date(payout.last_updated).getTime();
+      const now = Date.now();
+      setCanWithdraw(now - last > 24 * 60 * 60 * 1000);
+    } else {
+      setCanWithdraw(true);
+    }
   };
 
   const handleWithdraw = async () => {
     const amount = parseFloat(withdrawAmount);
-    
     if (!amount || amount <= 0) {
       toast({
         title: "Invalid Amount",
@@ -75,7 +115,6 @@ const VendorWallet = ({ vendorId }: VendorWalletProps) => {
       });
       return;
     }
-
     if (amount > balance.available) {
       toast({
         title: "Insufficient Balance",
@@ -84,35 +123,43 @@ const VendorWallet = ({ vendorId }: VendorWalletProps) => {
       });
       return;
     }
-
     if (!mpesaNumber || mpesaNumber.length < 10) {
       toast({
-        title: "Invalid M-Pesa Number",
-        description: "Please enter a valid M-Pesa number.",
+        title: "Invalid Payout Number",
+        description: "Please update your payout info in Settings.",
         variant: "destructive"
       });
       return;
     }
-
-    // In a real app, this would call your backend API
-    const newWithdrawal: Withdrawal = {
-      id: Date.now().toString(),
-      amount,
-      status: 'pending',
-      mpesa_number: mpesaNumber,
-      created_at: new Date().toISOString()
-    };
-
-    setWithdrawals(prev => [newWithdrawal, ...prev]);
-    setBalance(prev => ({
-      ...prev,
-      available: prev.available - amount,
-      pending: prev.pending + amount
-    }));
-
+    if (!canWithdraw) {
+      toast({
+        title: "Withdrawal Restricted",
+        description: "You can only withdraw 24 hours after updating your payout info.",
+        variant: "destructive"
+      });
+      return;
+    }
+    // Insert withdrawal into withdrawals table
+    const { error } = await supabase
+      .from('withdrawals')
+      .insert({
+        vendor_id: vendorId,
+        amount,
+        mpesa_number: mpesaNumber,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      });
+    if (error) {
+      toast({
+        title: "Withdrawal Failed",
+        description: "Could not submit withdrawal request.",
+        variant: "destructive"
+      });
+      return;
+    }
+    fetchWithdrawals();
     setWithdrawAmount("");
     setIsWithdrawDialogOpen(false);
-
     toast({
       title: "Withdrawal Initiated",
       description: `Your withdrawal of KES ${amount.toLocaleString()} has been submitted for processing.`,
@@ -212,10 +259,13 @@ const VendorWallet = ({ vendorId }: VendorWalletProps) => {
                     <Input
                       id="mpesa"
                       value={mpesaNumber}
-                      onChange={(e) => setMpesaNumber(e.target.value)}
+                      readOnly
                       placeholder="254712345678"
                     />
                   </div>
+                  {!canWithdraw && (
+                    <div className="text-xs text-red-600">You can only withdraw 24 hours after updating your payout info.</div>
+                  )}
                   <Button onClick={handleWithdraw} className="w-full">
                     Initiate Withdrawal
                   </Button>
