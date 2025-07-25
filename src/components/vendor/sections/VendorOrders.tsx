@@ -7,6 +7,8 @@ import { OrderService } from "@/services/orderService";
 import { OrderWithDetails } from "@/types/order";
 import { format } from "date-fns";
 import { Package, Truck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface VendorOrdersProps {
   vendorId: string;
@@ -15,12 +17,32 @@ interface VendorOrdersProps {
 const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
   const [orders, setOrders] = useState<OrderWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchOrders();
   }, [vendorId]);
 
+  const verifyVendorAuth = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.id !== vendorId) {
+      toast({
+        title: "Access Denied",
+        description: "Unauthorized access to orders.",
+        variant: "destructive"
+      });
+      return false;
+    }
+    return true;
+  };
+
   const fetchOrders = async () => {
+    // Verify vendor authorization first
+    if (!(await verifyVendorAuth())) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const vendorOrders = await OrderService.getVendorOrders(vendorId);
       setOrders(vendorOrders);

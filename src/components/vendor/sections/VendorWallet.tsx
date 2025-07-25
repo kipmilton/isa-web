@@ -14,10 +14,17 @@ import { supabase } from "@/integrations/supabase/client";
 interface Withdrawal {
   id: string;
   amount: number;
-  status: 'pending' | 'completed' | 'failed';
+  status: string;
   mpesa_number: string;
   created_at: string;
-  processed_at?: string;
+  processed_at?: string | null;
+  vendor_id: string;
+  updated_at: string;
+}
+
+interface PayoutPreferences {
+  mpesa_number?: string;
+  last_updated?: string;
 }
 
 interface VendorWalletProps {
@@ -41,30 +48,55 @@ const VendorWallet = ({ vendorId }: VendorWalletProps) => {
   }, [vendorId]);
 
   const fetchWalletData = async () => {
-    // Fetch all orders for this vendor
+    // Verify vendor authorization
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.id !== vendorId) {
+      toast({
+        title: "Access Denied",
+        description: "Unauthorized access to wallet data.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Fetch all orders for this vendor with proper filtering
     const { data: orders, error } = await supabase
       .from('orders')
       .select(`*, order_items(*, products!inner(vendor_id))`)
       .eq('order_items.products.vendor_id', vendorId);
+    
     if (error) {
       setBalance({ available: 0, pending: 0 });
       return;
     }
+    
     // Calculate available and pending balances
     let available = 0;
     let pending = 0;
     const COMMISSION = 0.1; // 10% for free plan, adjust as needed
+    
     for (const order of orders || []) {
       // Only count orders for this vendor
       const vendorOrderItems = (order.order_items || []).filter((item: any) => item.products?.vendor_id === vendorId);
       const total = vendorOrderItems.reduce((sum: number, item: any) => sum + (item.total_price || 0), 0);
+      
       if (order.status === 'completed') {
-        // TODO: Subtract withdrawn amounts if you have a withdrawals table
         available += total * (1 - COMMISSION);
       } else {
         pending += total * (1 - COMMISSION);
       }
     }
+    
+    // Subtract already withdrawn amounts
+    const { data: withdrawnAmounts } = await supabase
+      .from('withdrawals')
+      .select('amount')
+      .eq('vendor_id', vendorId)
+      .eq('status', 'completed');
+    
+    const totalWithdrawn = withdrawnAmounts?.reduce((sum, w) => sum + Number(w.amount), 0) || 0;
+    available = Math.max(0, available - totalWithdrawn);
+    
     setBalance({ available, pending });
   };
 
@@ -83,18 +115,33 @@ const VendorWallet = ({ vendorId }: VendorWalletProps) => {
   };
 
   const fetchPayoutInfo = async () => {
+    // Verify vendor authorization
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.id !== vendorId) {
+      return;
+    }
+
     const { data, error } = await supabase
       .from('profiles')
       .select('preferences')
       .eq('id', vendorId)
       .single();
-    let preferences = data?.preferences;
+    
+    if (error || !data) return;
+    
+    let preferences: any = data.preferences;
     if (typeof preferences === 'string') {
-      try { preferences = JSON.parse(preferences); } catch { preferences = {}; }
+      try { 
+        preferences = JSON.parse(preferences); 
+      } catch { 
+        preferences = {}; 
+      }
     }
-    const payout = preferences?.payout || {};
+    
+    const payout = (preferences as any)?.payout || {};
     setMpesaNumber(payout.mpesa_number || '');
     setPayoutLastUpdated(payout.last_updated || null);
+    
     // Enforce 24hr rule
     if (payout.last_updated) {
       const last = new Date(payout.last_updated).getTime();

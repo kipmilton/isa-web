@@ -440,6 +440,8 @@ export type Database = {
       }
       products: {
         Row: {
+          banned: boolean
+          banned_reason: string | null
           brand: string | null
           category: string
           commission_percentage: number | null
@@ -474,6 +476,8 @@ export type Database = {
           vendor_id: string | null
         }
         Insert: {
+          banned?: boolean
+          banned_reason?: string | null
           brand?: string | null
           category: string
           commission_percentage?: number | null
@@ -508,6 +512,8 @@ export type Database = {
           vendor_id?: string | null
         }
         Update: {
+          banned?: boolean
+          banned_reason?: string | null
           brand?: string | null
           category?: string
           commission_percentage?: number | null
@@ -556,6 +562,7 @@ export type Database = {
           admin_notes: string | null
           avatar_url: string | null
           business_type: string | null
+          chat_count: number | null
           company: string | null
           company_website: string | null
           created_at: string | null
@@ -567,6 +574,8 @@ export type Database = {
           last_name: string | null
           location: string | null
           phone_number: string | null
+          plan: string | null
+          plan_expiry: string | null
           preferences: Json | null
           role: string | null
           status: string | null
@@ -578,6 +587,7 @@ export type Database = {
           admin_notes?: string | null
           avatar_url?: string | null
           business_type?: string | null
+          chat_count?: number | null
           company?: string | null
           company_website?: string | null
           created_at?: string | null
@@ -589,6 +599,8 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           phone_number?: string | null
+          plan?: string | null
+          plan_expiry?: string | null
           preferences?: Json | null
           role?: string | null
           status?: string | null
@@ -600,6 +612,7 @@ export type Database = {
           admin_notes?: string | null
           avatar_url?: string | null
           business_type?: string | null
+          chat_count?: number | null
           company?: string | null
           company_website?: string | null
           created_at?: string | null
@@ -611,6 +624,8 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           phone_number?: string | null
+          plan?: string | null
+          plan_expiry?: string | null
           preferences?: Json | null
           role?: string | null
           status?: string | null
@@ -878,6 +893,30 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_searches: {
         Row: {
           created_at: string | null
@@ -904,6 +943,47 @@ export type Database = {
           {
             foreignKeyName: "user_searches_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      withdrawals: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          mpesa_number: string
+          processed_at: string | null
+          status: string
+          updated_at: string | null
+          vendor_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          mpesa_number: string
+          processed_at?: string | null
+          status?: string
+          updated_at?: string | null
+          vendor_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          mpesa_number?: string
+          processed_at?: string | null
+          status?: string
+          updated_at?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawals_vendor_id_fkey"
+            columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -954,7 +1034,15 @@ export type Database = {
       }
     }
     Functions: {
+      approve_vendor_application: {
+        Args: { application_id: string; admin_notes?: string }
+        Returns: boolean
+      }
       generate_order_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -972,11 +1060,19 @@ export type Database = {
           created_at: string
         }[]
       }
+      has_role: {
+        Args: { _user_id: string; _role: string }
+        Returns: boolean
+      }
       is_vendor_order: {
         Args: {
           order_row: Database["public"]["Tables"]["orders"]["Row"]
           vendor: string
         }
+        Returns: boolean
+      }
+      reject_vendor_application: {
+        Args: { application_id: string; admin_notes?: string }
         Returns: boolean
       }
     }

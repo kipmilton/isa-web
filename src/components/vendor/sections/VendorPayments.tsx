@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { CreditCard, DollarSign, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 interface Payment {
   id: string;
@@ -34,12 +35,25 @@ const VendorPayments = ({ vendorId }: VendorPaymentsProps) => {
     monthlyRevenue: 0,
     totalTransactions: 0
   });
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchPayments();
   }, [vendorId]);
 
   const fetchPayments = async () => {
+    // Verify vendor authorization
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.id !== vendorId) {
+      toast({
+        title: "Access Denied",
+        description: "Unauthorized access to payment data.",
+        variant: "destructive"
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       // Fetch payments for orders containing vendor's products
       const { data, error } = await supabase
