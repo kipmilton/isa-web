@@ -66,7 +66,7 @@ const AuthCallback = () => {
               }
             } else {
               // Customer - check if account setup is completed
-              if (!profile.account_setup_completed) {
+              if (!(profile as any).account_setup_completed) {
                 toast.success('Welcome back! Please complete your profile setup for better recommendations.');
               }
               navigate('/shop');

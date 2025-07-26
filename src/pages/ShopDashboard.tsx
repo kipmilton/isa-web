@@ -66,7 +66,7 @@ const ShopDashboard = () => {
         if (!error && profile) {
           setUserProfile(profile);
           // Show account setup modal if user hasn't completed setup
-          if (!profile.account_setup_completed && profile.user_type === 'customer') {
+          if (!(profile as any).account_setup_completed && profile.user_type === 'customer') {
             setShowAccountSetup(true);
           }
         }
@@ -312,7 +312,7 @@ const ShopDashboard = () => {
       
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
         {/* Account Setup Banner for Google Users */}
-        {userProfile && userProfile.user_type === 'customer' && !userProfile.account_setup_completed && (
+        {userProfile && userProfile.user_type === 'customer' && !(userProfile as any).account_setup_completed && (
           <div className="mb-6 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
