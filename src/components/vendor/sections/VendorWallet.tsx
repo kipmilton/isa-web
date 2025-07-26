@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Wallet, DollarSign, Clock, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -288,6 +288,9 @@ const VendorWallet = ({ vendorId }: VendorWalletProps) => {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Withdraw Funds</DialogTitle>
+                  <DialogDescription className="sr-only">
+                    Withdraw your available funds to your M-Pesa account.
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>

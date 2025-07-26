@@ -1,13 +1,13 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import TryFreeDialog from "@/components/TryFreeDialog";
 import { Link } from "react-router-dom";
-import { MessageCircle, Search, ShoppingBag, Smartphone, Apple, Play, Quote, Star, Gift, Home } from "lucide-react";
+import { MessageCircle, Search, ShoppingBag, Smartphone, Apple, Play, Quote, Star, Gift, Home, Menu, X } from "lucide-react";
 import AuthDialog from "@/components/auth/AuthDialog";
 
 const Index = () => {
@@ -18,6 +18,7 @@ const Index = () => {
   const vendorsRef = useRef<HTMLElement>(null);
   const [showTerms, setShowTerms] = useState(false);
   const [authDefaultVendor, setAuthDefaultVendor] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleThemeToggle = () => {
     setIsDarkTheme(!isDarkTheme);
@@ -99,9 +100,10 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-10 w-10" />
+              <img src="/lovable-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-10 w-10" />
               <span className="text-2xl font-bold text-gray-800">ISA</span>
             </div>
+            {/* Desktop Nav */}
             <div className="hidden md:flex items-center space-x-6">
               <Link to="/chat" className="text-gray-600 hover:text-orange-600 transition-colors">Ask ISA</Link>
               <a href="#how-it-works" className="text-gray-600 hover:text-orange-600 transition-colors">How it Works</a>
@@ -121,15 +123,76 @@ const Index = () => {
                 Sign In
               </Button>
             </div>
+            {/* Mobile Nav */}
+            <div className="md:hidden flex items-center">
+              <button
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                onClick={() => setMobileMenuOpen((open) => !open)}
+                className="p-2 rounded-full hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-6 w-6 text-orange-600" />
+                ) : (
+                  <Menu className="h-6 w-6 text-orange-600" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
+        {/* Mobile Dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg border-b z-50 animate-fade-in">
+            <div className="flex flex-col space-y-2 px-6 py-4">
+              <Link
+                to="/chat"
+                className="py-2 text-gray-700 hover:text-orange-600 border-b border-gray-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Ask ISA
+              </Link>
+              <a
+                href="#how-it-works"
+                className="py-2 text-gray-700 hover:text-orange-600 border-b border-gray-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                How it Works
+              </a>
+              <a
+                href="#trending"
+                className="py-2 text-gray-700 hover:text-orange-600 border-b border-gray-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Trending
+              </a>
+              <Link
+                to="/gift"
+                className="py-2 flex items-center text-gray-700 hover:text-orange-600 border-b border-gray-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Gift className="h-4 w-4 mr-1" /> Gift Someone
+              </Link>
+              <button
+                onClick={() => { setMobileMenuOpen(false); scrollToVendors(); }}
+                className="py-2 text-left text-green-600 border-b border-gray-100 hover:bg-green-50 rounded"
+              >
+                Join as Vendor
+              </button>
+              <button
+                onClick={() => { setMobileMenuOpen(false); handleSignIn(); }}
+                className="py-2 text-left text-orange-600 border-b border-gray-100 hover:bg-orange-50 rounded"
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <div className="flex justify-center mb-6 animate-fade-in">
-            <img src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-20 w-20" />
+            <img src="/lovable-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-20 w-20" />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-fade-in">
             Shop Smarter, Buy Better
@@ -453,8 +516,13 @@ const Index = () => {
 
       <Dialog open={showTerms} onOpenChange={setShowTerms}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold mb-4">ISA AI Shopping Assistant - Terms & Conditions</DialogTitle>
+            <DialogDescription className="sr-only">
+              Terms and conditions for using the ISA AI Shopping Assistant platform.
+            </DialogDescription>
+          </DialogHeader>
           <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">ISA AI Shopping Assistant - Terms & Conditions</h2>
             <h3 className="text-lg font-semibold mt-6">Customer Terms</h3>
             <div className="space-y-4 text-sm leading-relaxed">
               <div>

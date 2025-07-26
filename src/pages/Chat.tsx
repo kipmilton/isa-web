@@ -1,5 +1,7 @@
 
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import AuthDialog from "@/components/auth/AuthDialog";
 import { Send, Plus, History, Menu, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +24,8 @@ interface ChatHistory {
 }
 
 const Chat = () => {
+  const { user, loading } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([
@@ -100,6 +104,25 @@ const Chat = () => {
     if (hours < 24) return `${hours}h ago`;
     return `${Math.floor(hours / 24)}d ago`;
   };
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-xl">Loading...</div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-xl gap-6">
+        <div>You must be signed in to use Ask ISA.</div>
+        <Button
+          className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-full text-lg shadow-lg"
+          onClick={() => setShowAuth(true)}
+        >
+          Sign In
+        </Button>
+        <AuthDialog open={showAuth} onOpenChange={setShowAuth} />
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>

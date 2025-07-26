@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck } from "lucide-react";
+import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X } from "lucide-react";
 import { ProductService } from "@/services/productService";
 import { OrderService } from "@/services/orderService";
 import { useToast } from "@/hooks/use-toast";
@@ -43,6 +43,7 @@ const ShopDashboard = () => {
   const [showAskIsaDialog, setShowAskIsaDialog] = useState(true);
   const [showAccountSetup, setShowAccountSetup] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -239,8 +240,8 @@ const ShopDashboard = () => {
               </div>
             </Link>
             
-            {/* Navigation Icons */}
-            <div className="flex items-center space-x-2 lg:space-x-3">
+            {/* Desktop Navigation Icons */}
+            <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
               <Link to="/chat">
                 <Button variant="ghost" size="icon" className="relative group bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg">
                   <MessageCircle className="w-5 h-5" />
@@ -300,13 +301,114 @@ const ShopDashboard = () => {
               <Button 
                 variant="ghost" 
                 size="icon"
-                onClick={() => supabase.auth.signOut()}
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  toast({ title: "Signed out", description: "You have been logged out." });
+                  navigate("/");
+                }}
                 className="text-gray-600 hover:bg-gray-50 hover:text-gray-800"
               >
                 <LogOut className="w-4 h-4" />
               </Button>
             </div>
+
+            {/* Mobile Navigation */}
+            <div className="md:hidden flex items-center space-x-2">
+              {/* Cart and Wishlist buttons for quick access */}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowCart(true)}
+                className="text-green-600 hover:bg-green-50 hover:text-green-700 relative"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {cartItems.length > 0 && (
+                  <Badge className="absolute -top-1 -right-1 w-5 h-5 rounded-full p-0 text-xs bg-green-500">
+                    {cartItems.length}
+                  </Badge>
+                )}
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowLikedItems(true)}
+                className="text-red-500 hover:bg-red-50 hover:text-red-600 relative"
+              >
+                <Heart className="w-5 h-5" />
+                {likedItems.length > 0 && (
+                  <Badge className="absolute -top-1 -right-1 w-5 h-5 rounded-full p-0 text-xs bg-red-500">
+                    {likedItems.length}
+                  </Badge>
+                )}
+              </Button>
+
+              {/* Mobile Menu Button */}
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </Button>
+            </div>
           </div>
+
+          {/* Mobile Menu Dropdown */}
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-md">
+              <div className="py-4 space-y-3">
+                <Link 
+                  to="/chat"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <MessageCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium">Ask ISA</span>
+                </Link>
+                
+                <Link 
+                  to="/gift"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <Gift className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium">Gift Someone</span>
+                </Link>
+                
+                <button 
+                  onClick={() => { setShowProfile(true); setMobileMenuOpen(false); }}
+                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full"
+                >
+                  <Avatar className="w-8 h-8 border-2 border-orange-200">
+                    <AvatarImage src={user?.avatar_url} />
+                    <AvatarFallback className="bg-orange-100 text-orange-600">{user?.email?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium">Profile</span>
+                </button>
+                
+                <button 
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    setMobileMenuOpen(false);
+                    toast({ title: "Signed out", description: "You have been logged out." });
+                    navigate("/");
+                  }}
+                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full"
+                >
+                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <LogOut className="w-4 h-4 text-gray-600" />
+                  </div>
+                  <span className="font-medium">Sign Out</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </header>
       
@@ -538,6 +640,9 @@ const ShopDashboard = () => {
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Product Reviews & Ratings</DialogTitle>
+              <DialogDescription className="sr-only">
+                View and write reviews for this product.
+              </DialogDescription>
             </DialogHeader>
             
             {user && (
@@ -610,6 +715,9 @@ const ShopDashboard = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Your Profile</DialogTitle>
+              <DialogDescription className="sr-only">
+                View and edit your profile information.
+              </DialogDescription>
             </DialogHeader>
             <ProfileForm user={user} onClose={() => setShowProfile(false)} />
           </DialogContent>
@@ -632,6 +740,9 @@ const ShopDashboard = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Your Favorites</DialogTitle>
+              <DialogDescription className="sr-only">
+                View and manage your favorite products.
+              </DialogDescription>
             </DialogHeader>
             {likedItems.length === 0 ? (
               <div className="text-gray-500 py-8 text-center">You have no liked products.</div>

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -708,6 +708,9 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
             <DialogTitle>
               {editingProduct ? "Edit Product" : "Add New Product"}
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              {editingProduct ? "Edit product information and details." : "Add a new product to your inventory."}
+            </DialogDescription>
           </DialogHeader>
           
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -1014,6 +1017,9 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Ban Reason</DialogTitle>
+            <DialogDescription className="sr-only">
+              View the reason why this product was banned.
+            </DialogDescription>
           </DialogHeader>
           <div className="py-2 text-red-700 whitespace-pre-line">
             {banReasonText}

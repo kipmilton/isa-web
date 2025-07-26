@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -284,6 +284,17 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl p-0 overflow-hidden">
+        <DialogHeader className="sr-only">
+          <DialogTitle>
+            {userType === 'customer' ? 'Customer' : 'Vendor'} {isSignUp ? 'Sign Up' : 'Sign In'}
+          </DialogTitle>
+          <DialogDescription>
+            {isSignUp 
+              ? `Create your ${userType} account to get started` 
+              : `Welcome back! Sign in to your ${userType} account`
+            }
+          </DialogDescription>
+        </DialogHeader>
         <div className="flex min-h-[600px]">
           {/* Left Side - Form */}
           <div className="flex-1 p-8">
@@ -763,10 +774,15 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       {/* Terms and Conditions Dialog */}
     <Dialog open={showTermsDialog} onOpenChange={setShowTermsDialog}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold mb-4">
             {userType === 'customer' ? 'ISA AI Shopping Assistant - Customer Terms & Conditions' : 'ISA AI Shopping Assistant - Vendor Terms & Conditions'}
-          </h2>
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Terms and conditions for {userType === 'customer' ? 'customers' : 'vendors'} using the ISA AI Shopping Assistant platform.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="p-6">
 
           {userType === 'customer' ? (
             <div className="space-y-4 text-sm leading-relaxed">

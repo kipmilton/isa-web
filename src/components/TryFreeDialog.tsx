@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -66,6 +66,9 @@ const TryFreeDialog = ({ open, onOpenChange }: TryFreeDialogProps) => {
               {questionsLeft} questions left
             </span>
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Free trial chat with ISA AI Shopping Assistant. Ask questions about products and shopping.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">

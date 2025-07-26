@@ -1,5 +1,7 @@
 
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import AuthDialog from "@/components/auth/AuthDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +11,8 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 const Gift = () => {
+  const { user, loading } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
   const [formData, setFormData] = useState({
     age: "",
     hobbies: "",
@@ -84,6 +88,25 @@ const Gift = () => {
       toast.success("Found perfect gift suggestions for you!");
     }, 2000);
   };
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-xl">Loading...</div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-xl gap-6">
+        <div>You must be signed in to access the Gift section.</div>
+        <Button
+          className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-full text-lg shadow-lg"
+          onClick={() => setShowAuth(true)}
+        >
+          Sign In
+        </Button>
+        <AuthDialog open={showAuth} onOpenChange={setShowAuth} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-orange-50">
