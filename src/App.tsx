@@ -15,6 +15,7 @@ import VendorStatus from "./components/vendor/VendorStatus";
 import NotFound from "./pages/NotFound";
 import ShopDashboard from "./pages/ShopDashboard";
 import AuthCallback from "./pages/AuthCallback";
+import { Analytics } from "@vercel/analytics/react";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </VendorProvider>
+    <Analytics />
   </QueryClientProvider>
 );
 
