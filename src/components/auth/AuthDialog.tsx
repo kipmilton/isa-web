@@ -224,6 +224,8 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
         
         // Redirect based on user type
         if (userType === 'vendor') {
+          setIsVendor(true);
+          setVendorStatus('pending');
           navigate('/vendor-status');
         } else {
           navigate('/shop');

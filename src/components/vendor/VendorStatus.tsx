@@ -1,12 +1,47 @@
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, Clock, XCircle, AlertCircle, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useVendor } from "@/contexts/VendorContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const VendorStatus = () => {
-  const { vendorStatus, setVendorStatus } = useVendor();
+  const { vendorStatus, setVendorStatus, setIsVendor } = useVendor();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchVendorStatus = async () => {
+      setLoading(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('user_type, status')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile?.user_type === 'vendor') {
+            setIsVendor(true);
+            setVendorStatus((profile.status as 'pending' | 'approved' | 'rejected') || 'pending');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching vendor status:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Only fetch if vendorStatus is null (not set yet)
+    if (vendorStatus === null) {
+      fetchVendorStatus();
+    } else {
+      setLoading(false);
+    }
+  }, [vendorStatus, setVendorStatus, setIsVendor]);
 
   const getStatusIcon = () => {
     switch (vendorStatus) {
@@ -61,6 +96,21 @@ const VendorStatus = () => {
   };
 
   const status = getStatusMessage();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="text-center py-8">
+            <div className="flex items-center justify-center space-x-2">
+              <Loader2 className="w-8 h-8 animate-spin" />
+              <span>Loading vendor status...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 flex items-center justify-center p-4">
