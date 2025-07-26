@@ -14,6 +14,7 @@ import VendorDashboard from "./pages/VendorDashboard";
 import VendorStatus from "./components/vendor/VendorStatus";
 import NotFound from "./pages/NotFound";
 import ShopDashboard from "./pages/ShopDashboard";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/vendor-dashboard" element={<VendorDashboard />} />
             <Route path="/vendor-status" element={<VendorStatus />} />
             <Route path="/shop" element={<ShopDashboard />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

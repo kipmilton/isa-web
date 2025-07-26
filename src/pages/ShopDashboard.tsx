@@ -5,16 +5,17 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye } from "lucide-react";
+import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck } from "lucide-react";
 import { ProductService } from "@/services/productService";
 import { OrderService } from "@/services/orderService";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AuthDialog from "@/components/auth/AuthDialog";
 import CartModal from "@/components/CartModal";
+import AccountSetupModal from "@/components/AccountSetupModal";
 import { useNavigate, Link } from "react-router-dom";
 
 const categories = ["All", "Electronics", "Fashion", "Home", "Beauty", "Sports", "Books"];
@@ -40,6 +41,8 @@ const ShopDashboard = () => {
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
   const [showAskIsaDialog, setShowAskIsaDialog] = useState(true);
+  const [showAccountSetup, setShowAccountSetup] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,6 +53,27 @@ const ShopDashboard = () => {
     };
     getSession();
   }, []);
+
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (user?.id) {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        
+        if (!error && profile) {
+          setUserProfile(profile);
+          // Show account setup modal if user hasn't completed setup
+          if (!profile.account_setup_completed && profile.user_type === 'customer') {
+            setShowAccountSetup(true);
+          }
+        }
+      }
+    };
+    loadUserProfile();
+  }, [user]);
 
   const loadProducts = async () => {
     setProductLoading(true);
@@ -287,6 +311,32 @@ const ShopDashboard = () => {
       </header>
       
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
+        {/* Account Setup Banner for Google Users */}
+        {userProfile && userProfile.user_type === 'customer' && !userProfile.account_setup_completed && (
+          <div className="mb-6 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                  <UserCheck className="w-5 h-5 text-orange-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-orange-800">Complete Your Profile Setup</h3>
+                  <p className="text-sm text-orange-700">
+                    Help us provide more accurate and personalized product recommendations
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowAccountSetup(true)}
+                className="bg-orange-500 hover:bg-orange-600 text-white"
+                size="sm"
+              >
+                Complete Setup
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Categories and Search */}
         <div className="mb-6 sm:mb-8 space-y-4">
           <div className="flex items-center justify-between">
@@ -619,6 +669,12 @@ const ShopDashboard = () => {
       {/* Ask ISA Welcome Dialog */}
       <Dialog open={showAskIsaDialog} onOpenChange={setShowAskIsaDialog}>
         <DialogContent className="max-w-md text-center">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Ask ISA Chatbot Introduction</DialogTitle>
+            <DialogDescription className="sr-only">
+              Learn about the Ask ISA chatbot and choose to proceed to shopping or try the chat feature.
+            </DialogDescription>
+          </DialogHeader>
           <div className="flex flex-col items-center gap-4 p-2">
             <img src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-16 w-16 mb-2 rounded-full bg-white p-2" />
             <h2 className="text-2xl font-bold mb-2">Welcome to ISA Shopping!</h2>
@@ -636,6 +692,13 @@ const ShopDashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Account Setup Modal */}
+      <AccountSetupModal
+        open={showAccountSetup}
+        onOpenChange={setShowAccountSetup}
+        user={user}
+      />
     </div>
   );
 };
