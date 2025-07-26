@@ -559,7 +559,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_setup_completed: boolean | null
           admin_notes: string | null
+          age: number | null
           avatar_url: string | null
           business_type: string | null
           chat_count: number | null
@@ -584,7 +586,9 @@ export type Database = {
           user_type: string | null
         }
         Insert: {
+          account_setup_completed?: boolean | null
           admin_notes?: string | null
+          age?: number | null
           avatar_url?: string | null
           business_type?: string | null
           chat_count?: number | null
@@ -609,7 +613,9 @@ export type Database = {
           user_type?: string | null
         }
         Update: {
+          account_setup_completed?: boolean | null
           admin_notes?: string | null
+          age?: number | null
           avatar_url?: string | null
           business_type?: string | null
           chat_count?: number | null

@@ -23,15 +23,24 @@ const Admin = () => {
         return;
       }
 
-      // Check if user is an admin
-      const { data: roles, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session.user.id);
+      // Check if user is an admin - check both user_roles and profiles tables
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_type')
+        .eq('id', session.user.id)
+        .single();
 
-      if (roleError || !roles?.some(r => r.role === 'admin')) {
-        navigate('/');
-        return;
+      if (profileError || profile?.user_type !== 'admin') {
+        // Also check user_roles table as fallback
+        const { data: roles, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id);
+
+        if (roleError || !roles?.some(r => r.role === 'admin')) {
+          navigate('/');
+          return;
+        }
       }
 
       setUser({

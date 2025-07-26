@@ -256,27 +256,21 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
         if (profile?.user_type === 'admin') {
           toast.success("Signed in successfully!");
           onOpenChange(false);
-          setTimeout(() => {
-            navigate('/admin');
-          }, 1000);
+          navigate('/admin');
         } else if (profile?.user_type === 'vendor') {
           setIsVendor(true);
           setVendorStatus((profile?.status as 'pending' | 'approved' | 'rejected') || 'pending');
           toast.success("Signed in successfully!");
           onOpenChange(false);
-          setTimeout(() => {
-            if (profile?.status === 'approved') {
-              navigate('/vendor-dashboard');
-            } else {
-              navigate('/vendor-status');
-            }
-          }, 1000);
+          if (profile?.status === 'approved') {
+            navigate('/vendor-dashboard');
+          } else {
+            navigate('/vendor-status');
+          }
         } else {
           toast.success("Signed in successfully!");
           onOpenChange(false);
-          setTimeout(() => {
-            navigate('/shop');
-          }, 1000);
+          navigate('/shop');
         }
       }
     } catch (error) {
