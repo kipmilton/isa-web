@@ -34,6 +34,7 @@ const ProductDetail = () => {
   const [productImages, setProductImages] = useState<ProductImage[]>([]);
   const [productAttributes, setProductAttributes] = useState<ProductAttribute[]>([]);
   const [productReviews, setProductReviews] = useState<ProductReview[]>([]);
+  const [vendorInfo, setVendorInfo] = useState<{ first_name?: string; last_name?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
@@ -60,14 +61,19 @@ const ProductDetail = () => {
       if (productResult.error) throw new Error("Product not found");
       setProduct(productResult.data);
 
-      const imagesResult = await ProductService.getProductImages(productId!);
-      setProductImages(imagesResult);
+             const imagesResult = await ProductService.getProductImages(productId!);
+       setProductImages(imagesResult as unknown as ProductImage[]);
 
-      const attributesResult = await ProductService.getProductAttributes(productId!);
-      setProductAttributes(attributesResult);
+       const attributesResult = await ProductService.getProductAttributes(productId!);
+       setProductAttributes(attributesResult as unknown as ProductAttribute[]);
 
-      const reviewsResult = await ProductService.getProductReviews(productId!);
-      setProductReviews(reviewsResult);
+       const reviewsResult = await ProductService.getProductReviews(productId!);
+       setProductReviews(reviewsResult as unknown as ProductReview[]);
+
+       // Get vendor information from the product data
+       if (productResult.data.vendor) {
+         setVendorInfo(productResult.data.vendor);
+       }
 
       if (imagesResult.length === 0 && productResult.data.main_image) {
         setProductImages([{
@@ -104,6 +110,12 @@ const ProductDetail = () => {
 
       const userReviewResult = await ProductService.getUserReview(productId, user.id);
       setUserReview(userReviewResult);
+      
+      // Pre-populate review dialog if user has already reviewed
+      if (userReviewResult) {
+        setReviewRating(userReviewResult.rating);
+        setReviewText(userReviewResult.comment || '');
+      }
     } catch (error) {
       console.error("Error checking user interactions:", error);
     }
@@ -121,7 +133,13 @@ const ProductDetail = () => {
     if (!product) return;
 
     try {
-      await OrderService.addToCart(user.id, product.id, 1);
+      await OrderService.addToCart(user.id, {
+        product_id: product.id,
+        product_name: product.name,
+        product_category: product.category,
+        quantity: 1,
+        price: product.price
+      });
       setIsInCart(true);
       toast({ title: "Success", description: "Product added to cart" });
     } catch (error) {
@@ -150,7 +168,11 @@ const ProductDetail = () => {
         setIsLiked(false);
         toast({ title: "Removed from wishlist" });
       } else {
-        await OrderService.addToWishlist(user.id, product.id);
+        await OrderService.addToWishlist(user.id, {
+          product_id: product.id,
+          product_name: product.name,
+          product_category: product.category
+        });
         setIsLiked(true);
         toast({ title: "Added to wishlist" });
       }
@@ -170,7 +192,7 @@ const ProductDetail = () => {
       if (userReview) {
         await ProductService.updateProductReview(userReview.id, {
           rating: reviewRating,
-          review_text: reviewText
+          comment: reviewText
         });
         toast({ title: "Review updated successfully" });
       } else {
@@ -178,7 +200,7 @@ const ProductDetail = () => {
           product_id: product.id,
           user_id: user.id,
           rating: reviewRating,
-          review_text: reviewText
+          comment: reviewText
         });
         toast({ title: "Review submitted successfully" });
       }
@@ -186,7 +208,8 @@ const ProductDetail = () => {
       setShowReviewDialog(false);
       setReviewText("");
       setReviewRating(5);
-      loadProductDetails();
+      // Refresh product details to update rating and review count
+      await loadProductDetails();
     } catch (error) {
       toast({
         title: "Error",
@@ -216,6 +239,19 @@ const ProductDetail = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price).replace('KSh', 'Ksh');
+  };
+
+  const handleReviewDialogChange = (open: boolean) => {
+    setShowReviewDialog(open);
+    if (!open) {
+      // Reset form when dialog is closed
+      setReviewText("");
+      setReviewRating(5);
+    } else if (userReview) {
+      // Pre-populate with existing review
+      setReviewRating(userReview.rating);
+      setReviewText(userReview.comment || '');
+    }
   };
 
   if (loading) {
@@ -338,12 +374,17 @@ const ProductDetail = () => {
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="flex items-center">
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400 mr-1" />
-                  <span className="font-semibold">{(product.rating || 0).toFixed(1)}</span>
-                  <span className="text-gray-600 ml-1">({product.review_count || 0} reviews)</span>
-                </div>
+                             <div className="flex items-center gap-4 mb-4">
+                 <div className="flex items-center">
+                   <Star className="w-5 h-5 fill-yellow-400 text-yellow-400 mr-1" />
+                   <span className="font-semibold">
+                     {productReviews.length > 0 
+                       ? (productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length).toFixed(1)
+                       : '0.0'
+                     }
+                   </span>
+                   <span className="text-gray-600 ml-1">({productReviews.length} reviews)</span>
+                 </div>
                 <Badge variant="secondary">{product.category}</Badge>
                 {product.subcategory && (
                   <Badge variant="outline">{product.subcategory}</Badge>
@@ -449,52 +490,63 @@ const ProductDetail = () => {
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   {isInCart ? "In Cart" : "Add to Cart"}
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowReviewDialog(true)}
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Review
-                </Button>
+                                 <Button
+                   variant="outline"
+                   onClick={() => handleReviewDialogChange(true)}
+                 >
+                   <MessageCircle className="w-4 h-4 mr-2" />
+                   Review
+                 </Button>
               </div>
             </div>
 
-            {/* Pickup Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Pickup Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div>
-                  <span className="text-sm font-medium text-gray-600">Location:</span>
-                  <p className="text-sm">{product.pickup_location}</p>
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-600">Phone:</span>
-                  <p className="text-sm">{product.pickup_phone_number}</p>
-                </div>
-              </CardContent>
-            </Card>
+                         {/* Pickup Information */}
+             <Card>
+               <CardHeader>
+                 <CardTitle className="text-lg">Pickup Information</CardTitle>
+               </CardHeader>
+               <CardContent className="space-y-2">
+                 <div>
+                   <span className="text-sm font-medium text-gray-600">Vendor:</span>
+                   <p className="text-sm">
+                     {vendorInfo 
+                       ? `${vendorInfo.first_name || ''} ${vendorInfo.last_name || ''}`.trim() || 'Unknown Vendor'
+                       : 'Fullfilled by ISA'
+                     }
+                   </p>
+                 </div>
+                 <div>
+                   <span className="text-sm font-medium text-gray-600">Location:</span>
+                   <p className="text-sm">{product.pickup_location || 'Contact vendor for pickup location'}</p>
+                 </div>
+                 {/* {product.pickup_phone_number && (
+                   <div>
+                     <span className="text-sm font-medium text-gray-600">Phone:</span>
+                     <p className="text-sm">{product.pickup_phone_number}</p>
+                   </div>
+                 )} */}
+               </CardContent>
+             </Card>
           </div>
         </div>
 
         {/* Reviews Section */}
         <div className="mt-12">
-          <Tabs defaultValue="reviews" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="reviews">Reviews ({product.review_count || 0})</TabsTrigger>
-              <TabsTrigger value="details">Product Details</TabsTrigger>
-            </TabsList>
+                     <Tabs defaultValue="reviews" className="w-full">
+             <TabsList className="grid w-full grid-cols-2">
+               <TabsTrigger value="reviews">Reviews ({productReviews.length})</TabsTrigger>
+               <TabsTrigger value="details">Product Details</TabsTrigger>
+             </TabsList>
 
             <TabsContent value="reviews" className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-semibold">Customer Reviews</h3>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowReviewDialog(true)}
-                >
-                  Write a Review
-                </Button>
+                                 <Button
+                   variant="outline"
+                   onClick={() => handleReviewDialogChange(true)}
+                 >
+                   Write a Review
+                 </Button>
               </div>
 
               {productReviews.length > 0 ? (
@@ -506,12 +558,14 @@ const ProductDetail = () => {
                           <div className="flex items-center gap-2">
                             <Avatar className="w-8 h-8">
                                               <AvatarFallback>
-                  {review.user?.full_name?.charAt(0) || 'U'}
+                  {review.user?.first_name?.charAt(0) || review.user?.last_name?.charAt(0) || 'U'}
                 </AvatarFallback>
                             </Avatar>
                             <div>
                                               <p className="font-medium text-sm">
-                  {review.user?.full_name || 'Anonymous'}
+                  {review.user?.first_name && review.user?.last_name 
+                    ? `${review.user.first_name} ${review.user.last_name}` 
+                    : review.user?.first_name || review.user?.last_name || 'Anonymous'}
                 </p>
                               <div className="flex items-center gap-1">
                                 {[...Array(5)].map((_, i) => (
@@ -529,8 +583,8 @@ const ProductDetail = () => {
                             {new Date(review.created_at!).toLocaleDateString()}
                           </span>
                         </div>
-                        {review.review_text && (
-                          <p className="text-sm text-gray-700">{review.review_text}</p>
+                        {review.comment && (
+                          <p className="text-sm text-gray-700">{review.comment}</p>
                         )}
                       </CardContent>
                     </Card>
@@ -620,8 +674,8 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Review Dialog */}
-      <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
+             {/* Review Dialog */}
+       <Dialog open={showReviewDialog} onOpenChange={handleReviewDialogChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -664,9 +718,9 @@ const ProductDetail = () => {
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowReviewDialog(false)}>
-              Cancel
-            </Button>
+                         <Button variant="outline" onClick={() => handleReviewDialogChange(false)}>
+               Cancel
+             </Button>
             <Button onClick={handleSubmitReview}>
               {userReview ? "Update Review" : "Submit Review"}
             </Button>

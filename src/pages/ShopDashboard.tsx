@@ -76,6 +76,15 @@ const ShopDashboard = () => {
     loadUserProfile();
   }, [user]);
 
+  // Load products when component mounts and when filters change
+  useEffect(() => {
+    if (user) {
+      loadProducts();
+      loadCart();
+      loadWishlist();
+    }
+  }, [user, selectedCategory, searchQuery, priceRange]);
+
   const loadProducts = async () => {
     setProductLoading(true);
     let data = await ProductService.getProductsFiltered(selectedCategory, searchQuery);
@@ -85,7 +94,33 @@ const ShopDashboard = () => {
       product.price >= priceRange[0] && product.price <= priceRange[1]
     );
     
-    setProducts(data);
+    // Fetch real ratings and review counts for each product
+    const productsWithRatings = await Promise.all(
+      data.map(async (product: any) => {
+        try {
+          const reviews = await ProductService.getProductReviews(product.id);
+          const rating = reviews.length > 0 
+            ? (reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviews.length)
+            : 0;
+          const reviewCount = reviews.length;
+          
+          return {
+            ...product,
+            rating,
+            review_count: reviewCount
+          };
+        } catch (error) {
+          console.warn(`Error fetching reviews for product ${product.id}:`, error);
+          return {
+            ...product,
+            rating: 0,
+            review_count: 0
+          };
+        }
+      })
+    );
+    
+    setProducts(productsWithRatings);
     setProductLoading(false);
   };
 
@@ -502,7 +537,7 @@ const ShopDashboard = () => {
               onChange={e => setSearchQuery(e.target.value)}
               className="border-0 bg-transparent focus:ring-0 text-sm"
             />
-            <Button onClick={loadProducts} size="sm" className="rounded-full bg-orange-500 hover:bg-orange-600">
+            <Button size="sm" className="rounded-full bg-orange-500 hover:bg-orange-600">
               Search
             </Button>
           </div>
@@ -616,7 +651,7 @@ const ShopDashboard = () => {
                         </div>
                         <div className="flex items-center gap-1 text-xs text-gray-600">
                           <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                          <span>{product.rating?.toFixed(1) || '4.5'}</span>
+                          <span>{product.rating > 0 ? product.rating.toFixed(1) : '0.0'}</span>
                           <span className="text-gray-400">({product.review_count || 0})</span>
                         </div>
                       </div>

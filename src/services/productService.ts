@@ -61,7 +61,10 @@ export class ProductService {
   static async getProduct(id: string) {
     return await supabase
       .from('products')
-      .select('*')
+      .select(`
+        *,
+        vendor:profiles!products_vendor_id_fkey(first_name, last_name)
+      `)
       .eq('id', id)
       .single();
   }
@@ -168,7 +171,7 @@ export class ProductService {
       .from('product_reviews')
       .select(`
         *,
-        user:profiles!product_reviews_user_id_fkey(full_name, email)
+        user:profiles!product_reviews_user_id_fkey(first_name, last_name, email)
       `)
       .eq('product_id', productId)
       .order('created_at', { ascending: false });

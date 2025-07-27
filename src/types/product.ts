@@ -18,6 +18,10 @@ export interface Product {
   is_featured?: boolean;
   is_active?: boolean;
   vendor_id?: string;
+  vendor?: {
+    first_name?: string;
+    last_name?: string;
+  };
   pickup_location?: string;
   pickup_phone_number?: string;
   pickup_phone?: string;
@@ -60,11 +64,14 @@ export interface ProductReview {
   product_id: string;
   user_id: string;
   rating: number;
-  review_text?: string;
+  comment?: string;
+  title?: string;
+  is_verified_purchase?: boolean;
   created_at?: string;
   updated_at?: string;
   user?: {
-    full_name?: string;
+    first_name?: string;
+    last_name?: string;
     email?: string;
   };
 }
