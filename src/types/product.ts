@@ -34,3 +34,60 @@ export interface Product {
   banned?: boolean;
   banned_reason?: string | null;
 }
+
+export interface ProductAttribute {
+  id: string;
+  product_id: string;
+  attribute_name: string;
+  attribute_value: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ProductImage {
+  id: string;
+  product_id: string;
+  image_url: string;
+  image_description?: string;
+  display_order: number;
+  is_main_image: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ProductReview {
+  id: string;
+  product_id: string;
+  user_id: string;
+  rating: number;
+  review_text?: string;
+  created_at?: string;
+  updated_at?: string;
+  user?: {
+    full_name?: string;
+    email?: string;
+  };
+}
+
+export interface FashionAttribute {
+  size?: string;
+  color?: string;
+  material?: string;
+  style?: string;
+  gender?: string;
+  age_group?: string;
+  shoe_size?: string;
+  clothing_type?: string;
+}
+
+export interface ElectronicsSpecification {
+  ram?: string;
+  storage?: string;
+  processor?: string;
+  display_size?: string;
+  battery_capacity?: string;
+  camera_resolution?: string;
+  operating_system?: string;
+  connectivity?: string;
+  warranty?: string;
+}

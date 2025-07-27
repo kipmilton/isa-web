@@ -548,7 +548,8 @@ const ShopDashboard = () => {
                         <img 
                           src={product.main_image} 
                           alt={product.name} 
-                          className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300" 
+                          className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer" 
+                          onClick={() => navigate(`/product/${product.id}`)}
                         />
                       ) : (
                         <div className="h-full w-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
@@ -594,7 +595,10 @@ const ShopDashboard = () => {
                         <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
                           {product.category}
                         </Badge>
-                        <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-orange-600 transition-colors">
+                        <h3 
+                          className="font-semibold text-gray-900 line-clamp-2 group-hover:text-orange-600 transition-colors cursor-pointer"
+                          onClick={() => navigate(`/product/${product.id}`)}
+                        >
                           {product.name}
                         </h3>
                       </div>

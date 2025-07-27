@@ -24,12 +24,13 @@ import {
   TrendingUp,
   AlertCircle
 } from "lucide-react";
-import { Product } from "@/types/product";
+import { Product, ProductAttribute, ProductImage } from "@/types/product";
 import { ProductService } from "@/services/productService";
 import { ImageUploadService } from "@/services/imageUploadService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import ImageUpload from "./ImageUpload";
+import ProductAttributes from "./ProductAttributes";
 
 interface VendorProductManagementProps {
   user: any;
@@ -231,6 +232,9 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
     pickup_phone_number: ""
   });
 
+  const [productAttributes, setProductAttributes] = useState<Omit<ProductAttribute, 'id' | 'product_id' | 'created_at' | 'updated_at'>[]>([]);
+  const [productImages, setProductImages] = useState<Omit<ProductImage, 'id' | 'product_id' | 'created_at' | 'updated_at'>[]>([]);
+
   const [tagInput, setTagInput] = useState("");
 
   // 2. Replace category state with cascading selection state
@@ -327,11 +331,14 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
         review_count: 0,
       };
 
+      let productId: string;
+
       if (editingProduct) {
         const result = await ProductService.updateProduct(editingProduct.id, productData, user.id);
         if (result.error) {
           throw new Error(result.error.message);
         }
+        productId = editingProduct.id;
         toast({
           title: "Success",
           description: "Product updated successfully"
@@ -341,10 +348,21 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
         if (result.error) {
           throw new Error(result.error.message);
         }
+        productId = result.data[0].id;
         toast({
           title: "Success",
           description: "Product created successfully"
         });
+      }
+
+      // Save product attributes if it's a fashion item
+      if (mainCategory === 'Fashion' && productAttributes.length > 0) {
+        await ProductService.updateProductAttributes(productId, productAttributes);
+      }
+
+      // Save product images with descriptions
+      if (productImages.length > 0) {
+        await ProductService.updateProductImages(productId, productImages);
       }
 
       setShowAddDialog(false);
@@ -435,6 +453,8 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
     setSubCategory("");
     setSubSubCategory("");
     setExtraFields({});
+    setProductAttributes([]);
+    setProductImages([]);
   };
 
   const addTag = () => {
@@ -475,6 +495,16 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
       ...prev,
       images: [...(prev.images || []), result.url]
     }));
+
+    // Add to product images with description
+    const newImage: Omit<ProductImage, 'id' | 'product_id' | 'created_at' | 'updated_at'> = {
+      image_url: result.url,
+      image_description: `Image ${productImages.length + 1}`,
+      display_order: productImages.length,
+      is_main_image: productImages.length === 0
+    };
+
+    setProductImages(prev => [...prev, newImage]);
   };
 
   // Handle image removal
@@ -484,6 +514,8 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
       images: prev.images?.filter(img => img !== imageUrl) || [],
       main_image: prev.main_image === imageUrl ? "" : prev.main_image
     }));
+
+    setProductImages(prev => prev.filter(img => img.image_url !== imageUrl));
   };
 
   const filteredProducts = products.filter(product => {
@@ -827,6 +859,16 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                       </div>
                     ))}
                   </div>
+                )}
+
+                {/* Product Attributes for Fashion */}
+                {mainCategory === 'Fashion' && (
+                  <ProductAttributes
+                    category={mainCategory}
+                    subcategory={subCategory}
+                    attributes={productAttributes}
+                    onAttributesChange={setProductAttributes}
+                  />
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
