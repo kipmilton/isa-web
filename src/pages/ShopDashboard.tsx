@@ -120,7 +120,10 @@ const ShopDashboard = () => {
       })
     );
     
-    setProducts(productsWithRatings);
+    // Shuffle the products array to randomize the order
+    const shuffledProducts = [...productsWithRatings].sort(() => Math.random() - 0.5);
+    
+    setProducts(shuffledProducts);
     setProductLoading(false);
   };
 
