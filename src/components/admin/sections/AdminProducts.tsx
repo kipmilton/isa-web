@@ -5,20 +5,32 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Filter, Eye, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [banDialogOpen, setBanDialogOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [stockFilter, setStockFilter] = useState("all");
   const { toast } = useToast();
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    filterProducts();
+  }, [products, searchTerm, statusFilter, categoryFilter, stockFilter]);
 
   const fetchProducts = async () => {
     try {
@@ -48,6 +60,59 @@ const AdminProducts = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterProducts = () => {
+    let filtered = [...products];
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(product =>
+        product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.profiles?.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.profiles?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.profiles?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.profiles?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== "all") {
+      switch (statusFilter) {
+        case "active":
+          filtered = filtered.filter(product => product.is_active && !product.banned);
+          break;
+        case "inactive":
+          filtered = filtered.filter(product => !product.is_active && !product.banned);
+          break;
+        case "banned":
+          filtered = filtered.filter(product => product.banned);
+          break;
+      }
+    }
+
+    // Category filter
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter(product => product.category === categoryFilter);
+    }
+
+    // Stock filter
+    if (stockFilter !== "all") {
+      switch (stockFilter) {
+        case "in_stock":
+          filtered = filtered.filter(product => (product.stock_quantity || 0) > 0);
+          break;
+        case "out_of_stock":
+          filtered = filtered.filter(product => (product.stock_quantity || 0) === 0);
+          break;
+        case "low_stock":
+          filtered = filtered.filter(product => (product.stock_quantity || 0) > 0 && (product.stock_quantity || 0) < 5);
+          break;
+      }
+    }
+
+    setFilteredProducts(filtered);
   };
 
   const handleBanProduct = (product: any) => {
@@ -126,6 +191,52 @@ const AdminProducts = () => {
     }
   };
 
+  const handleToggleActive = async (product: any) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ is_active: !product.is_active })
+        .eq('id', product.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Product Updated",
+        description: `Product has been ${product.is_active ? 'deactivated' : 'activated'}.`
+      });
+
+      fetchProducts();
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update product",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const getUniqueCategories = () => {
+    const categories = products.map(product => product.category).filter(Boolean);
+    return [...new Set(categories)];
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      currencyDisplay: 'symbol',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount || 0).replace('KSh', 'Ksh');
+  };
+
+  const getStockStatus = (quantity: number) => {
+    if (quantity === 0) return { status: 'Out of Stock', variant: 'destructive' as const };
+    if (quantity < 5) return { status: 'Low Stock', variant: 'secondary' as const };
+    return { status: 'In Stock', variant: 'default' as const };
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -141,9 +252,83 @@ const AdminProducts = () => {
         <p className="text-gray-600 mt-2">Manage and moderate platform products</p>
       </div>
 
+      {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>All Products</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="w-5 h-5" />
+            Filters & Search
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="banned">Banned</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {getUniqueCategories().map(category => (
+                  <SelectItem key={category} value={category}>{category}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={stockFilter} onValueChange={setStockFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Stock" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stock</SelectItem>
+                <SelectItem value="in_stock">In Stock</SelectItem>
+                <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+                <SelectItem value="low_stock">Low Stock</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("all");
+                setCategoryFilter("all");
+                setStockFilter("all");
+              }}
+            >
+              Clear Filters
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Products Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            Products ({filteredProducts.length} of {products.length})
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -151,7 +336,7 @@ const AdminProducts = () => {
               <TableRow>
                 <TableHead>Product Name</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead>Price (KSH)</TableHead>
+                <TableHead>Price</TableHead>
                 <TableHead>Vendor</TableHead>
                 <TableHead>Stock</TableHead>
                 <TableHead>Status</TableHead>
@@ -159,70 +344,100 @@ const AdminProducts = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell className="font-medium">
-                    {product.name}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{product.category}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {product.price?.toLocaleString() || '0'}
-                  </TableCell>
-                  <TableCell>
-                    {product.profiles?.company || 
-                     `${product.profiles?.first_name || ''} ${product.profiles?.last_name || ''}`.trim() ||
-                     product.profiles?.email?.split('@')[0] ||
-                     'Unknown Vendor'
-                    }
-                  </TableCell>
-                  <TableCell>
-                    {product.stock_quantity || 0}
-                  </TableCell>
-                  <TableCell>
-                    {product.banned ? (
-                      <div>
-                        <Badge variant="destructive">Banned</Badge>
-                        {product.banned_reason && (
-                          <p className="text-xs text-gray-500 mt-1 max-w-48 truncate">
-                            Reason: {product.banned_reason}
-                          </p>
+              {filteredProducts.map((product) => {
+                const stockStatus = getStockStatus(product.stock_quantity || 0);
+                return (
+                  <TableRow key={product.id}>
+                    <TableCell className="font-medium max-w-48">
+                      <div className="truncate" title={product.name}>
+                        {product.name}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{product.category}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {formatCurrency(product.price)}
+                    </TableCell>
+                    <TableCell className="max-w-48">
+                      <div className="truncate" title={
+                        product.profiles?.company || 
+                        `${product.profiles?.first_name || ''} ${product.profiles?.last_name || ''}`.trim() ||
+                        product.profiles?.email
+                      }>
+                        {product.profiles?.company || 
+                         `${product.profiles?.first_name || ''} ${product.profiles?.last_name || ''}`.trim() ||
+                         product.profiles?.email?.split('@')[0] ||
+                         'Unknown Vendor'
+                        }
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className={product.stock_quantity === 0 ? 'text-red-500' : 
+                                        product.stock_quantity < 5 ? 'text-yellow-500' : 'text-green-500'}>
+                          {product.stock_quantity || 0}
+                        </span>
+                        {product.stock_quantity < 5 && product.stock_quantity > 0 && (
+                          <AlertTriangle className="w-4 h-4 text-yellow-500" />
                         )}
                       </div>
-                    ) : (
-                      <Badge variant={product.is_active ? 'default' : 'secondary'}>
-                        {product.is_active ? 'Active' : 'Inactive'}
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {product.banned ? (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleUnbanProduct(product)}
-                      >
-                        Unban
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleBanProduct(product)}
-                      >
-                        Ban
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      {product.banned ? (
+                        <div>
+                          <Badge variant="destructive">Banned</Badge>
+                          {product.banned_reason && (
+                            <p className="text-xs text-gray-500 mt-1 max-w-48 truncate" title={product.banned_reason}>
+                              Reason: {product.banned_reason}
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <Badge variant={product.is_active ? 'default' : 'secondary'}>
+                          {product.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        {product.banned ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleUnbanProduct(product)}
+                          >
+                            Unban
+                          </Button>
+                        ) : (
+                          <>
+                            <Button
+                              size="sm"
+                              variant={product.is_active ? "secondary" : "default"}
+                              onClick={() => handleToggleActive(product)}
+                            >
+                              {product.is_active ? 'Deactivate' : 'Activate'}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleBanProduct(product)}
+                            >
+                              Ban
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
           
-          {products.length === 0 && (
+          {filteredProducts.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              No products found
+              {products.length === 0 ? 'No products found' : 'No products match your filters'}
             </div>
           )}
         </CardContent>
@@ -241,6 +456,16 @@ const AdminProducts = () => {
             <div>
               <label className="text-sm font-medium">Product:</label>
               <p className="text-sm text-gray-600">{selectedProduct?.name}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Vendor:</label>
+              <p className="text-sm text-gray-600">
+                {selectedProduct?.profiles?.company || 
+                 `${selectedProduct?.profiles?.first_name || ''} ${selectedProduct?.profiles?.last_name || ''}`.trim() ||
+                 selectedProduct?.profiles?.email ||
+                 'Unknown Vendor'
+                }
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium">Ban Reason:</label>

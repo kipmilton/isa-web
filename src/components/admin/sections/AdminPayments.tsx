@@ -3,23 +3,33 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Search, Filter, DollarSign, Calendar, User, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminPayments = () => {
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [filteredWithdrawals, setFilteredWithdrawals] = useState<any[]>([]);
   const [selectedWithdrawal, setSelectedWithdrawal] = useState<any>(null);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
   const [actionNotes, setActionNotes] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchWithdrawals();
   }, []);
+
+  useEffect(() => {
+    filterWithdrawals();
+  }, [withdrawals, searchTerm, statusFilter]);
 
   const fetchWithdrawals = async () => {
     try {
@@ -49,6 +59,29 @@ const AdminPayments = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterWithdrawals = () => {
+    let filtered = [...withdrawals];
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(withdrawal =>
+        withdrawal.profiles?.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        withdrawal.profiles?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        withdrawal.profiles?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        withdrawal.profiles?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        withdrawal.mpesa_number?.includes(searchTerm) ||
+        withdrawal.amount?.toString().includes(searchTerm)
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(withdrawal => withdrawal.status === statusFilter);
+    }
+
+    setFilteredWithdrawals(filtered);
   };
 
   const handleWithdrawalAction = (withdrawal: any, action: 'approve' | 'reject') => {
@@ -112,6 +145,29 @@ const AdminPayments = () => {
     }
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      currencyDisplay: 'symbol',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount || 0).replace('KSh', 'Ksh');
+  };
+
+  const getPaymentStats = () => {
+    const pending = withdrawals.filter(w => w.status === 'pending').length;
+    const approved = withdrawals.filter(w => w.status === 'approved').length;
+    const rejected = withdrawals.filter(w => w.status === 'rejected').length;
+    const totalAmount = withdrawals
+      .filter(w => w.status === 'pending')
+      .reduce((sum, w) => sum + (w.amount || 0), 0);
+
+    return { pending, approved, rejected, totalAmount };
+  };
+
+  const stats = getPaymentStats();
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -127,16 +183,113 @@ const AdminPayments = () => {
         <p className="text-gray-600 mt-2">Review and process vendor payment requests</p>
       </div>
 
+      {/* Payment Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.pending}</div>
+            <p className="text-xs text-muted-foreground">
+              {formatCurrency(stats.totalAmount)} total
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Approved</CardTitle>
+            <DollarSign className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
+            <p className="text-xs text-muted-foreground">This month</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+            <DollarSign className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{stats.rejected}</div>
+            <p className="text-xs text-muted-foreground">This month</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{withdrawals.length}</div>
+            <p className="text-xs text-muted-foreground">All time</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Vendor Withdrawal Requests</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="w-5 h-5" />
+            Filters & Search
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search payments..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("all");
+              }}
+            >
+              Clear Filters
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Withdrawals Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            Vendor Withdrawal Requests ({filteredWithdrawals.length} of {withdrawals.length})
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Vendor</TableHead>
-                <TableHead>Amount (KSH)</TableHead>
+                <TableHead>Amount</TableHead>
                 <TableHead>M-Pesa Number</TableHead>
                 <TableHead>Request Date</TableHead>
                 <TableHead>Status</TableHead>
@@ -145,20 +298,27 @@ const AdminPayments = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {withdrawals.map((withdrawal) => (
+              {filteredWithdrawals.map((withdrawal) => (
                 <TableRow key={withdrawal.id}>
                   <TableCell className="font-medium">
-                    {withdrawal.profiles?.company || 
-                     `${withdrawal.profiles?.first_name || ''} ${withdrawal.profiles?.last_name || ''}`.trim() ||
-                     withdrawal.profiles?.email?.split('@')[0] ||
-                     'Unknown Vendor'
-                    }
+                    <div>
+                      <p className="font-medium">
+                        {withdrawal.profiles?.company || 
+                         `${withdrawal.profiles?.first_name || ''} ${withdrawal.profiles?.last_name || ''}`.trim() ||
+                         withdrawal.profiles?.email?.split('@')[0] ||
+                         'Unknown Vendor'
+                        }
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {withdrawal.profiles?.email || 'N/A'}
+                      </p>
+                    </div>
                   </TableCell>
                   <TableCell>
-                    {withdrawal.amount?.toLocaleString() || '0'}
+                    <span className="font-bold">{formatCurrency(withdrawal.amount)}</span>
                   </TableCell>
                   <TableCell>
-                    {withdrawal.mpesa_number}
+                    {withdrawal.mpesa_number || 'N/A'}
                   </TableCell>
                   <TableCell>
                     {withdrawal.created_at 
@@ -196,15 +356,24 @@ const AdminPayments = () => {
                         </Button>
                       </div>
                     )}
+                    {withdrawal.status !== 'pending' && (
+                      <div className="text-xs text-gray-500">
+                        {withdrawal.admin_notes && (
+                          <p className="max-w-32 truncate" title={withdrawal.admin_notes}>
+                            {withdrawal.admin_notes}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
           
-          {withdrawals.length === 0 && (
+          {filteredWithdrawals.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              No payment requests found
+              {withdrawals.length === 0 ? "No payment requests found" : "No payments match your filters"}
             </div>
           )}
         </CardContent>
@@ -227,21 +396,44 @@ const AdminPayments = () => {
           
           {selectedWithdrawal && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <strong>Vendor:</strong> {selectedWithdrawal.profiles?.company || 
-                   `${selectedWithdrawal.profiles?.first_name || ''} ${selectedWithdrawal.profiles?.last_name || ''}`.trim() ||
-                   'Unknown'
-                  }
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-gray-500" />
+                    <span className="font-medium">Vendor:</span>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    {selectedWithdrawal.profiles?.company || 
+                     `${selectedWithdrawal.profiles?.first_name || ''} ${selectedWithdrawal.profiles?.last_name || ''}`.trim() ||
+                     'Unknown'
+                    }
+                  </p>
                 </div>
-                <div>
-                  <strong>Amount:</strong> KSH {selectedWithdrawal.amount?.toLocaleString()}
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-gray-500" />
+                    <span className="font-medium">Amount:</span>
+                  </div>
+                  <p className="text-sm font-bold">{formatCurrency(selectedWithdrawal.amount)}</p>
                 </div>
-                <div>
-                  <strong>M-Pesa Number:</strong> {selectedWithdrawal.mpesa_number}
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-gray-500" />
+                    <span className="font-medium">M-Pesa Number:</span>
+                  </div>
+                  <p className="text-sm text-gray-600">{selectedWithdrawal.mpesa_number || 'N/A'}</p>
                 </div>
-                <div>
-                  <strong>Request Date:</strong> {new Date(selectedWithdrawal.created_at).toLocaleDateString()}
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <span className="font-medium">Request Date:</span>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    {new Date(selectedWithdrawal.created_at).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
 
