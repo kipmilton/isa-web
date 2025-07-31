@@ -537,63 +537,63 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-3 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Product Management</h1>
-              <p className="text-gray-600">Manage your product catalog</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Product Management</h1>
+              <p className="text-gray-600 text-sm sm:text-base">Manage your product catalog</p>
             </div>
-            <Button onClick={() => setShowAddDialog(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setShowAddDialog(true)} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Add Product
             </Button>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center">
-                  <Package className="w-8 h-8 text-blue-600" />
-                  <div className="ml-3">
-                    <p className="text-sm text-gray-600">Total Products</p>
-                    <p className="text-2xl font-bold">{products.length}</p>
+                  <Package className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" />
+                  <div className="ml-2 sm:ml-3 min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-gray-600">Total Products</p>
+                    <p className="text-lg sm:text-2xl font-bold truncate">{products.length}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center">
-                  <TrendingUp className="w-8 h-8 text-green-600" />
-                  <div className="ml-3">
-                    <p className="text-sm text-gray-600">Active Products</p>
-                    <p className="text-2xl font-bold">{products.filter(p => p.is_active).length}</p>
+                  <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-600 flex-shrink-0" />
+                  <div className="ml-2 sm:ml-3 min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-gray-600">Active Products</p>
+                    <p className="text-lg sm:text-2xl font-bold truncate">{products.filter(p => p.is_active).length}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center">
-                  <Star className="w-8 h-8 text-yellow-600" />
-                  <div className="ml-3">
-                    <p className="text-sm text-gray-600">Featured</p>
-                    <p className="text-2xl font-bold">{products.filter(p => p.is_featured).length}</p>
+                  <Star className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-600 flex-shrink-0" />
+                  <div className="ml-2 sm:ml-3 min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-gray-600">Featured</p>
+                    <p className="text-lg sm:text-2xl font-bold truncate">{products.filter(p => p.is_featured).length}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center">
-                  <AlertCircle className="w-8 h-8 text-red-600" />
-                  <div className="ml-3">
-                    <p className="text-sm text-gray-600">Out of Stock</p>
-                    <p className="text-2xl font-bold">{products.filter(p => (p.stock_quantity || 0) === 0).length}</p>
+                  <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-red-600 flex-shrink-0" />
+                  <div className="ml-2 sm:ml-3 min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm text-gray-600">Out of Stock</p>
+                    <p className="text-lg sm:text-2xl font-bold truncate">{products.filter(p => (p.stock_quantity || 0) === 0).length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -601,7 +601,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -609,12 +609,12 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 text-sm sm:text-base"
                 />
               </div>
             </div>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full sm:w-48">
+              <SelectTrigger className="w-full sm:w-48 text-sm sm:text-base">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -628,11 +628,11 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {loading ? (
             <div className="col-span-full flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-2">Loading products...</span>
+              <span className="ml-2 text-sm sm:text-base">Loading products...</span>
             </div>
           ) : filteredProducts.map((product) => (
             <Card key={product.id} className="hover:shadow-lg transition-shadow">
@@ -641,54 +641,54 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                   <img
                     src={product.main_image || product.images?.[0] || '/placeholder.svg'}
                     alt={product.name}
-                    className="w-full h-48 object-cover rounded-t-lg"
+                    className="w-full h-40 sm:h-48 object-cover rounded-t-lg"
                   />
                   <div className="absolute top-2 right-2 flex gap-1">
                     <Button
                       size="icon"
                       variant="secondary"
-                      className="w-8 h-8 bg-white/90 hover:bg-white"
+                      className="w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white"
                       onClick={() => handleEdit(product)}
                       disabled={product.banned}
                     >
-                      <Edit className="w-4 h-4" />
+                      <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
                     <Button
                       size="icon"
                       variant="destructive"
-                      className="w-8 h-8 bg-red-500/90 hover:bg-red-500"
+                      className="w-7 h-7 sm:w-8 sm:h-8 bg-red-500/90 hover:bg-red-500"
                       onClick={() => handleDelete(product.id)}
                       disabled={product.banned}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
                   </div>
                   <div className="absolute top-2 left-2 flex gap-1">
                     {product.is_featured && (
-                      <Badge className="bg-yellow-500 text-white">Featured</Badge>
+                      <Badge className="bg-yellow-500 text-white text-xs">Featured</Badge>
                     )}
                     {!product.is_active && (
-                      <Badge variant="destructive">Inactive</Badge>
+                      <Badge variant="destructive" className="text-xs">Inactive</Badge>
                     )}
                     {product.banned && (
-                      <Badge className="bg-red-600 text-white">Banned by ISA team</Badge>
+                      <Badge className="bg-red-600 text-white text-xs">Banned</Badge>
                     )}
                   </div>
                 </div>
                 
-                <div className="p-4">
-                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
+                <div className="p-3 sm:p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm sm:text-base">{product.name}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
                   
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-lg font-bold text-gray-900">Ksh {product.price?.toLocaleString()}</span>
-                    <Badge variant="secondary">{product.category}</Badge>
+                    <span className="text-base sm:text-lg font-bold text-gray-900">Ksh {product.price?.toLocaleString()}</span>
+                    <Badge variant="secondary" className="text-xs">{product.category}</Badge>
                   </div>
                   
-                  <div className="flex items-center justify-between text-sm text-gray-600">
+                  <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600">
                     <span>Stock: {product.stock_quantity || 0}</span>
                     <div className="flex items-center">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
+                      <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400 mr-1" />
                       <span>{(product.rating || 0).toFixed(1)} ({product.review_count || 0})</span>
                     </div>
                   </div>
@@ -697,7 +697,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="text-red-600 border-red-400 hover:bg-red-50"
+                        className="text-red-600 border-red-400 hover:bg-red-50 text-xs"
                         onClick={() => {
                           setBanReasonText(product.banned_reason || "");
                           setBanReasonDialogOpen(true);
@@ -715,9 +715,9 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
 
         {filteredProducts.length === 0 && !loading && (
           <div className="text-center py-12">
-            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-600 mb-4">
+            <Package className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-600 mb-4 text-sm sm:text-base">
               {searchQuery || selectedCategory !== "All" 
                 ? "Try adjusting your search or filters"
                 : "Get started by adding your first product"

@@ -88,37 +88,37 @@ const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Orders Management</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Orders Management</h1>
       
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Orders</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{orders.length}</div>
+            <div className="text-lg sm:text-2xl font-bold">{orders.length}</div>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Pending Orders</CardTitle>
             <Package className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{pendingOrders.length}</div>
+            <div className="text-lg sm:text-2xl font-bold text-yellow-600">{pendingOrders.length}</div>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed Orders</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Completed Orders</CardTitle>
             <Truck className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{completedOrders.length}</div>
+            <div className="text-lg sm:text-2xl font-bold text-green-600">{completedOrders.length}</div>
           </CardContent>
         </Card>
       </div>
@@ -126,68 +126,73 @@ const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
       {/* Orders Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Orders</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Recent Orders</CardTitle>
         </CardHeader>
         <CardContent>
           {orders.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-500 text-sm sm:text-base">
               No orders found for your products yet.
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order Number</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Items</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.order_number}</TableCell>
-                    <TableCell>{order.customer_email}</TableCell>
-                    <TableCell>{order.order_items?.length || 0} items</TableCell>
-                    <TableCell>{order.currency} {order.total_amount}</TableCell>
-                    <TableCell>{getStatusBadge(order.status)}</TableCell>
-                    <TableCell>
-                      {order.created_at ? format(new Date(order.created_at), 'MMM dd, yyyy') : 'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      {order.status === 'pending' && (
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            onClick={() => updateOrderStatus(order.id, 'processing')}
-                          >
-                            Accept
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateOrderStatus(order.id, 'cancelled')}
-                          >
-                            Decline
-                          </Button>
-                        </div>
-                      )}
-                      {order.status === 'processing' && (
-                        <Button
-                          size="sm"
-                          onClick={() => updateOrderStatus(order.id, 'shipped')}
-                        >
-                          Mark Shipped
-                        </Button>
-                      )}
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs sm:text-sm">Order Number</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Customer</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Items</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Total</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Status</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {orders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium text-xs sm:text-sm">{order.order_number}</TableCell>
+                      <TableCell className="text-xs sm:text-sm">{order.customer_email}</TableCell>
+                      <TableCell className="text-xs sm:text-sm">{order.order_items?.length || 0} items</TableCell>
+                      <TableCell className="text-xs sm:text-sm">{order.currency} {order.total_amount}</TableCell>
+                      <TableCell>{getStatusBadge(order.status)}</TableCell>
+                      <TableCell className="text-xs sm:text-sm">
+                        {order.created_at ? format(new Date(order.created_at), 'MMM dd, yyyy') : 'N/A'}
+                      </TableCell>
+                      <TableCell>
+                        {order.status === 'pending' && (
+                          <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
+                            <Button
+                              size="sm"
+                              className="text-xs"
+                              onClick={() => updateOrderStatus(order.id, 'processing')}
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                              onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                            >
+                              Decline
+                            </Button>
+                          </div>
+                        )}
+                        {order.status === 'processing' && (
+                          <Button
+                            size="sm"
+                            className="text-xs"
+                            onClick={() => updateOrderStatus(order.id, 'shipped')}
+                          >
+                            Mark Shipped
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

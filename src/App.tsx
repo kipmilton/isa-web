@@ -34,11 +34,7 @@ const App = () => (
             <Route path="/vendors" element={<Vendors />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/gift" element={<Gift />} />
-            <Route path="/admin" element={
-              <AuthGuard requireAuth={true} allowedUserTypes={['vendor']} allowedVendorStatuses={['approved']}>
-                <Admin />
-              </AuthGuard>
-            } />
+            <Route path="/admin" element={<Admin />} />
             <Route path="/vendor-dashboard" element={
               <AuthGuard requireAuth={true} allowedUserTypes={['vendor']} allowedVendorStatuses={['approved']}>
                 <VendorDashboard />

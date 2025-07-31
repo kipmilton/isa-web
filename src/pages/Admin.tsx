@@ -18,7 +18,10 @@ const Admin = () => {
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
       
+      console.log('Admin check - Session:', session?.user?.email);
+      
       if (error || !session) {
+        console.log('Admin check - No session, redirecting to home');
         navigate('/');
         return;
       }
@@ -30,19 +33,28 @@ const Admin = () => {
         .eq('id', session.user.id)
         .single();
 
+      console.log('Admin check - Profile:', profile);
+      console.log('Admin check - Profile error:', profileError);
+
       if (profileError || profile?.user_type !== 'admin') {
+        console.log('Admin check - Not admin in profiles, checking user_roles');
         // Also check user_roles table as fallback
         const { data: roles, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', session.user.id);
 
+        console.log('Admin check - Roles:', roles);
+        console.log('Admin check - Role error:', roleError);
+
         if (roleError || !roles?.some(r => r.role === 'admin')) {
+          console.log('Admin check - Not admin in roles either, redirecting to home');
           navigate('/');
           return;
         }
       }
 
+      console.log('Admin check - Authentication successful');
       setUser({
         id: session.user.id,
         email: session.user.email,

@@ -11,7 +11,8 @@ import {
   User,
   Receipt,
   ChevronRight,
-  LogOut
+  LogOut,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -21,9 +22,10 @@ interface VendorSidebarProps {
   onSectionChange: (section: string) => void;
   onLogout: () => void;
   userName: string;
+  isMobile?: boolean;
 }
 
-const VendorSidebar = ({ activeSection, onSectionChange, onLogout, userName }: VendorSidebarProps) => {
+const VendorSidebar = ({ activeSection, onSectionChange, onLogout, userName, isMobile = false }: VendorSidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menuItems = [
@@ -40,28 +42,42 @@ const VendorSidebar = ({ activeSection, onSectionChange, onLogout, userName }: V
   return (
     <div className={cn(
       "h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300",
-      isCollapsed ? "w-16" : "w-64"
+      isMobile ? "w-64" : isCollapsed ? "w-16" : "w-64"
     )}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
-          {!isCollapsed && (
-            <div>
+          {(!isCollapsed || isMobile) && (
+            <div className="flex-1 min-w-0">
               <h2 className="text-lg font-semibold text-gray-900">Vendor Portal</h2>
               <p className="text-sm text-gray-600 truncate">{userName}</p>
             </div>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="ml-auto"
-          >
-            <ChevronRight className={cn(
-              "h-4 w-4 transition-transform",
-              isCollapsed ? "rotate-0" : "rotate-180"
-            )} />
-          </Button>
+          <div className="flex items-center gap-2">
+            {isMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onSectionChange(activeSection)}
+                className="text-gray-600"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            )}
+            {!isMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="ml-auto"
+              >
+                <ChevronRight className={cn(
+                  "h-4 w-4 transition-transform",
+                  isCollapsed ? "rotate-0" : "rotate-180"
+                )} />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -79,12 +95,12 @@ const VendorSidebar = ({ activeSection, onSectionChange, onLogout, userName }: V
                 "w-full justify-start h-10 px-3",
                 isActive && "bg-blue-600 text-white hover:bg-blue-700",
                 !isActive && "text-gray-700 hover:bg-gray-100",
-                isCollapsed && "px-2 justify-center"
+                !isMobile && isCollapsed && "px-2 justify-center"
               )}
               onClick={() => onSectionChange(item.id)}
             >
-              <Icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
-              {!isCollapsed && <span>{item.label}</span>}
+              <Icon className={cn("h-4 w-4", (!isCollapsed || isMobile) && "mr-3")} />
+              {(!isCollapsed || isMobile) && <span>{item.label}</span>}
             </Button>
           );
         })}
@@ -96,12 +112,12 @@ const VendorSidebar = ({ activeSection, onSectionChange, onLogout, userName }: V
           variant="ghost"
           className={cn(
             "w-full justify-start h-10 px-3 text-red-600 hover:bg-red-50 hover:text-red-700",
-            isCollapsed && "px-2 justify-center"
+            !isMobile && isCollapsed && "px-2 justify-center"
           )}
           onClick={onLogout}
         >
-          <LogOut className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
-          {!isCollapsed && <span>Logout</span>}
+          <LogOut className={cn("h-4 w-4", (!isCollapsed || isMobile) && "mr-3")} />
+          {(!isCollapsed || isMobile) && <span>Logout</span>}
         </Button>
       </div>
     </div>

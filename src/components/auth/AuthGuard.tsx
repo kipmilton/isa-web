@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 interface AuthGuardProps {
   children: ReactNode;
   requireAuth?: boolean;
-  allowedUserTypes?: ('customer' | 'vendor')[];
+  allowedUserTypes?: ('customer' | 'vendor' | 'admin')[];
   allowedVendorStatuses?: ('pending' | 'approved' | 'rejected')[];
 }
 

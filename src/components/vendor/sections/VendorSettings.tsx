@@ -378,20 +378,20 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Settings</h1>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="account" className="flex items-center space-x-2">
-            <User className="h-4 w-4" />
+          <TabsTrigger value="account" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
+            <User className="h-3 w-3 sm:h-4 sm:w-4" />
             <span>Account</span>
           </TabsTrigger>
-          <TabsTrigger value="payout" className="flex items-center space-x-2">
-            <Phone className="h-4 w-4" />
+          <TabsTrigger value="payout" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
+            <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
             <span>Payout</span>
           </TabsTrigger>
-          <TabsTrigger value="billing" className="flex items-center space-x-2">
-            <CreditCard className="h-4 w-4" />
+          <TabsTrigger value="billing" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
+            <CreditCard className="h-3 w-3 sm:h-4 sm:w-4" />
             <span>Billing</span>
           </TabsTrigger>
         </TabsList>
@@ -399,80 +399,90 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
         <TabsContent value="account">
           <Card>
             <CardHeader>
-              <CardTitle>Account Settings</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">Account Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="first_name">First Name</Label>
+                  <Label htmlFor="first_name" className="text-sm">First Name</Label>
                   <Input
                     id="first_name"
                     value={profile.first_name}
                     onChange={(e) => setProfile(prev => ({ ...prev, first_name: e.target.value }))}
+                    className="text-sm sm:text-base"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="last_name">Last Name</Label>
+                  <Label htmlFor="last_name" className="text-sm">Last Name</Label>
                   <Input
                     id="last_name"
                     value={profile.last_name}
                     onChange={(e) => setProfile(prev => ({ ...prev, last_name: e.target.value }))}
+                    className="text-sm sm:text-base"
                   />
                 </div>
               </div>
               
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-sm">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={profile.email}
                   disabled
-                  className="bg-gray-50"
+                  className="bg-gray-50 text-sm sm:text-base"
                 />
                 <p className="text-xs text-gray-500 mt-1">Email cannot be changed here. Contact support if needed.</p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone" className="text-sm">Phone Number</Label>
                   <Input
                     id="phone"
                     value={profile.phone_number}
                     onChange={(e) => setProfile(prev => ({ ...prev, phone_number: e.target.value }))}
+                    className="text-sm sm:text-base"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="location">Location</Label>
+                  <Label htmlFor="location" className="text-sm">Location</Label>
                   <Input
                     id="location"
                     value={profile.location}
                     onChange={(e) => setProfile(prev => ({ ...prev, location: e.target.value }))}
+                    className="text-sm sm:text-base"
                   />
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="company">Company Name</Label>
+                  <Label htmlFor="company" className="text-sm">Company Name</Label>
                   <Input
                     id="company"
                     value={profile.company}
                     onChange={(e) => setProfile(prev => ({ ...prev, company: e.target.value }))}
+                    className="text-sm sm:text-base"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="business_type">Business Type</Label>
+                  <Label htmlFor="business_type" className="text-sm">Business Type</Label>
                   <Input
                     id="business_type"
                     value={profile.business_type}
                     onChange={(e) => setProfile(prev => ({ ...prev, business_type: e.target.value }))}
+                    className="text-sm sm:text-base"
                   />
                 </div>
               </div>
               
-              <Button onClick={updateProfile} disabled={loading}>
-                {loading ? "Updating..." : "Update Profile"}
+              <Button 
+                onClick={updateProfile} 
+                disabled={loading}
+                className="w-full sm:w-auto"
+              >
+                {loading ? 'Saving...' : 'Save Changes'}
               </Button>
             </CardContent>
           </Card>

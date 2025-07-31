@@ -250,12 +250,16 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           .eq('id', authData.user.id)
           .single();
 
+        console.log('AuthDialog - Profile:', profile);
+        console.log('AuthDialog - Profile error:', profileError);
+
         if (profileError) {
           console.error('Error fetching user profile:', profileError);
         }
 
         // Redirect based on user type and status
         if (profile?.user_type === 'admin') {
+          console.log('AuthDialog - Admin detected, redirecting to /admin');
           toast.success("Signed in successfully!");
           onOpenChange(false);
           navigate('/admin');

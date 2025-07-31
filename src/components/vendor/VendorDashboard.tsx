@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import VendorSidebar from "./VendorSidebar";
 import VendorHome from "./sections/VendorHome";
@@ -10,6 +10,7 @@ import VendorReviews from "./sections/VendorReviews";
 import VendorPayments from "./sections/VendorPayments";
 import VendorWallet from "./sections/VendorWallet";
 import VendorSettings from "./sections/VendorSettings";
+import { Button } from "@/components/ui/button";
 
 interface VendorDashboardProps {
   user: any;
@@ -23,6 +24,7 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
   const [productCount, setProductCount] = useState(0);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeFromBanner, setUpgradeFromBanner] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const PLAN_LIMITS: Record<string, number> = {
     free: 5,
@@ -67,6 +69,12 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
   const handleUpgradeClick = () => {
     setActiveSection('settings');
     setUpgradeFromBanner(true);
+    setMobileMenuOpen(false);
+  };
+
+  const handleSectionChange = (section: string) => {
+    setActiveSection(section);
+    setMobileMenuOpen(false);
   };
 
   const renderContent = () => {
@@ -76,7 +84,7 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
       case "products":
         return (
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">My Products</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">My Products</h1>
             <VendorProductManagement user={user} />
           </div>
         );
@@ -85,7 +93,7 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
       case "store":
         return (
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">My Store</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">My Store</h1>
             <VendorProductManagement user={user} />
           </div>
         );
@@ -108,29 +116,68 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <VendorSidebar
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
-        onLogout={onLogout}
-        userName={user.name}
-      />
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block">
+        <VendorSidebar
+          activeSection={activeSection}
+          onSectionChange={handleSectionChange}
+          onLogout={onLogout}
+          userName={user.name}
+        />
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setMobileMenuOpen(false)}>
+          <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg" onClick={(e) => e.stopPropagation()}>
+            <VendorSidebar
+              activeSection={activeSection}
+              onSectionChange={handleSectionChange}
+              onLogout={onLogout}
+              userName={user.name}
+              isMobile={true}
+            />
+          </div>
+        </div>
+      )}
+
       <main className="flex-1 overflow-y-auto">
-        <div className="p-8">
+        {/* Mobile Header */}
+        <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileMenuOpen(true)}
+              className="text-gray-600"
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">Vendor Portal</h1>
+              <p className="text-sm text-gray-600">{user.name}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 md:p-8">
           {showBanner && (
-            <div className="mb-6 bg-orange-100 border-l-4 border-orange-500 p-4 rounded flex items-center justify-between">
+            <div className="mb-6 bg-orange-100 border-l-4 border-orange-500 p-4 rounded flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-3">
-                <AlertTriangle className="text-orange-500 w-6 h-6" />
-                <span className="font-semibold text-orange-800">
-                  {plan === 'free' && `You are on the Free Plan: `}
-                  {plan.startsWith('premium') && `You are on the Premium Plan: `}
-                  {productCount}/{productLimit} products uploaded
-                  {planExpiry && plan !== 'free' && (
-                    <span className="ml-2 text-xs text-orange-700">(Expires: {new Date(planExpiry).toLocaleDateString()})</span>
-                  )}
-                </span>
+                <AlertTriangle className="text-orange-500 w-6 h-6 flex-shrink-0" />
+                <div className="min-w-0">
+                  <span className="font-semibold text-orange-800 text-sm sm:text-base">
+                    {plan === 'free' && `You are on the Free Plan: `}
+                    {plan.startsWith('premium') && `You are on the Premium Plan: `}
+                    {productCount}/{productLimit} products uploaded
+                    {planExpiry && plan !== 'free' && (
+                      <span className="block sm:inline sm:ml-2 text-xs text-orange-700">(Expires: {new Date(planExpiry).toLocaleDateString()})</span>
+                    )}
+                  </span>
+                </div>
               </div>
               <button
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded shadow"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded shadow text-sm whitespace-nowrap"
                 onClick={handleUpgradeClick}
               >
                 Upgrade
@@ -140,7 +187,7 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
           {renderContent()}
           {/* Upgrade Modal Placeholder */}
           {showUpgrade && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
               <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                 <h3 className="text-lg font-bold mb-4">Upgrade Your Plan</h3>
                 <p className="mb-4">To upload more products and enjoy lower commissions, upgrade your plan in the Settings &gt; Billing section.</p>
