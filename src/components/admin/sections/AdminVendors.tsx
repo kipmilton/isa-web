@@ -287,10 +287,10 @@ const AdminVendors = () => {
                   <strong>Location:</strong> {selectedVendor.location || 'N/A'}
                 </div>
                 <div>
-                  <strong>Tax ID:</strong> {selectedVendor.tax_id || 'N/A'}
+                  <strong>Tax ID/KRA PIN:</strong> {selectedVendor.tax_id || 'N/A'}
                 </div>
                 <div>
-                  <strong>Website:</strong> {selectedVendor.company_website || 'N/A'}
+                  <strong>Website/Social Media Links:</strong> {selectedVendor.company_website || 'N/A'}
                 </div>
               </div>
               

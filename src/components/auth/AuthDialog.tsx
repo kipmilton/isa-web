@@ -581,18 +581,19 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                         </div>
                         
                         <div>
-                          <Label htmlFor="taxId">Tax ID</Label>
+                          <Label htmlFor="taxId">Tax ID/KRA PIN</Label>
                           <Input 
                             id="taxId" 
                             required 
                             className="mt-1"
                             value={vendorData.taxId}
                             onChange={(e) => handleVendorInputChange('taxId', e.target.value)}
+                            placeholder="Enter your Tax ID or KRA PIN"
                           />
                         </div>
                         
                         <div>
-                          <Label htmlFor="companyWebsite">Company Website</Label>
+                          <Label htmlFor="companyWebsite">Your Website/Social Media Page Links</Label>
                           <Input 
                             id="companyWebsite" 
                             type="url" 
@@ -600,6 +601,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                             className="mt-1"
                             value={vendorData.companyWebsite}
                             onChange={(e) => handleVendorInputChange('companyWebsite', e.target.value)}
+                            placeholder="Enter your website or social media links"
                           />
                         </div>
                         

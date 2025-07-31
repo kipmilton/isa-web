@@ -23,6 +23,7 @@ import { ProductService } from "@/services/productService";
 import { OrderService } from "@/services/orderService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const ProductDetail = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -53,6 +54,30 @@ const ProductDetail = () => {
       }
     }
   }, [productId, user]);
+
+  // Check for rejected vendors on page load
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('user_type, status')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile?.user_type === 'vendor' && profile.status === 'rejected') {
+            navigate('/vendor-rejection');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking user status:', error);
+      }
+    };
+
+    checkUserStatus();
+  }, [navigate]);
 
   const loadProductDetails = async () => {
     setLoading(true);

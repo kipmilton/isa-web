@@ -34,7 +34,10 @@ const VendorDashboard = () => {
         return;
       }
 
-      if (profile.status !== 'approved') {
+      if (profile.status === 'rejected') {
+        navigate('/vendor-rejection');
+        return;
+      } else if (profile.status !== 'approved') {
         navigate('/vendor-status');
         return;
       }

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { Button } from "@/components/ui/button";
@@ -7,12 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GiftIcon, Heart, Sparkles, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Gift = () => {
   const { user, loading } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     age: "",
     hobbies: "",
@@ -22,6 +24,30 @@ const Gift = () => {
   });
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Check for rejected vendors on page load
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('user_type, status')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile?.user_type === 'vendor' && profile.status === 'rejected') {
+            navigate('/vendor-rejection');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking user status:', error);
+      }
+    };
+
+    checkUserStatus();
+  }, [navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import TryFreeDialog from "@/components/TryFreeDialog";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MessageCircle, Search, ShoppingBag, Smartphone, Apple, Play, Quote, Star, Gift, Home, Menu, X } from "lucide-react";
 import AuthDialog from "@/components/auth/AuthDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
@@ -19,6 +20,31 @@ const Index = () => {
   const [showTerms, setShowTerms] = useState(false);
   const [authDefaultVendor, setAuthDefaultVendor] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Check for rejected vendors on page load
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('user_type, status')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile?.user_type === 'vendor' && profile.status === 'rejected') {
+            navigate('/vendor-rejection');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking user status:', error);
+      }
+    };
+
+    checkUserStatus();
+  }, [navigate]);
 
   const handleThemeToggle = () => {
     setIsDarkTheme(!isDarkTheme);

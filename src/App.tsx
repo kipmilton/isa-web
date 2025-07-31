@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { VendorProvider } from "@/contexts/VendorContext";
+import AuthGuard from "./components/auth/AuthGuard";
 import Index from "./pages/Index";
 import Vendors from "./pages/Vendors";
 import Chat from "./pages/Chat";
@@ -12,6 +13,7 @@ import Gift from "./pages/Gift";
 import Admin from "./pages/Admin";
 import VendorDashboard from "./pages/VendorDashboard";
 import VendorStatus from "./components/vendor/VendorStatus";
+import VendorRejection from "./pages/VendorRejection";
 import NotFound from "./pages/NotFound";
 import ShopDashboard from "./pages/ShopDashboard";
 import ProductDetail from "./pages/ProductDetail";
@@ -32,9 +34,26 @@ const App = () => (
             <Route path="/vendors" element={<Vendors />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/gift" element={<Gift />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/vendor-dashboard" element={<VendorDashboard />} />
-            <Route path="/vendor-status" element={<VendorStatus />} />
+            <Route path="/admin" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['vendor']} allowedVendorStatuses={['approved']}>
+                <Admin />
+              </AuthGuard>
+            } />
+            <Route path="/vendor-dashboard" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['vendor']} allowedVendorStatuses={['approved']}>
+                <VendorDashboard />
+              </AuthGuard>
+            } />
+            <Route path="/vendor-status" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['vendor']} allowedVendorStatuses={['pending']}>
+                <VendorStatus />
+              </AuthGuard>
+            } />
+            <Route path="/vendor-rejection" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['vendor']} allowedVendorStatuses={['rejected']}>
+                <VendorRejection />
+              </AuthGuard>
+            } />
             <Route path="/shop" element={<ShopDashboard />} />
             <Route path="/product/:productId" element={<ProductDetail />} />
             <Route path="/auth/callback" element={<AuthCallback />} />

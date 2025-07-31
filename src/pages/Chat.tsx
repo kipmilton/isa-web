@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { Send, Plus, History, Menu, Home } from "lucide-react";
@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: number;
@@ -28,6 +29,7 @@ const Chat = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
+  const navigate = useNavigate();
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([
     {
       id: "1",
@@ -48,6 +50,30 @@ const Chat = () => {
       preview: "Need some home decoration inspiration..."
     }
   ]);
+
+  // Check for rejected vendors on page load
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('user_type, status')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile?.user_type === 'vendor' && profile.status === 'rejected') {
+            navigate('/vendor-rejection');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking user status:', error);
+      }
+    };
+
+    checkUserStatus();
+  }, [navigate]);
 
   const handleSendMessage = () => {
     if (!currentMessage.trim()) return;

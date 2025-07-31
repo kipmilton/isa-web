@@ -89,7 +89,7 @@ const VendorStatus = () => {
     if (vendorStatus === 'approved') {
       window.location.href = '/vendor-dashboard';
     } else if (vendorStatus === 'rejected') {
-      window.location.href = '/vendors';
+      window.location.href = '/vendor-rejection';
     } else {
       window.location.href = '/';
     }
