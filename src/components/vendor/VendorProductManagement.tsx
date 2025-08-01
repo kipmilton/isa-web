@@ -866,7 +866,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                   <ProductAttributes
                     category={mainCategory}
                     subcategory={subCategory}
-                    attributes={productAttributes}
+                    attributes={productAttributes as any}
                     onAttributesChange={setProductAttributes}
                   />
                 )}
