@@ -41,6 +41,201 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_orders: {
+        Row: {
+          actual_delivery_time: string | null
+          created_at: string
+          current_location_lat: number | null
+          current_location_lng: number | null
+          delivery_fee: number
+          delivery_location_address: string
+          delivery_location_lat: number
+          delivery_location_lng: number
+          delivery_personnel_id: string | null
+          distance_km: number
+          estimated_delivery_time: string | null
+          id: string
+          order_id: string
+          pickup_location_address: string
+          pickup_location_lat: number
+          pickup_location_lng: number
+          status: string
+          tracking_updates: Json | null
+          updated_at: string
+        }
+        Insert: {
+          actual_delivery_time?: string | null
+          created_at?: string
+          current_location_lat?: number | null
+          current_location_lng?: number | null
+          delivery_fee: number
+          delivery_location_address: string
+          delivery_location_lat: number
+          delivery_location_lng: number
+          delivery_personnel_id?: string | null
+          distance_km: number
+          estimated_delivery_time?: string | null
+          id?: string
+          order_id: string
+          pickup_location_address: string
+          pickup_location_lat: number
+          pickup_location_lng: number
+          status?: string
+          tracking_updates?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          actual_delivery_time?: string | null
+          created_at?: string
+          current_location_lat?: number | null
+          current_location_lng?: number | null
+          delivery_fee?: number
+          delivery_location_address?: string
+          delivery_location_lat?: number
+          delivery_location_lng?: number
+          delivery_personnel_id?: string | null
+          distance_km?: number
+          estimated_delivery_time?: string | null
+          id?: string
+          order_id?: string
+          pickup_location_address?: string
+          pickup_location_lat?: number
+          pickup_location_lng?: number
+          status?: string
+          tracking_updates?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_orders_delivery_personnel_id_fkey"
+            columns: ["delivery_personnel_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_personnel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_orders_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_personnel: {
+        Row: {
+          admin_notes: string | null
+          constituency: string
+          county: string
+          created_at: string
+          current_location_lat: number | null
+          current_location_lng: number | null
+          drivers_license_url: string
+          email: string
+          first_name: string
+          id: string
+          id_card_url: string
+          is_available: boolean
+          is_online: boolean
+          last_name: string
+          phone_number: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          constituency: string
+          county: string
+          created_at?: string
+          current_location_lat?: number | null
+          current_location_lng?: number | null
+          drivers_license_url: string
+          email: string
+          first_name: string
+          id?: string
+          id_card_url: string
+          is_available?: boolean
+          is_online?: boolean
+          last_name: string
+          phone_number: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          constituency?: string
+          county?: string
+          created_at?: string
+          current_location_lat?: number | null
+          current_location_lng?: number | null
+          drivers_license_url?: string
+          email?: string
+          first_name?: string
+          id?: string
+          id_card_url?: string
+          is_available?: boolean
+          is_online?: boolean
+          last_name?: string
+          phone_number?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      delivery_tracking: {
+        Row: {
+          accuracy: number | null
+          delivery_order_id: string
+          delivery_personnel_id: string
+          heading: number | null
+          id: string
+          latitude: number
+          longitude: number
+          speed: number | null
+          timestamp: string
+        }
+        Insert: {
+          accuracy?: number | null
+          delivery_order_id: string
+          delivery_personnel_id: string
+          heading?: number | null
+          id?: string
+          latitude: number
+          longitude: number
+          speed?: number | null
+          timestamp?: string
+        }
+        Update: {
+          accuracy?: number | null
+          delivery_order_id?: string
+          delivery_personnel_id?: string
+          heading?: number | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          speed?: number | null
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_tracking_delivery_order_id_fkey"
+            columns: ["delivery_order_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_tracking_delivery_personnel_id_fkey"
+            columns: ["delivery_personnel_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_personnel"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jumia_product_interactions: {
         Row: {
           created_at: string | null
@@ -347,6 +542,55 @@ export type Database = {
           },
         ]
       }
+      product_attributes: {
+        Row: {
+          attribute_name: string
+          attribute_value: string
+          created_at: string
+          id: string
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          attribute_name: string
+          attribute_value: string
+          created_at?: string
+          id?: string
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          attribute_name?: string
+          attribute_value?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_attributes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_popularity"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_attributes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_popularity"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "product_attributes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_categories: {
         Row: {
           created_at: string | null
@@ -384,6 +628,61 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_images: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          image_description: string | null
+          image_url: string
+          is_main_image: boolean
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_description?: string | null
+          image_url: string
+          is_main_image?: boolean
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_description?: string | null
+          image_url?: string
+          is_main_image?: boolean
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_popularity"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_popularity"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -468,9 +767,9 @@ export type Database = {
           images: string[] | null
           is_active: boolean | null
           is_featured: boolean | null
+          location_address: string | null
           location_lat: number | null
           location_lng: number | null
-          location_address: string | null
           main_category: string | null
           main_image: string | null
           name: string
@@ -507,9 +806,9 @@ export type Database = {
           images?: string[] | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          location_address?: string | null
           location_lat?: number | null
           location_lng?: number | null
-          location_address?: string | null
           main_category?: string | null
           main_image?: string | null
           name: string
@@ -546,9 +845,9 @@ export type Database = {
           images?: string[] | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          location_address?: string | null
           location_lat?: number | null
           location_lng?: number | null
-          location_address?: string | null
           main_category?: string | null
           main_image?: string | null
           name?: string
@@ -603,6 +902,7 @@ export type Database = {
           plan: string | null
           plan_expiry: string | null
           preferences: Json | null
+          rejection_reason: string | null
           role: string | null
           status: string | null
           tax_id: string | null
@@ -630,6 +930,7 @@ export type Database = {
           plan?: string | null
           plan_expiry?: string | null
           preferences?: Json | null
+          rejection_reason?: string | null
           role?: string | null
           status?: string | null
           tax_id?: string | null
@@ -657,6 +958,7 @@ export type Database = {
           plan?: string | null
           plan_expiry?: string | null
           preferences?: Json | null
+          rejection_reason?: string | null
           role?: string | null
           status?: string | null
           tax_id?: string | null
@@ -1020,209 +1322,6 @@ export type Database = {
           },
         ]
       }
-      delivery_personnel: {
-        Row: {
-          id: string
-          user_id: string
-          email: string
-          first_name: string
-          last_name: string
-          phone_number: string
-          county: string
-          constituency: string
-          id_card_url: string
-          drivers_license_url: string
-          current_location_lat: number | null
-          current_location_lng: number | null
-          is_online: boolean
-          is_available: boolean
-          status: string
-          admin_notes: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          email: string
-          first_name: string
-          last_name: string
-          phone_number: string
-          county: string
-          constituency: string
-          id_card_url: string
-          drivers_license_url: string
-          current_location_lat?: number | null
-          current_location_lng?: number | null
-          is_online?: boolean
-          is_available?: boolean
-          status?: string
-          admin_notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          email?: string
-          first_name?: string
-          last_name?: string
-          phone_number?: string
-          county?: string
-          constituency?: string
-          id_card_url?: string
-          drivers_license_url?: string
-          current_location_lat?: number | null
-          current_location_lng?: number | null
-          is_online?: boolean
-          is_available?: boolean
-          status?: string
-          admin_notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "delivery_personnel_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      delivery_orders: {
-        Row: {
-          id: string
-          order_id: string
-          delivery_personnel_id: string | null
-          pickup_location_lat: number
-          pickup_location_lng: number
-          pickup_location_address: string
-          delivery_location_lat: number
-          delivery_location_lng: number
-          delivery_location_address: string
-          distance_km: number
-          delivery_fee: number
-          estimated_delivery_time: string | null
-          actual_delivery_time: string | null
-          status: string
-          current_location_lat: number | null
-          current_location_lng: number | null
-          tracking_updates: Json
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          order_id: string
-          delivery_personnel_id?: string | null
-          pickup_location_lat: number
-          pickup_location_lng: number
-          pickup_location_address: string
-          delivery_location_lat: number
-          delivery_location_lng: number
-          delivery_location_address: string
-          distance_km: number
-          delivery_fee: number
-          estimated_delivery_time?: string | null
-          actual_delivery_time?: string | null
-          status?: string
-          current_location_lat?: number | null
-          current_location_lng?: number | null
-          tracking_updates?: Json
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          order_id?: string
-          delivery_personnel_id?: string | null
-          pickup_location_lat?: number
-          pickup_location_lng?: number
-          pickup_location_address?: string
-          delivery_location_lat?: number
-          delivery_location_lng?: number
-          delivery_location_address?: string
-          distance_km?: number
-          delivery_fee?: number
-          estimated_delivery_time?: string | null
-          actual_delivery_time?: string | null
-          status?: string
-          current_location_lat?: number | null
-          current_location_lng?: number | null
-          tracking_updates?: Json
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "delivery_orders_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "delivery_orders_delivery_personnel_id_fkey"
-            columns: ["delivery_personnel_id"]
-            isOneToOne: false
-            referencedRelation: "delivery_personnel"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      delivery_tracking: {
-        Row: {
-          id: string
-          delivery_order_id: string
-          delivery_personnel_id: string
-          latitude: number
-          longitude: number
-          accuracy: number | null
-          speed: number | null
-          heading: number | null
-          timestamp: string
-        }
-        Insert: {
-          id?: string
-          delivery_order_id: string
-          delivery_personnel_id: string
-          latitude: number
-          longitude: number
-          accuracy?: number | null
-          speed?: number | null
-          heading?: number | null
-          timestamp?: string
-        }
-        Update: {
-          id?: string
-          delivery_order_id?: string
-          delivery_personnel_id?: string
-          latitude?: number
-          longitude?: number
-          accuracy?: number | null
-          speed?: number | null
-          heading?: number | null
-          timestamp?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "delivery_tracking_delivery_order_id_fkey"
-            columns: ["delivery_order_id"]
-            isOneToOne: false
-            referencedRelation: "delivery_orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "delivery_tracking_delivery_personnel_id_fkey"
-            columns: ["delivery_personnel_id"]
-            isOneToOne: false
-            referencedRelation: "delivery_personnel"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       product_popularity: {
@@ -1271,6 +1370,14 @@ export type Database = {
         Args: { application_id: string; admin_notes?: string }
         Returns: boolean
       }
+      calculate_delivery_fee: {
+        Args: { distance_km: number }
+        Returns: number
+      }
+      calculate_distance_km: {
+        Args: { lat1: number; lng1: number; lat2: number; lng2: number }
+        Returns: number
+      }
       generate_order_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1295,6 +1402,10 @@ export type Database = {
       }
       has_role: {
         Args: { _user_id: string; _role: string }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       is_vendor_order: {
