@@ -148,11 +148,25 @@ const DeliverySignupDialog = ({ open, onOpenChange }: DeliverySignupDialogProps)
             last_name: formData.lastName,
             phone_number: formData.phoneNumber,
             user_type: 'delivery',
-            account_setup_completed: true
+            account_setup_completed: true,
+            status: 'pending' // Set pending status for delivery users
           });
 
         if (profileError) {
           throw new Error(profileError.message);
+        }
+
+        // Assign delivery role
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: authData.user.id,
+            role: 'delivery'
+          });
+
+        if (roleError) {
+          console.error('Error assigning delivery role:', roleError);
+          // Don't throw error, just log it as the main flow worked
         }
 
         toast({
