@@ -7,6 +7,7 @@ import {
   Package, 
   CreditCard, 
   Wallet,
+  Truck,
   Shield,
   ChevronRight,
   LogOut
@@ -32,6 +33,7 @@ const AdminSidebar = ({ activeSection, onSectionChange, onLogout, userName }: Ad
     { id: 'products', label: 'Products', icon: Package },
     { id: 'payments', label: 'Payments', icon: CreditCard },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
+    { id: 'delivery', label: 'Manage Delivery', icon: Truck },
   ];
 
   return (

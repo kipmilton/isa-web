@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { X, CreditCard, Check, MapPin, Download, Lock } from 'lucide-react';
+import { X, CreditCard, Check, MapPin, Download, Lock, Truck, Home } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrderService } from '@/services/orderService';
 import { DeliveryFeeService, DeliveryLocation } from '@/services/deliveryFeeService';
@@ -14,6 +14,7 @@ import { MpesaService } from '@/services/mpesaService';
 // import { AirtelMoneyService } from '@/services/airtelMoneyService'; // Uncomment if you have this service
 import { CartItemWithProduct, Address, PaymentMethod, DeliveryDetails } from '@/types/order';
 import { Product } from '@/types/product';
+import LocationPicker from './LocationPicker';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -35,13 +36,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [orderNumber, setOrderNumber] = useState('');
   const [currentStep, setCurrentStep] = useState<'delivery' | 'payment' | 'pay' | 'complete'>('delivery');
 
-  const [deliveryAddress, setDeliveryAddress] = useState<Address>({
-    street: '',
-    city: '',
-    state: '',
-    zip: '',
-    country: 'Kenya'
-  });
+  const [deliveryType, setDeliveryType] = useState<'pickup' | 'delivery'>('delivery');
+  const [deliveryLocation, setDeliveryLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    address: string;
+    city?: string;
+    county?: string;
+  } | null>(null);
   const [contactInfo, setContactInfo] = useState({
     email: user?.email || '',
     phone: ''
@@ -56,10 +58,13 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const { toast } = useToast();
 
   useEffect(() => {
-    if (deliveryAddress.street && deliveryAddress.city) {
-      calculateDeliveryFeeForAddress();
+    if (deliveryType === 'delivery' && deliveryLocation) {
+      calculateDeliveryFeeForLocation();
+    } else {
+      setCalculatedDeliveryFee(0);
+      setDeliveryFeeDetails(null);
     }
-  }, [deliveryAddress.street, deliveryAddress.city]);
+  }, [deliveryType, deliveryLocation]);
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const deliveryFee = calculatedDeliveryFee;
@@ -74,27 +79,35 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }).format(price);
   };
 
-  const calculateDeliveryFeeForAddress = async () => {
-    if (!deliveryAddress.street || !deliveryAddress.city) {
+  const calculateDeliveryFeeForLocation = async () => {
+    if (!deliveryLocation) {
       setCalculatedDeliveryFee(0);
       setDeliveryFeeDetails(null);
       return;
     }
     setIsCalculatingDeliveryFee(true);
     try {
+      // Get the first product's pickup location (vendor location)
+      const firstProduct = cartItems[0]?.product;
+      if (!firstProduct?.location_lat || !firstProduct?.location_lng) {
+        setCalculatedDeliveryFee(100); // Default minimum fee
+        setDeliveryFeeDetails({ distance: 0, fee: 100 });
+        return;
+      }
+
       const pickupLocation: DeliveryLocation = {
-        latitude: -1.2921,
-        longitude: 36.8219,
-        address: 'ISA Nairobi Hub',
+        latitude: firstProduct.location_lat,
+        longitude: firstProduct.location_lng,
+        address: firstProduct.location_address || 'Vendor Location',
         city: 'Nairobi',
         county: 'Nairobi'
       };
-      const deliveryLocation: DeliveryLocation = {
-        latitude: 0,
-        longitude: 0,
-        address: deliveryAddress.street,
-        city: deliveryAddress.city,
-        county: deliveryAddress.state
+      const deliveryLocationData: DeliveryLocation = {
+        latitude: deliveryLocation.latitude,
+        longitude: deliveryLocation.longitude,
+        address: deliveryLocation.address,
+        city: deliveryLocation.city || 'Nairobi',
+        county: deliveryLocation.county || 'Nairobi'
       };
       const deliveryItems = cartItems.map(item => ({
         weight: 0.5,
@@ -123,8 +136,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
         toast({ title: 'Missing Information', description: 'Please provide your email and phone number.', variant: 'destructive' });
         return;
       }
-      if (!deliveryAddress.street || !deliveryAddress.city) {
-        toast({ title: 'Missing Information', description: 'Please fill in your delivery address.', variant: 'destructive' });
+      if (deliveryType === 'delivery' && !deliveryLocation) {
+        toast({ title: 'Missing Information', description: 'Please select your delivery location.', variant: 'destructive' });
         return;
       }
       setCurrentStep('payment');
@@ -148,12 +161,41 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       // Create order first
       const order = await OrderService.createOrder(user.id, {
         items: cartItems.map(item => ({ product_id: item.product_id, quantity: item.quantity })),
-        shipping_address: deliveryAddress,
-        billing_address: deliveryAddress,
+        shipping_address: deliveryType === 'delivery' && deliveryLocation ? {
+          street: deliveryLocation.address,
+          city: deliveryLocation.city || 'Nairobi',
+          state: deliveryLocation.county || 'Nairobi',
+          zip: '',
+          country: 'Kenya'
+        } : {
+          street: cartItems[0]?.product?.location_address || 'Vendor Location',
+          city: 'Nairobi',
+          state: 'Nairobi',
+          zip: '',
+          country: 'Kenya'
+        },
+        billing_address: deliveryType === 'delivery' && deliveryLocation ? {
+          street: deliveryLocation.address,
+          city: deliveryLocation.city || 'Nairobi',
+          state: deliveryLocation.county || 'Nairobi',
+          zip: '',
+          country: 'Kenya'
+        } : {
+          street: cartItems[0]?.product?.location_address || 'Vendor Location',
+          city: 'Nairobi',
+          state: 'Nairobi',
+          zip: '',
+          country: 'Kenya'
+        },
         customer_email: contactInfo.email,
         customer_phone: contactInfo.phone,
-        notes: `ISA Delivery\n${notes}`,
-        payment_method: paymentMethod
+        notes: `${deliveryType === 'delivery' ? 'ISA Delivery' : 'Pickup'}\n${notes}`,
+        payment_method: paymentMethod,
+        delivery_type: deliveryType,
+        delivery_location_lat: deliveryType === 'delivery' ? deliveryLocation?.latitude : null,
+        delivery_location_lng: deliveryType === 'delivery' ? deliveryLocation?.longitude : null,
+        delivery_location_address: deliveryType === 'delivery' ? deliveryLocation?.address : null,
+        delivery_fee: deliveryType === 'delivery' ? calculatedDeliveryFee : 0
       });
       let paymentResponse;
       if (paymentMethod === 'mpesa') {
@@ -247,27 +289,93 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                  <MapPin className="w-5 h-5 mr-2" />
-                  Delivery Address
+                  <Truck className="w-5 h-5 mr-2" />
+                  Delivery Options
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <Label htmlFor="street">Street Address</Label>
-                    <Input id="street" value={deliveryAddress.street} onChange={e => setDeliveryAddress(prev => ({ ...prev, street: e.target.value }))} placeholder="123 Main St" className="bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600" />
-                  </div>
-                  <div>
-                    <Label htmlFor="city">City</Label>
-                    <Input id="city" value={deliveryAddress.city} onChange={e => setDeliveryAddress(prev => ({ ...prev, city: e.target.value }))} placeholder="Nairobi" className="bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600" />
-                  </div>
-                  <div>
-                    <Label htmlFor="state">County</Label>
-                    <Input id="state" value={deliveryAddress.state} onChange={e => setDeliveryAddress(prev => ({ ...prev, state: e.target.value }))} placeholder="Nairobi" className="bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600" />
-                  </div>
-                  <div>
-                    <Label htmlFor="zip">Postal Code</Label>
-                    <Input id="zip" value={deliveryAddress.zip} onChange={e => setDeliveryAddress(prev => ({ ...prev, zip: e.target.value }))} placeholder="00100" className="bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600" />
+                
+                {/* Delivery Type Selection */}
+                <div className="mb-6">
+                  <Label className="text-sm font-medium text-gray-700 mb-3 block">How would you like to receive your order?</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card 
+                      className={`cursor-pointer transition-all ${
+                        deliveryType === 'pickup' 
+                          ? 'ring-2 ring-orange-500 bg-orange-50 border-orange-200' 
+                          : 'hover:shadow-md border-gray-200'
+                      }`}
+                      onClick={() => setDeliveryType('pickup')}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <Home className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-gray-900">Pickup</h4>
+                            <p className="text-sm text-gray-600">Collect from vendor location</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card 
+                      className={`cursor-pointer transition-all ${
+                        deliveryType === 'delivery' 
+                          ? 'ring-2 ring-orange-500 bg-orange-50 border-orange-200' 
+                          : 'hover:shadow-md border-gray-200'
+                      }`}
+                      onClick={() => setDeliveryType('delivery')}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <Truck className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-gray-900">Home Delivery</h4>
+                            <p className="text-sm text-gray-600">Delivered to your location</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
                 </div>
+
+                {/* Location Selection */}
+                {deliveryType === 'delivery' && (
+                  <div className="mb-6">
+                    <Label className="text-sm font-medium text-gray-700 mb-3 block">Where should we deliver your order?</Label>
+                    <LocationPicker
+                      onLocationSelect={setDeliveryLocation}
+                      selectedLocation={deliveryLocation}
+                      title="Delivery Location"
+                      description="Choose where you want your items delivered"
+                      placeholder="Search for your delivery address..."
+                    />
+                  </div>
+                )}
+
+                {/* Pickup Location Display */}
+                {deliveryType === 'pickup' && (
+                  <div className="mb-6">
+                    <Label className="text-sm font-medium text-gray-700 mb-3 block">Pickup Location</Label>
+                    <Card className="bg-gray-50 border-gray-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <MapPin className="w-5 h-5 text-gray-600" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              {cartItems[0]?.product?.location_address || 'Vendor Location'}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              Contact vendor for pickup details
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
                 <div className="mt-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Delivery Fee Details</h4>
                   {isCalculatingDeliveryFee ? (

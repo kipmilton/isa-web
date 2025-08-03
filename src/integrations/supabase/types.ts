@@ -216,6 +216,11 @@ export type Database = {
           currency: string | null
           customer_email: string
           customer_phone: string | null
+          delivery_fee: number | null
+          delivery_location_address: string | null
+          delivery_location_lat: number | null
+          delivery_location_lng: number | null
+          delivery_type: string | null
           discount_amount: number | null
           estimated_delivery_date: string | null
           fulfillment_method: string
@@ -243,6 +248,11 @@ export type Database = {
           currency?: string | null
           customer_email: string
           customer_phone?: string | null
+          delivery_fee?: number | null
+          delivery_location_address?: string | null
+          delivery_location_lat?: number | null
+          delivery_location_lng?: number | null
+          delivery_type?: string | null
           discount_amount?: number | null
           estimated_delivery_date?: string | null
           fulfillment_method: string
@@ -270,6 +280,11 @@ export type Database = {
           currency?: string | null
           customer_email?: string
           customer_phone?: string | null
+          delivery_fee?: number | null
+          delivery_location_address?: string | null
+          delivery_location_lat?: number | null
+          delivery_location_lng?: number | null
+          delivery_type?: string | null
           discount_amount?: number | null
           estimated_delivery_date?: string | null
           fulfillment_method?: string
@@ -453,6 +468,9 @@ export type Database = {
           images: string[] | null
           is_active: boolean | null
           is_featured: boolean | null
+          location_lat: number | null
+          location_lng: number | null
+          location_address: string | null
           main_category: string | null
           main_image: string | null
           name: string
@@ -489,6 +507,9 @@ export type Database = {
           images?: string[] | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          location_lat?: number | null
+          location_lng?: number | null
+          location_address?: string | null
           main_category?: string | null
           main_image?: string | null
           name: string
@@ -525,6 +546,9 @@ export type Database = {
           images?: string[] | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          location_lat?: number | null
+          location_lng?: number | null
+          location_address?: string | null
           main_category?: string | null
           main_image?: string | null
           name?: string
@@ -992,6 +1016,209 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_personnel: {
+        Row: {
+          id: string
+          user_id: string
+          email: string
+          first_name: string
+          last_name: string
+          phone_number: string
+          county: string
+          constituency: string
+          id_card_url: string
+          drivers_license_url: string
+          current_location_lat: number | null
+          current_location_lng: number | null
+          is_online: boolean
+          is_available: boolean
+          status: string
+          admin_notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          email: string
+          first_name: string
+          last_name: string
+          phone_number: string
+          county: string
+          constituency: string
+          id_card_url: string
+          drivers_license_url: string
+          current_location_lat?: number | null
+          current_location_lng?: number | null
+          is_online?: boolean
+          is_available?: boolean
+          status?: string
+          admin_notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          email?: string
+          first_name?: string
+          last_name?: string
+          phone_number?: string
+          county?: string
+          constituency?: string
+          id_card_url?: string
+          drivers_license_url?: string
+          current_location_lat?: number | null
+          current_location_lng?: number | null
+          is_online?: boolean
+          is_available?: boolean
+          status?: string
+          admin_notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_personnel_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_orders: {
+        Row: {
+          id: string
+          order_id: string
+          delivery_personnel_id: string | null
+          pickup_location_lat: number
+          pickup_location_lng: number
+          pickup_location_address: string
+          delivery_location_lat: number
+          delivery_location_lng: number
+          delivery_location_address: string
+          distance_km: number
+          delivery_fee: number
+          estimated_delivery_time: string | null
+          actual_delivery_time: string | null
+          status: string
+          current_location_lat: number | null
+          current_location_lng: number | null
+          tracking_updates: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          order_id: string
+          delivery_personnel_id?: string | null
+          pickup_location_lat: number
+          pickup_location_lng: number
+          pickup_location_address: string
+          delivery_location_lat: number
+          delivery_location_lng: number
+          delivery_location_address: string
+          distance_km: number
+          delivery_fee: number
+          estimated_delivery_time?: string | null
+          actual_delivery_time?: string | null
+          status?: string
+          current_location_lat?: number | null
+          current_location_lng?: number | null
+          tracking_updates?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          order_id?: string
+          delivery_personnel_id?: string | null
+          pickup_location_lat?: number
+          pickup_location_lng?: number
+          pickup_location_address?: string
+          delivery_location_lat?: number
+          delivery_location_lng?: number
+          delivery_location_address?: string
+          distance_km?: number
+          delivery_fee?: number
+          estimated_delivery_time?: string | null
+          actual_delivery_time?: string | null
+          status?: string
+          current_location_lat?: number | null
+          current_location_lng?: number | null
+          tracking_updates?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_orders_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_orders_delivery_personnel_id_fkey"
+            columns: ["delivery_personnel_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_personnel"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_tracking: {
+        Row: {
+          id: string
+          delivery_order_id: string
+          delivery_personnel_id: string
+          latitude: number
+          longitude: number
+          accuracy: number | null
+          speed: number | null
+          heading: number | null
+          timestamp: string
+        }
+        Insert: {
+          id?: string
+          delivery_order_id: string
+          delivery_personnel_id: string
+          latitude: number
+          longitude: number
+          accuracy?: number | null
+          speed?: number | null
+          heading?: number | null
+          timestamp?: string
+        }
+        Update: {
+          id?: string
+          delivery_order_id?: string
+          delivery_personnel_id?: string
+          latitude?: number
+          longitude?: number
+          accuracy?: number | null
+          speed?: number | null
+          heading?: number | null
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_tracking_delivery_order_id_fkey"
+            columns: ["delivery_order_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_tracking_delivery_personnel_id_fkey"
+            columns: ["delivery_personnel_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_personnel"
             referencedColumns: ["id"]
           },
         ]

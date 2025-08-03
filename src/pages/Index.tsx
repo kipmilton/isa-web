@@ -9,6 +9,7 @@ import TryFreeDialog from "@/components/TryFreeDialog";
 import { Link, useNavigate } from "react-router-dom";
 import { MessageCircle, Search, ShoppingBag, Smartphone, Apple, Play, Quote, Star, Gift, Home, Menu, X } from "lucide-react";
 import AuthDialog from "@/components/auth/AuthDialog";
+import DeliverySignupDialog from "@/components/auth/DeliverySignupDialog";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
@@ -16,13 +17,14 @@ const Index = () => {
   const [authType, setAuthType] = useState<'customer' | 'vendor'>('customer');
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [showTryFreeDialog, setShowTryFreeDialog] = useState(false);
+  const [showDeliverySignup, setShowDeliverySignup] = useState(false);
   const vendorsRef = useRef<HTMLElement>(null);
   const [showTerms, setShowTerms] = useState(false);
   const [authDefaultVendor, setAuthDefaultVendor] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Check for rejected vendors on page load
+  // Check for rejected vendors and delivery users on page load
   useEffect(() => {
     const checkUserStatus = async () => {
       try {
@@ -36,6 +38,35 @@ const Index = () => {
           
           if (profile?.user_type === 'vendor' && profile.status === 'rejected') {
             navigate('/vendor-rejection');
+          } else if (profile?.user_type === 'delivery') {
+            console.log('Index - Delivery user detected, checking status...');
+            // Check delivery personnel status
+            const { data: deliveryProfile, error: deliveryError } = await supabase
+              .from('delivery_personnel')
+              .select('status')
+              .eq('user_id', session.user.id)
+              .single();
+
+            console.log('Index - Delivery profile:', deliveryProfile);
+            console.log('Index - Delivery error:', deliveryError);
+
+            if (!deliveryError && deliveryProfile) {
+              console.log('Index - Delivery status:', deliveryProfile.status);
+              if (deliveryProfile.status === 'approved') {
+                console.log('Index - Redirecting to delivery dashboard');
+                navigate('/delivery-dashboard');
+              } else if (deliveryProfile.status === 'rejected') {
+                console.log('Index - Redirecting to delivery rejection');
+                navigate('/delivery-rejection');
+              } else {
+                console.log('Index - Redirecting to delivery pending');
+                navigate('/delivery-pending');
+              }
+            } else {
+              console.log('Index - Delivery profile not found, redirecting to pending');
+              // Fallback to pending if delivery profile not found
+              navigate('/delivery-pending');
+            }
           }
         }
       } catch (error) {
@@ -68,6 +99,10 @@ const Index = () => {
   const handleVendorSignIn = () => {
     setAuthType('vendor');
     setShowAuth(true);
+  };
+
+  const handleDeliverySignup = () => {
+    setShowDeliverySignup(true);
   };
 
   const scrollToVendors = () => {
@@ -145,6 +180,13 @@ const Index = () => {
               >
                 Join as Vendor
               </Button>
+              <Button 
+                onClick={handleDeliverySignup} 
+                variant="outline" 
+                className="border-blue-500 text-blue-600 hover:bg-blue-50"
+              >
+                Join ISA Delivery
+              </Button>
               <Button onClick={handleSignIn} variant="outline" className="border-orange-500 text-orange-600 hover:bg-orange-50">
                 Sign In
               </Button>
@@ -202,6 +244,12 @@ const Index = () => {
                 className="py-2 text-left text-green-600 border-b border-gray-100 hover:bg-green-50 rounded"
               >
                 Join as Vendor
+              </button>
+              <button
+                onClick={() => { setMobileMenuOpen(false); handleDeliverySignup(); }}
+                className="py-2 text-left text-blue-600 border-b border-gray-100 hover:bg-blue-50 rounded"
+              >
+                Join ISA Delivery
               </button>
               <button
                 onClick={() => { setMobileMenuOpen(false); handleSignIn(); }}
@@ -536,6 +584,12 @@ const Index = () => {
       <AuthDialog 
         open={showAuth} 
         onOpenChange={(open) => { setShowAuth(open); if (!open) setAuthDefaultVendor(false); }} 
+      />
+
+      {/* Delivery Signup Dialog */}
+      <DeliverySignupDialog 
+        open={showDeliverySignup} 
+        onOpenChange={setShowDeliverySignup} 
       />
 
       <TryFreeDialog open={showTryFreeDialog} onOpenChange={setShowTryFreeDialog} />

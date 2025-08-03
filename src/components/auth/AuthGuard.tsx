@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 interface AuthGuardProps {
   children: ReactNode;
   requireAuth?: boolean;
-  allowedUserTypes?: ('customer' | 'vendor' | 'admin')[];
+  allowedUserTypes?: ('customer' | 'vendor' | 'admin' | 'delivery')[];
   allowedVendorStatuses?: ('pending' | 'approved' | 'rejected')[];
 }
 
@@ -70,6 +70,25 @@ const AuthGuard = ({
         if (profile.user_type === 'vendor' && profile.status === 'rejected') {
           navigate('/vendor-rejection');
           return;
+        }
+
+        // Check if user is a delivery personnel and check their status
+        if (profile.user_type === 'delivery') {
+          const { data: deliveryProfile, error: deliveryError } = await supabase
+            .from('delivery_personnel')
+            .select('status')
+            .eq('user_id', session.user.id)
+            .single();
+
+          if (!deliveryError && deliveryProfile) {
+            if (deliveryProfile.status === 'rejected') {
+              navigate('/delivery-rejection');
+              return;
+            } else if (deliveryProfile.status === 'pending') {
+              navigate('/delivery-pending');
+              return;
+            }
+          }
         }
 
         // Check user type restrictions

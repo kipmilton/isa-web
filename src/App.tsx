@@ -18,6 +18,10 @@ import NotFound from "./pages/NotFound";
 import ShopDashboard from "./pages/ShopDashboard";
 import ProductDetail from "./pages/ProductDetail";
 import AuthCallback from "./pages/AuthCallback";
+import DeliveryDashboard from "./pages/DeliveryDashboard";
+import DeliveryPending from "./pages/DeliveryPending";
+import DeliveryRejection from "./pages/DeliveryRejection";
+import Shipping from "./pages/Shipping";
 import { Analytics } from "@vercel/analytics/react";
 
 const queryClient = new QueryClient();
@@ -50,9 +54,37 @@ const App = () => (
                 <VendorRejection />
               </AuthGuard>
             } />
-            <Route path="/shop" element={<ShopDashboard />} />
-            <Route path="/product/:productId" element={<ProductDetail />} />
+            <Route path="/shop" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['customer']}>
+                <ShopDashboard />
+              </AuthGuard>
+            } />
+            <Route path="/product/:productId" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['customer']}>
+                <ProductDetail />
+              </AuthGuard>
+            } />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/delivery-dashboard" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['delivery']}>
+                <DeliveryDashboard />
+              </AuthGuard>
+            } />
+            <Route path="/delivery-pending" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['delivery']}>
+                <DeliveryPending />
+              </AuthGuard>
+            } />
+            <Route path="/delivery-rejection" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['delivery']}>
+                <DeliveryRejection />
+              </AuthGuard>
+            } />
+            <Route path="/shipping" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['customer']}>
+                <Shipping />
+              </AuthGuard>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

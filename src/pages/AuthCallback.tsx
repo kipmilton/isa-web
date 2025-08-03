@@ -64,6 +64,26 @@ const AuthCallback = () => {
               } else {
                 navigate('/vendor-status');
               }
+            } else if (profile.user_type === 'delivery') {
+              // Check delivery personnel status
+              const { data: deliveryProfile, error: deliveryError } = await supabase
+                .from('delivery_personnel')
+                .select('status')
+                .eq('user_id', session.user.id)
+                .single();
+
+              if (!deliveryError && deliveryProfile) {
+                if (deliveryProfile.status === 'approved') {
+                  navigate('/delivery-dashboard');
+                } else if (deliveryProfile.status === 'rejected') {
+                  navigate('/delivery-rejection');
+                } else {
+                  navigate('/delivery-pending');
+                }
+              } else {
+                // Fallback to pending if delivery profile not found
+                navigate('/delivery-pending');
+              }
             } else {
               // Customer - check if account setup is completed
               if (!(profile as any).account_setup_completed) {

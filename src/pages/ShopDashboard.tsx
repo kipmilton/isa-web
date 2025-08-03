@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X } from "lucide-react";
+import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X, Truck } from "lucide-react";
 import { ProductService } from "@/services/productService";
 import { OrderService } from "@/services/orderService";
 import { useToast } from "@/hooks/use-toast";
@@ -287,6 +287,13 @@ const ShopDashboard = () => {
                 </Button>
               </Link>
               
+              <Link to="/shipping">
+                <Button variant="ghost" size="icon" className="relative group bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg">
+                  <Truck className="w-5 h-5" />
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Track Orders</span>
+                </Button>
+              </Link>
+              
               <Link to="/gift">
                 <Button variant="ghost" size="icon" className="relative group bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-lg">
                   <Gift className="w-5 h-5" />
@@ -417,6 +424,17 @@ const ShopDashboard = () => {
                     <Gift className="w-4 h-4 text-white" />
                   </div>
                   <span className="font-medium">Gift Someone</span>
+                </Link>
+                
+                <Link 
+                  to="/shipping"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                    <Truck className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium">Track Orders</span>
                 </Link>
                 
                 <button 

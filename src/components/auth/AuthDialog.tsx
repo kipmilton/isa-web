@@ -273,6 +273,38 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           } else {
             navigate('/vendor-status');
           }
+        } else if (profile?.user_type === 'delivery') {
+          console.log('AuthDialog - Delivery user detected, checking status...');
+          // Check delivery personnel status
+          const { data: deliveryProfile, error: deliveryError } = await supabase
+            .from('delivery_personnel')
+            .select('status')
+            .eq('user_id', authData.user.id)
+            .single();
+
+          console.log('AuthDialog - Delivery profile:', deliveryProfile);
+          console.log('AuthDialog - Delivery error:', deliveryError);
+
+          toast.success("Signed in successfully!");
+          onOpenChange(false);
+          
+          if (!deliveryError && deliveryProfile) {
+            console.log('AuthDialog - Delivery status:', deliveryProfile.status);
+            if (deliveryProfile.status === 'approved') {
+              console.log('AuthDialog - Redirecting to delivery dashboard');
+              navigate('/delivery-dashboard');
+            } else if (deliveryProfile.status === 'rejected') {
+              console.log('AuthDialog - Redirecting to delivery rejection');
+              navigate('/delivery-rejection');
+            } else {
+              console.log('AuthDialog - Redirecting to delivery pending');
+              navigate('/delivery-pending');
+            }
+          } else {
+            console.log('AuthDialog - Delivery profile not found, redirecting to pending');
+            // Fallback to pending if delivery profile not found
+            navigate('/delivery-pending');
+          }
         } else {
           toast.success("Signed in successfully!");
           onOpenChange(false);
