@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { DeliveryPersonnel } from "@/types/delivery";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,22 +20,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-interface DeliveryPersonnel {
-  id: string;
-  user_id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  phone_number: string;
-  county: string;
-  constituency: string;
-  id_card_url: string;
-  drivers_license_url: string;
-  status: 'pending' | 'approved' | 'rejected' | 'suspended';
-  admin_notes: string | null;
-  created_at: string;
-  updated_at: string;
-}
 
 const AdminDelivery = () => {
   const [deliveryPersonnel, setDeliveryPersonnel] = useState<DeliveryPersonnel[]>([]);
@@ -62,7 +47,7 @@ const AdminDelivery = () => {
         return;
       }
 
-      setDeliveryPersonnel(data || []);
+      setDeliveryPersonnel((data || []) as DeliveryPersonnel[]);
     } catch (error) {
       console.error('Error:', error);
       toast.error('Failed to fetch delivery personnel');

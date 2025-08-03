@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { DeliveryOrder } from '@/types/delivery';
 import { 
   MapPin, 
   Clock, 
@@ -24,33 +25,6 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-interface DeliveryOrder {
-  id: string;
-  order_id: string;
-  pickup_location_address: string;
-  delivery_location_address: string;
-  distance_km: number;
-  delivery_fee: number;
-  status: string;
-  created_at: string;
-  estimated_delivery_time: string | null;
-  actual_delivery_time: string | null;
-  current_location_lat: number | null;
-  current_location_lng: number | null;
-  tracking_updates: any[];
-  order: {
-    customer_email: string;
-    customer_phone: string | null;
-    order_number: string;
-    total_amount: number;
-    delivery_type: string;
-  };
-  delivery_personnel: {
-    first_name: string;
-    last_name: string;
-    phone_number: string;
-  } | null;
-}
 
 const Shipping = () => {
   const [user, setUser] = useState<any>(null);
@@ -106,7 +80,7 @@ const Shipping = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setDeliveryOrders(data || []);
+      setDeliveryOrders((data || []) as DeliveryOrder[]);
     } catch (error) {
       console.error('Error fetching delivery orders:', error);
       toast({

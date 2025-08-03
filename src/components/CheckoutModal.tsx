@@ -108,7 +108,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
         address: deliveryLocation.address,
         city: deliveryLocation.city || 'Nairobi',
         county: deliveryLocation.county || 'Nairobi'
-      };
+      } as DeliveryLocation;
       const deliveryItems = cartItems.map(item => ({
         weight: 0.5,
         quantity: item.quantity,
@@ -116,7 +116,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       }));
       const feeResponse = await DeliveryFeeService.calculateDeliveryFee({
         pickupLocation,
-        deliveryLocation,
+        deliveryLocation: deliveryLocationData,
         items: deliveryItems,
         deliveryType: 'standard'
       });

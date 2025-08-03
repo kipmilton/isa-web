@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { DeliveryOrder } from '@/types/delivery';
 
 export interface Location {
   lat: number;
@@ -6,27 +7,6 @@ export interface Location {
   address: string;
 }
 
-export interface DeliveryOrder {
-  id: string;
-  order_id: string;
-  delivery_personnel_id: string | null;
-  pickup_location_lat: number;
-  pickup_location_lng: number;
-  pickup_location_address: string;
-  delivery_location_lat: number;
-  delivery_location_lng: number;
-  delivery_location_address: string;
-  distance_km: number;
-  delivery_fee: number;
-  estimated_delivery_time: string | null;
-  actual_delivery_time: string | null;
-  status: string;
-  current_location_lat: number | null;
-  current_location_lng: number | null;
-  tracking_updates: any[];
-  created_at: string;
-  updated_at: string;
-}
 
 export class DeliveryService {
   // Calculate distance between two points using Haversine formula
@@ -84,7 +64,7 @@ export class DeliveryService {
         .select()
         .single();
 
-      return { data, error };
+      return { data: data as DeliveryOrder, error };
     } catch (error) {
       return { data: null, error };
     }
@@ -102,7 +82,7 @@ export class DeliveryService {
         .eq('order.user_id', userId)
         .order('created_at', { ascending: false });
 
-      return { data, error };
+      return { data: data as DeliveryOrder[], error };
     } catch (error) {
       return { data: null, error };
     }
@@ -126,7 +106,7 @@ export class DeliveryService {
         .eq('status', 'pending')
         .order('created_at', { ascending: true });
 
-      return { data, error };
+      return { data: data as DeliveryOrder[], error };
     } catch (error) {
       return { data: null, error };
     }
@@ -160,7 +140,7 @@ export class DeliveryService {
         .eq('delivery_personnel_id', deliveryPersonnel.id)
         .order('created_at', { ascending: false });
 
-      return { data, error };
+      return { data: data as DeliveryOrder[], error };
     } catch (error) {
       return { data: null, error };
     }

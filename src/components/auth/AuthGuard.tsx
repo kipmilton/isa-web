@@ -92,14 +92,14 @@ const AuthGuard = ({
         }
 
         // Check user type restrictions
-        if (allowedUserTypes.length > 0 && !allowedUserTypes.includes(profile.user_type)) {
+        if (allowedUserTypes.length > 0 && !allowedUserTypes.includes(profile.user_type as any)) {
           navigate('/');
           return;
         }
 
         // Check vendor status restrictions
         if (profile.user_type === 'vendor' && allowedVendorStatuses.length > 0) {
-          if (!allowedVendorStatuses.includes(profile.status)) {
+          if (!allowedVendorStatuses.includes(profile.status as any)) {
             navigate('/');
             return;
           }

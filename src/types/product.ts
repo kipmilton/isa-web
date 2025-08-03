@@ -25,6 +25,9 @@ export interface Product {
   pickup_location?: string;
   pickup_phone_number?: string;
   pickup_phone?: string;
+  location_lat?: number;
+  location_lng?: number;
+  location_address?: string;
   currency?: string;
   specifications?: any;
   tags?: string[];

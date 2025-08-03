@@ -56,6 +56,9 @@ export interface CartItemWithProduct {
     main_image?: string;
     category: string;
     stock_quantity: number;
+    location_lat?: number;
+    location_lng?: number;
+    location_address?: string;
   };
 }
 

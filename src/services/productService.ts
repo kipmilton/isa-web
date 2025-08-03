@@ -90,7 +90,7 @@ export class ProductService {
 
   // Product Attributes Methods
   static async getProductAttributes(productId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('product_attributes')
       .select('*')
       .eq('product_id', productId)
@@ -109,7 +109,7 @@ export class ProductService {
       product_id: productId
     }));
 
-    return await supabase
+    return await (supabase as any)
       .from('product_attributes')
       .insert(attributesWithProductId)
       .select();
@@ -117,7 +117,7 @@ export class ProductService {
 
   static async updateProductAttributes(productId: string, attributes: Omit<ProductAttribute, 'id' | 'product_id' | 'created_at' | 'updated_at'>[]) {
     // Delete existing attributes
-    await supabase
+    await (supabase as any)
       .from('product_attributes')
       .delete()
       .eq('product_id', productId);
@@ -128,7 +128,7 @@ export class ProductService {
 
   // Product Images Methods
   static async getProductImages(productId: string) {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('product_images')
       .select('*')
       .eq('product_id', productId)
@@ -148,7 +148,7 @@ export class ProductService {
       display_order: index
     }));
 
-    return await supabase
+    return await (supabase as any)
       .from('product_images')
       .insert(imagesWithProductId)
       .select();
@@ -156,7 +156,7 @@ export class ProductService {
 
   static async updateProductImages(productId: string, images: Omit<ProductImage, 'id' | 'product_id' | 'created_at' | 'updated_at'>[]) {
     // Delete existing images
-    await supabase
+    await (supabase as any)
       .from('product_images')
       .delete()
       .eq('product_id', productId);
