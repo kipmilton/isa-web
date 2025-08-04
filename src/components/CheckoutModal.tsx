@@ -9,12 +9,10 @@ import { Separator } from '@/components/ui/separator';
 import { X, CreditCard, Check, MapPin, Download, Lock, Truck, Home } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrderService } from '@/services/orderService';
-import { DeliveryFeeService, DeliveryLocation } from '@/services/deliveryFeeService';
 import { MpesaService } from '@/services/mpesaService';
 // import { AirtelMoneyService } from '@/services/airtelMoneyService'; // Uncomment if you have this service
 import { CartItemWithProduct, Address, PaymentMethod, DeliveryDetails } from '@/types/order';
 import { Product } from '@/types/product';
-import LocationPicker from './LocationPicker';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -36,38 +34,19 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [orderNumber, setOrderNumber] = useState('');
   const [currentStep, setCurrentStep] = useState<'delivery' | 'payment' | 'pay' | 'complete'>('delivery');
 
-  const [deliveryType, setDeliveryType] = useState<'pickup' | 'delivery'>('delivery');
-  const [deliveryLocation, setDeliveryLocation] = useState<{
-    latitude: number;
-    longitude: number;
-    address: string;
-    city?: string;
-    county?: string;
-  } | null>(null);
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   const [contactInfo, setContactInfo] = useState({
     email: user?.email || '',
-    phone: ''
+    phone: '',
+    whatsapp: ''
   });
   const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'airtel_money'>('mpesa');
   const [mobileNumber, setMobileNumber] = useState('');
   const [notes, setNotes] = useState('');
-  const [calculatedDeliveryFee, setCalculatedDeliveryFee] = useState(0);
-  const [isCalculatingDeliveryFee, setIsCalculatingDeliveryFee] = useState(false);
-  const [deliveryFeeDetails, setDeliveryFeeDetails] = useState<any>(null);
-
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (deliveryType === 'delivery' && deliveryLocation) {
-      calculateDeliveryFeeForLocation();
-    } else {
-      setCalculatedDeliveryFee(0);
-      setDeliveryFeeDetails(null);
-    }
-  }, [deliveryType, deliveryLocation]);
-
   const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-  const deliveryFee = calculatedDeliveryFee;
+  const deliveryFee = 500; // Fixed delivery fee
   const totalAmount = subtotal + deliveryFee;
 
   const formatPrice = (price: number) => {
@@ -79,65 +58,15 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }).format(price);
   };
 
-  const calculateDeliveryFeeForLocation = async () => {
-    if (!deliveryLocation) {
-      setCalculatedDeliveryFee(0);
-      setDeliveryFeeDetails(null);
-      return;
-    }
-    setIsCalculatingDeliveryFee(true);
-    try {
-      // Get the first product's pickup location (vendor location)
-      const firstProduct = cartItems[0]?.product;
-      if (!firstProduct?.location_lat || !firstProduct?.location_lng) {
-        setCalculatedDeliveryFee(100); // Default minimum fee
-        setDeliveryFeeDetails({ distance: 0, fee: 100 });
-        return;
-      }
-
-      const pickupLocation: DeliveryLocation = {
-        latitude: firstProduct.location_lat,
-        longitude: firstProduct.location_lng,
-        address: firstProduct.location_address || 'Vendor Location',
-        city: 'Nairobi',
-        county: 'Nairobi'
-      };
-      const deliveryLocationData: DeliveryLocation = {
-        latitude: deliveryLocation.latitude,
-        longitude: deliveryLocation.longitude,
-        address: deliveryLocation.address,
-        city: deliveryLocation.city || 'Nairobi',
-        county: deliveryLocation.county || 'Nairobi'
-      } as DeliveryLocation;
-      const deliveryItems = cartItems.map(item => ({
-        weight: 0.5,
-        quantity: item.quantity,
-        isFragile: false
-      }));
-      const feeResponse = await DeliveryFeeService.calculateDeliveryFee({
-        pickupLocation,
-        deliveryLocation: deliveryLocationData,
-        items: deliveryItems,
-        deliveryType: 'standard'
-      });
-      setCalculatedDeliveryFee(feeResponse.totalFee);
-      setDeliveryFeeDetails(feeResponse);
-    } catch (error) {
-      setCalculatedDeliveryFee(500);
-      setDeliveryFeeDetails(null);
-    } finally {
-      setIsCalculatingDeliveryFee(false);
-    }
-  };
 
   const handleNextStep = () => {
     if (currentStep === 'delivery') {
-      if (!contactInfo.email || !contactInfo.phone) {
-        toast({ title: 'Missing Information', description: 'Please provide your email and phone number.', variant: 'destructive' });
+      if (!contactInfo.email || !contactInfo.phone || !contactInfo.whatsapp) {
+        toast({ title: 'Missing Information', description: 'Please provide your email, phone number and WhatsApp number.', variant: 'destructive' });
         return;
       }
-      if (deliveryType === 'delivery' && !deliveryLocation) {
-        toast({ title: 'Missing Information', description: 'Please select your delivery location.', variant: 'destructive' });
+      if (!deliveryAddress.trim()) {
+        toast({ title: 'Missing Information', description: 'Please enter your delivery address.', variant: 'destructive' });
         return;
       }
       setCurrentStep('payment');
@@ -161,27 +90,15 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       // Create order first
       const order = await OrderService.createOrder(user.id, {
         items: cartItems.map(item => ({ product_id: item.product_id, quantity: item.quantity })),
-        shipping_address: deliveryType === 'delivery' && deliveryLocation ? {
-          street: deliveryLocation.address,
-          city: deliveryLocation.city || 'Nairobi',
-          state: deliveryLocation.county || 'Nairobi',
-          zip: '',
-          country: 'Kenya'
-        } : {
-          street: cartItems[0]?.product?.location_address || 'Vendor Location',
+        shipping_address: {
+          street: deliveryAddress,
           city: 'Nairobi',
           state: 'Nairobi',
           zip: '',
           country: 'Kenya'
         },
-        billing_address: deliveryType === 'delivery' && deliveryLocation ? {
-          street: deliveryLocation.address,
-          city: deliveryLocation.city || 'Nairobi',
-          state: deliveryLocation.county || 'Nairobi',
-          zip: '',
-          country: 'Kenya'
-        } : {
-          street: cartItems[0]?.product?.location_address || 'Vendor Location',
+        billing_address: {
+          street: deliveryAddress,
           city: 'Nairobi',
           state: 'Nairobi',
           zip: '',
@@ -189,13 +106,13 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
         },
         customer_email: contactInfo.email,
         customer_phone: contactInfo.phone,
-        notes: `${deliveryType === 'delivery' ? 'ISA Delivery' : 'Pickup'}\n${notes}`,
+        notes: `ISA Delivery - WhatsApp: ${contactInfo.whatsapp}\nDelivery Address: ${deliveryAddress}\n${notes}`,
         payment_method: paymentMethod,
-        delivery_type: deliveryType,
-        delivery_location_lat: deliveryType === 'delivery' ? deliveryLocation?.latitude : null,
-        delivery_location_lng: deliveryType === 'delivery' ? deliveryLocation?.longitude : null,
-        delivery_location_address: deliveryType === 'delivery' ? deliveryLocation?.address : null,
-        delivery_fee: deliveryType === 'delivery' ? calculatedDeliveryFee : 0
+        delivery_type: 'delivery',
+        delivery_location_lat: null,
+        delivery_location_lng: null,
+        delivery_location_address: deliveryAddress,
+        delivery_fee: deliveryFee
       });
       let paymentResponse;
       if (paymentMethod === 'mpesa') {
@@ -225,7 +142,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   };
 
   const downloadReceipt = () => {
-    const receiptContent = `Order Receipt\nOrder #: ${orderNumber}\nDate: ${new Date().toLocaleDateString()}\nCustomer: ${contactInfo.email}\nPhone: ${contactInfo.phone}\n\nItems:\n${cartItems.map(item => `${item.product.name} x${item.quantity} - ${formatPrice(item.product.price * item.quantity)}`).join('\n')}\n\nSubtotal: ${formatPrice(subtotal)}\nDelivery Fee: ${formatPrice(deliveryFee)}\nTotal: ${formatPrice(totalAmount)}\n\nDelivery Method: ISA Delivery\nPayment Method: ${paymentMethod === 'mpesa' ? 'M-Pesa' : 'Airtel Money'}\n    `;
+    const receiptContent = `Order Receipt\nOrder #: ${orderNumber}\nDate: ${new Date().toLocaleDateString()}\nCustomer: ${contactInfo.email}\nPhone: ${contactInfo.phone}\nWhatsApp: ${contactInfo.whatsapp}\n\nItems:\n${cartItems.map(item => `${item.product.name} x${item.quantity} - ${formatPrice(item.product.price * item.quantity)}`).join('\n')}\n\nSubtotal: ${formatPrice(subtotal)}\nDelivery Fee: ${formatPrice(deliveryFee)}\nTotal: ${formatPrice(totalAmount)}\n\nDelivery Address: ${deliveryAddress}\nDelivery Method: ISA Delivery\nPayment Method: ${paymentMethod === 'mpesa' ? 'M-Pesa' : 'Airtel Money'}\n    `;
     const blob = new Blob([receiptContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -290,129 +207,58 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                   <Truck className="w-5 h-5 mr-2" />
-                  Delivery Options
+                  Delivery Information
                 </h3>
                 
-                {/* Delivery Type Selection */}
-                <div className="mb-6">
-                  <Label className="text-sm font-medium text-gray-700 mb-3 block">How would you like to receive your order?</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card 
-                      className={`cursor-pointer transition-all ${
-                        deliveryType === 'pickup' 
-                          ? 'ring-2 ring-orange-500 bg-orange-50 border-orange-200' 
-                          : 'hover:shadow-md border-gray-200'
-                      }`}
-                      onClick={() => setDeliveryType('pickup')}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <Home className="w-5 h-5 text-blue-600" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-900">Pickup</h4>
-                            <p className="text-sm text-gray-600">Collect from vendor location</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card 
-                      className={`cursor-pointer transition-all ${
-                        deliveryType === 'delivery' 
-                          ? 'ring-2 ring-orange-500 bg-orange-50 border-orange-200' 
-                          : 'hover:shadow-md border-gray-200'
-                      }`}
-                      onClick={() => setDeliveryType('delivery')}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                            <Truck className="w-5 h-5 text-green-600" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-900">Home Delivery</h4>
-                            <p className="text-sm text-gray-600">Delivered to your location</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="deliveryAddress">Where do you want the item to be delivered to? (include WhatsApp number a delivery guy may contact you with for location)</Label>
+                    <Textarea
+                      id="deliveryAddress"
+                      value={deliveryAddress}
+                      onChange={(e) => setDeliveryAddress(e.target.value)}
+                      placeholder="Please provide detailed delivery address (e.g., 3KM off Limuru Road, near Shell Petrol Station, blue gate house)"
+                      className="bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600 min-h-[100px]"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="whatsappNumber">WhatsApp Number for Delivery Contact</Label>
+                    <Input
+                      id="whatsappNumber"
+                      type="tel"
+                      value={contactInfo.whatsapp}
+                      onChange={(e) => setContactInfo(prev => ({ ...prev, whatsapp: e.target.value }))}
+                      placeholder="Enter WhatsApp number (e.g., +254712345678)"
+                      className="bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600"
+                      required
+                    />
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      Delivery personnel will contact you on this number for location details
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="deliveryNotes">Additional Comments for Delivery</Label>
+                    <Textarea
+                      id="deliveryNotes"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Any additional information to help the delivery person find you (landmarks, building details, etc.)"
+                      className="bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600"
+                      rows={3}
+                    />
                   </div>
                 </div>
 
-                {/* Location Selection */}
-                {deliveryType === 'delivery' && (
-                  <div className="mb-6">
-                    <Label className="text-sm font-medium text-gray-700 mb-3 block">Where should we deliver your order?</Label>
-                    <LocationPicker
-                      onLocationSelect={setDeliveryLocation}
-                      selectedLocation={deliveryLocation}
-                      title="Delivery Location"
-                      description="Choose where you want your items delivered"
-                      placeholder="Search for your delivery address..."
-                    />
-                  </div>
-                )}
-
-                {/* Pickup Location Display */}
-                {deliveryType === 'pickup' && (
-                  <div className="mb-6">
-                    <Label className="text-sm font-medium text-gray-700 mb-3 block">Pickup Location</Label>
-                    <Card className="bg-gray-50 border-gray-200">
-                      <CardContent className="p-4">
-                        <div className="flex items-center space-x-3">
-                          <MapPin className="w-5 h-5 text-gray-600" />
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              {cartItems[0]?.product?.location_address || 'Vendor Location'}
-                            </p>
-                            <p className="text-xs text-gray-600">
-                              Contact vendor for pickup details
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                )}
                 <div className="mt-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Delivery Fee Details</h4>
-                  {isCalculatingDeliveryFee ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm text-gray-600 dark:text-gray-300">Calculating delivery fee...</span>
-                    </div>
-                  ) : deliveryFeeDetails ? (
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-300">Base Fee:</span>
-                        <span className="text-gray-900 dark:text-white">{formatPrice(deliveryFeeDetails.baseFee)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-300">Distance Fee ({deliveryFeeDetails.distance}km):</span>
-                        <span className="text-gray-900 dark:text-white">{formatPrice(deliveryFeeDetails.distanceFee)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-300">Weight Fee:</span>
-                        <span className="text-gray-900 dark:text-white">{formatPrice(deliveryFeeDetails.weightFee)}</span>
-                      </div>
-                      {deliveryFeeDetails.fragileFee > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-300">Fragile Items:</span>
-                          <span className="text-gray-900 dark:text-white">{formatPrice(deliveryFeeDetails.fragileFee)}</span>
-                        </div>
-                      )}
-                      <Separator />
-                      <div className="flex justify-between font-semibold">
-                        <span className="text-gray-900 dark:text-white">Total Delivery Fee:</span>
-                        <span className="text-gray-900 dark:text-white">{formatPrice(deliveryFeeDetails.totalFee)}</span>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Estimated delivery: {deliveryFeeDetails.estimatedDeliveryTime}</p>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Enter your address to calculate delivery fee</p>
-                  )}
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Delivery Fee</h4>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-300">Standard Delivery:</span>
+                    <span className="text-gray-900 dark:text-white">{formatPrice(deliveryFee)}</span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Estimated delivery: 1-2 business days</p>
                 </div>
               </div>
               <Separator />
@@ -465,7 +311,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-300">Delivery Fee:</span>
-                    <span className="text-gray-900 dark:text-white">{deliveryFee === 0 ? 'Free' : formatPrice(deliveryFee)}</span>
+                    <span className="text-gray-900 dark:text-white">{formatPrice(deliveryFee)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">

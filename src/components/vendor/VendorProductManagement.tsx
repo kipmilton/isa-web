@@ -31,7 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import ImageUpload from "./ImageUpload";
 import ProductAttributes from "./ProductAttributes";
-import LocationPicker from "../LocationPicker";
+
 
 interface VendorProductManagementProps {
   user: any;
@@ -236,13 +236,6 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
   const [productAttributes, setProductAttributes] = useState<Omit<ProductAttribute, 'id' | 'product_id' | 'created_at' | 'updated_at'>[]>([]);
   const [productImages, setProductImages] = useState<Omit<ProductImage, 'id' | 'product_id' | 'created_at' | 'updated_at'>[]>([]);
 
-  const [productLocation, setProductLocation] = useState<{
-    latitude: number;
-    longitude: number;
-    address: string;
-    city?: string;
-    county?: string;
-  } | null>(null);
 
   const [tagInput, setTagInput] = useState("");
 
@@ -338,9 +331,9 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
         } : {}),
         rating: 0,
         review_count: 0,
-        location_lat: productLocation?.latitude || null,
-        location_lng: productLocation?.longitude || null,
-        location_address: productLocation?.address || formData.pickup_location,
+        location_lat: null,
+        location_lng: null,
+        location_address: formData.pickup_location,
       };
 
       let productId: string;
@@ -413,18 +406,6 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
       pickup_phone_number: product.pickup_phone_number || ""
     });
 
-    // Set product location if available
-    if (product.location_lat && product.location_lng) {
-      setProductLocation({
-        latitude: product.location_lat,
-        longitude: product.location_lng,
-        address: product.location_address || product.pickup_location || '',
-        city: 'Nairobi',
-        county: 'Nairobi'
-      });
-    } else {
-      setProductLocation(null);
-    }
     setMainCategory(product.category);
     setSubCategory(product.subcategory || "");
     setShowAddDialog(true);
@@ -473,7 +454,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
       pickup_location: "",
       pickup_phone_number: ""
     });
-    setProductLocation(null);
+    
     setTagInput("");
     setMainCategory("");
     setSubCategory("");
@@ -922,19 +903,14 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
 
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium text-gray-700 mb-3 block">Product Pickup Location *</Label>
-                    <LocationPicker
-                      onLocationSelect={(location) => {
-                        setProductLocation(location);
-                        setFormData(prev => ({ 
-                          ...prev, 
-                          pickup_location: location.address 
-                        }));
-                      }}
-                      selectedLocation={productLocation}
-                      title="Pickup Location"
-                      description="Where customers can pick up this product"
-                      placeholder="Search for pickup location..."
+                    <Label htmlFor="pickup_location">Where do you want the item to be picked from? *</Label>
+                    <Textarea
+                      id="pickup_location"
+                      value={formData.pickup_location}
+                      onChange={(e) => setFormData(prev => ({ ...prev, pickup_location: e.target.value }))}
+                      placeholder="Please provide detailed pickup address (e.g., 3KM off Limuru Road, near Shell Petrol Station, blue gate house)"
+                      className="min-h-[100px]"
+                      required
                     />
                   </div>
                   
