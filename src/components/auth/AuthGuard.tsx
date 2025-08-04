@@ -117,7 +117,7 @@ const AuthGuard = ({
     };
 
     checkAuth();
-  }, [navigate, requireAuth, allowedUserTypes, allowedVendorStatuses]);
+  }, [navigate, requireAuth]);
 
   if (loading) {
     return (
