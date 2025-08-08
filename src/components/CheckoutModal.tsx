@@ -212,7 +212,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="deliveryAddress">Where do you want the item to be delivered to? (include WhatsApp number a delivery guy may contact you with for location)</Label>
+                    <Label htmlFor="deliveryAddress">Where do you want the item to be delivered to?</Label>
                     <Textarea
                       id="deliveryAddress"
                       value={deliveryAddress}
@@ -235,12 +235,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       required
                     />
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      Delivery personnel will contact you on this number for location details
+                      Delivery personnel may contact you on this number for location details
                     </p>
                   </div>
 
                   <div>
-                    <Label htmlFor="deliveryNotes">Additional Comments for Delivery</Label>
+                    <Label htmlFor="deliveryNotes">Additional Comments/special requests for Delivery</Label>
                     <Textarea
                       id="deliveryNotes"
                       value={notes}
@@ -253,7 +253,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </div>
 
                 <div className="mt-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Delivery Fee</h4>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Delivery Fee(Our delivery team will negotiate this amount with you.)</h4>
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-300">Standard Delivery:</span>
                     <span className="text-gray-900 dark:text-white">{formatPrice(deliveryFee)}</span>
