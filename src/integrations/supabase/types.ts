@@ -542,6 +542,86 @@ export type Database = {
           },
         ]
       }
+      points_config: {
+        Row: {
+          created_at: string
+          first_purchase_points: number
+          id: string
+          point_value_kes: number
+          points_expiry_months: number
+          quiz_completion_points: number
+          referral_purchase_points: number
+          referral_signup_points: number
+          spending_points_per_100_kes: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          first_purchase_points?: number
+          id?: string
+          point_value_kes?: number
+          points_expiry_months?: number
+          quiz_completion_points?: number
+          referral_purchase_points?: number
+          referral_signup_points?: number
+          spending_points_per_100_kes?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          first_purchase_points?: number
+          id?: string
+          point_value_kes?: number
+          points_expiry_months?: number
+          quiz_completion_points?: number
+          referral_purchase_points?: number
+          referral_signup_points?: number
+          spending_points_per_100_kes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      points_transactions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          order_id: string | null
+          points: number
+          reason: string
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          order_id?: string | null
+          points: number
+          reason: string
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          order_id?: string | null
+          points?: number
+          reason?: string
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "points_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_attributes: {
         Row: {
           attribute_name: string
@@ -1017,6 +1097,39 @@ export type Database = {
           },
         ]
       }
+      style_quiz_questions: {
+        Row: {
+          created_at: string
+          gender: string
+          id: string
+          is_active: boolean
+          options: Json
+          question_order: number
+          question_text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          gender: string
+          id?: string
+          is_active?: boolean
+          options: Json
+          question_order: number
+          question_text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          gender?: string
+          id?: string
+          is_active?: boolean
+          options?: Json
+          question_order?: number
+          question_text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_cart_items: {
         Row: {
           added_at: string | null
@@ -1138,6 +1251,39 @@ export type Database = {
           },
         ]
       }
+      user_points: {
+        Row: {
+          available_points: number
+          created_at: string
+          id: string
+          lifetime_earned: number
+          lifetime_redeemed: number
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_points?: number
+          created_at?: string
+          id?: string
+          lifetime_earned?: number
+          lifetime_redeemed?: number
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_points?: number
+          created_at?: string
+          id?: string
+          lifetime_earned?: number
+          lifetime_redeemed?: number
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_product_interactions: {
         Row: {
           created_at: string | null
@@ -1225,6 +1371,68 @@ export type Database = {
           },
         ]
       }
+      user_quiz_responses: {
+        Row: {
+          completed_at: string
+          id: string
+          question_id: string
+          selected_option: Json
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          question_id: string
+          selected_option: Json
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          question_id?: string
+          selected_option?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_quiz_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "style_quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_referrals: {
+        Row: {
+          created_at: string
+          id: string
+          purchase_points_awarded: boolean
+          referral_code: string
+          referred_id: string
+          referrer_id: string
+          signup_points_awarded: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          purchase_points_awarded?: boolean
+          referral_code: string
+          referred_id: string
+          referrer_id: string
+          signup_points_awarded?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          purchase_points_awarded?: boolean
+          referral_code?: string
+          referred_id?: string
+          referrer_id?: string
+          signup_points_awarded?: boolean
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           assigned_at: string | null
@@ -1280,6 +1488,114 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_subscriptions: {
+        Row: {
+          auto_renew: boolean
+          billing_cycle: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          plan_type: string
+          price_kes: number | null
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_renew?: boolean
+          billing_cycle?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_type: string
+          price_kes?: number | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_renew?: boolean
+          billing_cycle?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_type?: string
+          price_kes?: number | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vendor_commissions: {
+        Row: {
+          category: string
+          created_at: string
+          freemium_commission_rate: number
+          id: string
+          premium_commission_rate: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          freemium_commission_rate?: number
+          id?: string
+          premium_commission_rate?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          freemium_commission_rate?: number
+          id?: string
+          premium_commission_rate?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vendor_subscriptions: {
+        Row: {
+          auto_renew: boolean
+          created_at: string
+          expires_at: string | null
+          id: string
+          monthly_fee_usd: number
+          plan_type: string
+          started_at: string
+          status: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          auto_renew?: boolean
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          monthly_fee_usd?: number
+          plan_type: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          auto_renew?: boolean
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          monthly_fee_usd?: number
+          plan_type?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
       }
       withdrawals: {
         Row: {
@@ -1370,6 +1686,10 @@ export type Database = {
         Args: { application_id: string; admin_notes?: string }
         Returns: boolean
       }
+      award_spending_points: {
+        Args: { user_id_param: string; amount_spent: number }
+        Returns: undefined
+      }
       calculate_delivery_fee: {
         Args: { distance_km: number }
         Returns: number
@@ -1409,9 +1729,19 @@ export type Database = {
         Returns: boolean
       }
       is_vendor_order: {
+        Args:
+          | { order_id: number }
+          | {
+              order_row: Database["public"]["Tables"]["orders"]["Row"]
+              vendor: string
+            }
+        Returns: boolean
+      }
+      redeem_points: {
         Args: {
-          order_row: Database["public"]["Tables"]["orders"]["Row"]
-          vendor: string
+          user_id_param: string
+          points_to_redeem: number
+          order_id_param?: string
         }
         Returns: boolean
       }
