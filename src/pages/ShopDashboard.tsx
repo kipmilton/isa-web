@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X, Truck, Settings } from "lucide-react";
+import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X, Truck, Settings, Wallet, CreditCard } from "lucide-react";
 import { ProductService } from "@/services/productService";
 import { OrderService } from "@/services/orderService";
 import { useToast } from "@/hooks/use-toast";
@@ -356,11 +356,23 @@ const ShopDashboard = () => {
                     <User className="w-4 h-4 mr-2" />
                     View Profile
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/profile?tab=wallet')}>
+                    <Wallet className="w-4 h-4 mr-2" />
+                    My Wallet
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/profile?tab=quiz')}>
+                    <Star className="w-4 h-4 mr-2" />
+                    Style Quiz
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/shipping')}>
                     <Truck className="w-4 h-4 mr-2" />
                     My Shipping
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile?tab=subscription')}>
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Subscription
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/profile?tab=settings')}>
                     <Settings className="w-4 h-4 mr-2" />
                     Settings
@@ -455,6 +467,26 @@ const ShopDashboard = () => {
                 </button>
 
                 <button
+                  onClick={() => { navigate('/profile?tab=wallet'); setMobileMenuOpen(false); }}
+                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-lg flex items-center justify-center">
+                    <Wallet className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium">My Wallet</span>
+                </button>
+
+                <button
+                  onClick={() => { navigate('/profile?tab=quiz'); setMobileMenuOpen(false); }}
+                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <Star className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium">Style Quiz</span>
+                </button>
+
+                <button
                   onClick={() => { navigate('/shipping'); setMobileMenuOpen(false); }}
                   className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full"
                 >
@@ -465,7 +497,17 @@ const ShopDashboard = () => {
                 </button>
 
                 <button
-                  onClick={() => { navigate('/profile?tab=settings'); setMobileMenuOpen(false); }}
+                  onClick={() => { navigate('/subscription'); setMobileMenuOpen(false); }}
+                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <CreditCard className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium">Subscription</span>
+                </button>
+
+                <button
+                  onClick={() => { navigate('/settings'); setMobileMenuOpen(false); }}
                   className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full"
                 >
                   <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">

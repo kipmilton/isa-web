@@ -10,7 +10,8 @@ import {
   Truck,
   Shield,
   ChevronRight,
-  LogOut
+  LogOut,
+  Star
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -32,7 +33,9 @@ const AdminSidebar = ({ activeSection, onSectionChange, onLogout, userName }: Ad
     { id: 'orders', label: 'Orders', icon: ShoppingCart },
     { id: 'products', label: 'Products', icon: Package },
     { id: 'payments', label: 'Payments', icon: CreditCard },
-    { id: 'wallet', label: 'Wallet', icon: Wallet },
+    { id: 'loyalty', label: 'Loyalty Program', icon: Wallet },
+    { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },
+    { id: 'style-quiz', label: 'Style Quiz', icon: Star },
     { id: 'delivery', label: 'Manage Delivery', icon: Truck },
   ];
 

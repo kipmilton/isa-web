@@ -1,108 +1,96 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Gift, DollarSign, Users, Star } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Wallet, 
+  Settings, 
+  Save, 
+  TrendingUp, 
+  Users, 
+  Star,
+  ShoppingCart,
+  Gift,
+  DollarSign
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-interface PointsConfig {
-  id: string;
-  point_value_kes: number;
-  spending_points_per_100_kes: number;
-  first_purchase_points: number;
-  referral_signup_points: number;
-  referral_purchase_points: number;
-  quiz_completion_points: number;
-  points_expiry_months: number;
-}
-
-interface CommissionRate {
-  id: string;
-  category: string;
-  freemium_commission_rate: number;
-  premium_commission_rate: number;
-}
-
-export default function AdminLoyalty() {
-  const [pointsConfig, setPointsConfig] = useState<PointsConfig | null>(null);
-  const [commissionRates, setCommissionRates] = useState<CommissionRate[]>([]);
+const AdminLoyalty = () => {
+  const [pointsConfig, setPointsConfig] = useState<any>(null);
+  const [commissionRates, setCommissionRates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    loadData();
+    loadLoyaltyData();
   }, []);
 
-  const loadData = async () => {
+  const loadLoyaltyData = async () => {
     try {
       // Load points configuration
-      const { data: configData } = await supabase
+      const { data: configData, error: configError } = await supabase
         .from('points_config')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
 
-      if (configData) {
+      if (!configError && configData) {
         setPointsConfig(configData);
       }
 
       // Load commission rates
-      const { data: ratesData } = await supabase
+      const { data: commissionData, error: commissionError } = await supabase
         .from('vendor_commissions')
         .select('*')
-        .order('category');
+        .order('category', { ascending: true });
 
-      if (ratesData) {
-        setCommissionRates(ratesData);
+      if (!commissionError && commissionData) {
+        setCommissionRates(commissionData);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load loyalty settings",
-        variant: "destructive"
-      });
+      console.error('Error loading loyalty data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const savePointsConfig = async () => {
+  const handlePointsConfigUpdate = async () => {
     if (!pointsConfig) return;
 
     setSaving(true);
     try {
       const { error } = await supabase
         .from('points_config')
-        .update({
-          point_value_kes: pointsConfig.point_value_kes,
-          spending_points_per_100_kes: pointsConfig.spending_points_per_100_kes,
-          first_purchase_points: pointsConfig.first_purchase_points,
-          referral_signup_points: pointsConfig.referral_signup_points,
-          referral_purchase_points: pointsConfig.referral_purchase_points,
-          quiz_completion_points: pointsConfig.quiz_completion_points,
-          points_expiry_months: pointsConfig.points_expiry_months
-        })
-        .eq('id', pointsConfig.id);
+        .insert({
+          point_value_kes: parseFloat(pointsConfig.point_value_kes),
+          spending_points_per_100_kes: parseInt(pointsConfig.spending_points_per_100_kes),
+          first_purchase_points: parseInt(pointsConfig.first_purchase_points),
+          referral_signup_points: parseInt(pointsConfig.referral_signup_points),
+          referral_purchase_points: parseInt(pointsConfig.referral_purchase_points),
+          quiz_completion_points: parseInt(pointsConfig.quiz_completion_points),
+          points_expiry_months: parseInt(pointsConfig.points_expiry_months)
+        });
 
       if (error) throw error;
 
       toast({
-        title: "Settings saved",
-        description: "Points configuration updated successfully"
+        title: "Success",
+        description: "Points configuration updated successfully!"
       });
+
+      await loadLoyaltyData();
     } catch (error) {
-      console.error('Error saving points config:', error);
+      console.error('Error updating points config:', error);
       toast({
         title: "Error",
-        description: "Failed to save points configuration",
+        description: "Failed to update points configuration",
         variant: "destructive"
       });
     } finally {
@@ -110,27 +98,23 @@ export default function AdminLoyalty() {
     }
   };
 
-  const saveCommissionRate = async (rateId: string, field: 'freemium_commission_rate' | 'premium_commission_rate', value: number) => {
+  const handleCommissionUpdate = async (category: string, field: string, value: number) => {
     try {
       const { error } = await supabase
         .from('vendor_commissions')
         .update({ [field]: value })
-        .eq('id', rateId);
+        .eq('category', category);
 
       if (error) throw error;
 
-      setCommissionRates(prev => 
-        prev.map(rate => 
-          rate.id === rateId ? { ...rate, [field]: value } : rate
-        )
-      );
-
       toast({
-        title: "Rate updated",
-        description: "Commission rate updated successfully"
+        title: "Success",
+        description: `Commission rate updated for ${category}`
       });
+
+      await loadLoyaltyData();
     } catch (error) {
-      console.error('Error saving commission rate:', error);
+      console.error('Error updating commission:', error);
       toast({
         title: "Error",
         description: "Failed to update commission rate",
@@ -139,165 +123,193 @@ export default function AdminLoyalty() {
     }
   };
 
+  const handleConfigChange = (field: string, value: string) => {
+    setPointsConfig((prev: any) => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   if (loading) {
-    return <div className="animate-pulse">Loading loyalty settings...</div>;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Gift className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">Loyalty & Rewards Management</h1>
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Loyalty Program Management</h1>
+        <p className="text-gray-600 mt-2">Manage ISA Points configuration and vendor commission rates</p>
       </div>
 
       <Tabs defaultValue="points" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="points" className="flex items-center gap-2">
-            <Star className="h-4 w-4" />
-            Points System
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="points" className="flex items-center space-x-2">
+            <Wallet className="w-4 h-4" />
+            <span>Points Configuration</span>
           </TabsTrigger>
-          <TabsTrigger value="commissions" className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            Commission Rates
-          </TabsTrigger>
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Overview
+          <TabsTrigger value="commissions" className="flex items-center space-x-2">
+            <DollarSign className="w-4 h-4" />
+            <span>Commission Rates</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="points" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Points Configuration
+              <CardTitle className="flex items-center space-x-2">
+                <Settings className="w-5 h-5" />
+                <span>Points Configuration</span>
               </CardTitle>
-              <CardDescription>
-                Configure how users earn and redeem ISA points
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {pointsConfig && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="pointValue">Point Value (KES)</Label>
-                      <Input
-                        id="pointValue"
-                        type="number"
-                        step="0.01"
-                        value={pointsConfig.point_value_kes}
-                        onChange={(e) => setPointsConfig({
-                          ...pointsConfig,
-                          point_value_kes: parseFloat(e.target.value) || 0
-                        })}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        How much 1 point is worth in KES
-                      </p>
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="pointValue">Point Value (KES)</Label>
+                  <Input
+                    id="pointValue"
+                    type="number"
+                    step="0.01"
+                    value={pointsConfig?.point_value_kes || 0.1}
+                    onChange={(e) => handleConfigChange('point_value_kes', e.target.value)}
+                    className="mt-1"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">Value of 1 point in KES</p>
+                </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="spendingPoints">Points per KES 100 spent</Label>
-                      <Input
-                        id="spendingPoints"
-                        type="number"
-                        value={pointsConfig.spending_points_per_100_kes}
-                        onChange={(e) => setPointsConfig({
-                          ...pointsConfig,
-                          spending_points_per_100_kes: parseInt(e.target.value) || 0
-                        })}
-                      />
-                    </div>
+                <div>
+                  <Label htmlFor="expiryMonths">Points Expiry (Months)</Label>
+                  <Input
+                    id="expiryMonths"
+                    type="number"
+                    value={pointsConfig?.points_expiry_months || 12}
+                    onChange={(e) => handleConfigChange('points_expiry_months', e.target.value)}
+                    className="mt-1"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">How long points remain valid</p>
+                </div>
+              </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="firstPurchase">First Purchase Bonus</Label>
-                      <Input
-                        id="firstPurchase"
-                        type="number"
-                        value={pointsConfig.first_purchase_points}
-                        onChange={(e) => setPointsConfig({
-                          ...pointsConfig,
-                          first_purchase_points: parseInt(e.target.value) || 0
-                        })}
-                      />
-                    </div>
+              <Separator />
 
-                    <div className="space-y-2">
-                      <Label htmlFor="referralSignup">Referral Signup Points</Label>
-                      <Input
-                        id="referralSignup"
-                        type="number"
-                        value={pointsConfig.referral_signup_points}
-                        onChange={(e) => setPointsConfig({
-                          ...pointsConfig,
-                          referral_signup_points: parseInt(e.target.value) || 0
-                        })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="referralPurchase">Referral Purchase Points</Label>
-                      <Input
-                        id="referralPurchase"
-                        type="number"
-                        value={pointsConfig.referral_purchase_points}
-                        onChange={(e) => setPointsConfig({
-                          ...pointsConfig,
-                          referral_purchase_points: parseInt(e.target.value) || 0
-                        })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="quizCompletion">Quiz Completion Points</Label>
-                      <Input
-                        id="quizCompletion"
-                        type="number"
-                        value={pointsConfig.quiz_completion_points}
-                        onChange={(e) => setPointsConfig({
-                          ...pointsConfig,
-                          quiz_completion_points: parseInt(e.target.value) || 0
-                        })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="expiry">Points Expiry (months)</Label>
-                      <Input
-                        id="expiry"
-                        type="number"
-                        value={pointsConfig.points_expiry_months}
-                        onChange={(e) => setPointsConfig({
-                          ...pointsConfig,
-                          points_expiry_months: parseInt(e.target.value) || 0
-                        })}
-                      />
-                    </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Points Earning Rules</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="spendingPoints">Points per KES 100 Spent</Label>
+                    <Input
+                      id="spendingPoints"
+                      type="number"
+                      value={pointsConfig?.spending_points_per_100_kes || 10}
+                      onChange={(e) => handleConfigChange('spending_points_per_100_kes', e.target.value)}
+                      className="mt-1"
+                    />
                   </div>
 
-                  <Separator />
-
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Preview: Redemption Values</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {[100, 500, 1000, 5000].map(points => (
-                        <div key={points} className="p-3 border rounded-lg text-center">
-                          <div className="font-semibold">{points} points</div>
-                          <div className="text-sm text-muted-foreground">
-                            ≈ KES {(points * pointsConfig.point_value_kes).toFixed(2)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  <div>
+                    <Label htmlFor="firstPurchase">First Purchase Bonus</Label>
+                    <Input
+                      id="firstPurchase"
+                      type="number"
+                      value={pointsConfig?.first_purchase_points || 100}
+                      onChange={(e) => handleConfigChange('first_purchase_points', e.target.value)}
+                      className="mt-1"
+                    />
                   </div>
 
-                  <Button onClick={savePointsConfig} disabled={saving}>
-                    {saving ? "Saving..." : "Save Configuration"}
-                  </Button>
-                </>
-              )}
+                  <div>
+                    <Label htmlFor="referralSignup">Referral Signup Bonus</Label>
+                    <Input
+                      id="referralSignup"
+                      type="number"
+                      value={pointsConfig?.referral_signup_points || 200}
+                      onChange={(e) => handleConfigChange('referral_signup_points', e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="referralPurchase">Referral Purchase Bonus</Label>
+                    <Input
+                      id="referralPurchase"
+                      type="number"
+                      value={pointsConfig?.referral_purchase_points || 200}
+                      onChange={(e) => handleConfigChange('referral_purchase_points', e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="quizCompletion">Style Quiz Completion</Label>
+                    <Input
+                      id="quizCompletion"
+                      type="number"
+                      value={pointsConfig?.quiz_completion_points || 20}
+                      onChange={(e) => handleConfigChange('quiz_completion_points', e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Button 
+                onClick={handlePointsConfigUpdate}
+                disabled={saving}
+                className="w-full bg-orange-500 hover:bg-orange-600"
+              >
+                {saving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Update Points Configuration
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Points Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <TrendingUp className="w-5 h-5" />
+                <span>Current Points System</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {pointsConfig?.spending_points_per_100_kes || 10}
+                  </div>
+                  <div className="text-sm text-green-700">Points per KES 100</div>
+                </div>
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {pointsConfig?.first_purchase_points || 100}
+                  </div>
+                  <div className="text-sm text-blue-700">First Purchase Bonus</div>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {pointsConfig?.referral_signup_points || 200}
+                  </div>
+                  <div className="text-sm text-purple-700">Referral Bonus</div>
+                </div>
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {pointsConfig?.quiz_completion_points || 20}
+                  </div>
+                  <div className="text-sm text-orange-700">Quiz Completion</div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -305,121 +317,80 @@ export default function AdminLoyalty() {
         <TabsContent value="commissions" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Vendor Commission Rates</CardTitle>
-              <CardDescription>
-                Set commission rates by category for freemium and premium vendors
-              </CardDescription>
+              <CardTitle className="flex items-center space-x-2">
+                <DollarSign className="w-5 h-5" />
+                <span>Vendor Commission Rates</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {commissionRates.map((rate) => (
-                  <div key={rate.id} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center p-4 border rounded-lg">
-                    <div>
-                      <Badge variant="outline" className="capitalize">
-                        {rate.category}
-                      </Badge>
+                  <div key={rate.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold capitalize">{rate.category}</h3>
+                      <Badge variant="outline">{rate.category}</Badge>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm">Freemium Rate (%)</Label>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        value={rate.freemium_commission_rate}
-                        onChange={(e) => saveCommissionRate(
-                          rate.id, 
-                          'freemium_commission_rate', 
-                          parseFloat(e.target.value) || 0
-                        )}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm">Premium Rate (%)</Label>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        value={rate.premium_commission_rate}
-                        onChange={(e) => saveCommissionRate(
-                          rate.id, 
-                          'premium_commission_rate', 
-                          parseFloat(e.target.value) || 0
-                        )}
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor={`freemium-${rate.category}`}>Freemium Commission (%)</Label>
+                        <Input
+                          id={`freemium-${rate.category}`}
+                          type="number"
+                          step="0.1"
+                          value={rate.freemium_commission_rate}
+                          onChange={(e) => handleCommissionUpdate(rate.category, 'freemium_commission_rate', parseFloat(e.target.value))}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`premium-${rate.category}`}>Premium Commission (%)</Label>
+                        <Input
+                          id={`premium-${rate.category}`}
+                          type="number"
+                          step="0.1"
+                          value={rate.premium_commission_rate}
+                          onChange={(e) => handleCommissionUpdate(rate.category, 'premium_commission_rate', parseFloat(e.target.value))}
+                          className="mt-1"
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Points Issued</CardTitle>
-                <Star className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">125,000</div>
-                <p className="text-xs text-muted-foreground">
-                  +12% from last month
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Points Redeemed</CardTitle>
-                <Gift className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">45,200</div>
-                <p className="text-xs text-muted-foreground">
-                  +8% from last month
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">2,847</div>
-                <p className="text-xs text-muted-foreground">
-                  +15% from last month
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
+          {/* Commission Summary */}
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
+              <CardTitle className="flex items-center space-x-2">
+                <TrendingUp className="w-5 h-5" />
+                <span>Commission Summary</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Quiz completions increased</p>
-                    <p className="text-sm text-muted-foreground">+25 completions today</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold mb-3 text-green-600">Freemium Rates</h4>
+                  <div className="space-y-2">
+                    {commissionRates.map((rate) => (
+                      <div key={rate.id} className="flex justify-between">
+                        <span className="capitalize">{rate.category}</span>
+                        <span className="font-semibold">{rate.freemium_commission_rate}%</span>
+                      </div>
+                    ))}
                   </div>
-                  <Badge variant="outline">+25</Badge>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Referral signups</p>
-                    <p className="text-sm text-muted-foreground">8 new referrals</p>
+                <div>
+                  <h4 className="font-semibold mb-3 text-blue-600">Premium Rates</h4>
+                  <div className="space-y-2">
+                    {commissionRates.map((rate) => (
+                      <div key={rate.id} className="flex justify-between">
+                        <span className="capitalize">{rate.category}</span>
+                        <span className="font-semibold">{rate.premium_commission_rate}%</span>
+                      </div>
+                    ))}
                   </div>
-                  <Badge variant="outline">+8</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Points redemptions</p>
-                    <p className="text-sm text-muted-foreground">152 redemptions today</p>
-                  </div>
-                  <Badge variant="outline">+152</Badge>
                 </div>
               </div>
             </CardContent>
@@ -428,4 +399,6 @@ export default function AdminLoyalty() {
       </Tabs>
     </div>
   );
-}
+};
+
+export default AdminLoyalty;

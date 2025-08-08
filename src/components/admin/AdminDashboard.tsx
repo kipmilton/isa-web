@@ -6,7 +6,9 @@ import AdminVendors from "./sections/AdminVendors";
 import AdminOrders from "./sections/AdminOrders";
 import AdminProducts from "./sections/AdminProducts";
 import AdminPayments from "./sections/AdminPayments";
-import AdminWallet from "./sections/AdminWallet";
+import AdminLoyalty from "./sections/AdminLoyalty";
+import AdminSubscriptions from "./sections/AdminSubscriptions";
+import AdminStyleQuiz from "./sections/AdminStyleQuiz";
 import AdminDelivery from "./sections/AdminDelivery";
 
 interface AdminDashboardProps {
@@ -31,8 +33,12 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
         return <AdminProducts />;
       case "payments":
         return <AdminPayments />;
-      case "wallet":
-        return <AdminWallet />;
+      case "loyalty":
+        return <AdminLoyalty />;
+      case "subscriptions":
+        return <AdminSubscriptions />;
+      case "style-quiz":
+        return <AdminStyleQuiz />;
       case "delivery":
         return <AdminDelivery />;
       default:
