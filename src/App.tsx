@@ -22,6 +22,7 @@ import DeliveryDashboard from "./pages/DeliveryDashboard";
 import DeliveryPending from "./pages/DeliveryPending";
 import DeliveryRejection from "./pages/DeliveryRejection";
 import Shipping from "./pages/Shipping";
+import Profile from "./pages/Profile";
 import { Analytics } from "@vercel/analytics/react";
 
 const queryClient = new QueryClient();
@@ -83,6 +84,11 @@ const App = () => (
             <Route path="/shipping" element={
               <AuthGuard requireAuth={true} allowedUserTypes={['customer']}>
                 <Shipping />
+              </AuthGuard>
+            } />
+            <Route path="/profile" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['customer']}>
+                <Profile />
               </AuthGuard>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

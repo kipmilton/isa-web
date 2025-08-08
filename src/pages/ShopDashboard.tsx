@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X, Truck } from "lucide-react";
+import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X, Truck, Settings } from "lucide-react";
 import { ProductService } from "@/services/productService";
 import { OrderService } from "@/services/orderService";
 import { useToast } from "@/hooks/use-toast";
@@ -23,7 +24,6 @@ const categories = ["All", "Electronics", "Fashion", "Home", "Beauty", "Sports",
 const ShopDashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showProfile, setShowProfile] = useState(false);
   const [showCart, setShowCart] = useState(false);
   const [showLikedItems, setShowLikedItems] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -240,6 +240,20 @@ const ShopDashboard = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({ title: "Signed out", description: "You have been logged out." });
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to sign out',
+        variant: 'destructive'
+      });
+    }
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-xl">Loading...</div>;
   }
@@ -281,23 +295,16 @@ const ShopDashboard = () => {
             {/* Desktop Navigation Icons */}
             <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
               <Link to="/chat">
-                <Button variant="ghost" size="icon" className="relative group bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg">
+                <Button variant="ghost" className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg px-3 py-2">
                   <MessageCircle className="w-5 h-5" />
-                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Ask ISA</span>
-                </Button>
-              </Link>
-              
-              <Link to="/shipping">
-                <Button variant="ghost" size="icon" className="relative group bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg">
-                  <Truck className="w-5 h-5" />
-                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Track Orders</span>
+                  <span className="text-sm font-medium">Ask ISA</span>
                 </Button>
               </Link>
               
               <Link to="/gift">
-                <Button variant="ghost" size="icon" className="relative group bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-lg">
+                <Button variant="ghost" className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-lg px-3 py-2">
                   <Gift className="w-5 h-5" />
-                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Gift Someone</span>
+                  <span className="text-sm font-medium">Gift Someone</span>
                 </Button>
               </Link>
               
@@ -331,30 +338,40 @@ const ShopDashboard = () => {
                 <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Cart</span>
               </Button>
               
-              <Button 
-                variant="ghost" 
-                className="flex items-center space-x-2 text-gray-700 hover:bg-gray-50" 
-                onClick={() => setShowProfile(true)}
-              >
-                <Avatar className="w-8 h-8 border-2 border-orange-200">
-                  <AvatarImage src={user?.avatar_url} />
-                  <AvatarFallback className="bg-orange-100 text-orange-600">{user?.email?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium hidden lg:inline">{user?.email?.split('@')[0] || 'User'}</span>
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                  toast({ title: "Signed out", description: "You have been logged out." });
-                  navigate("/");
-                }}
-                className="text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-              >
-                <LogOut className="w-4 h-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    className="flex items-center space-x-2 text-gray-700 hover:bg-gray-50" 
+                  >
+                    <Avatar className="w-8 h-8 border-2 border-orange-200">
+                      <AvatarImage src={user?.avatar_url} />
+                      <AvatarFallback className="bg-orange-100 text-orange-600">{user?.email?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium hidden lg:inline">{user?.email?.split('@')[0] || 'User'}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => navigate('/profile?tab=profile')}>
+                    <User className="w-4 h-4 mr-2" />
+                    View Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/shipping')}>
+                    <Truck className="w-4 h-4 mr-2" />
+                    My Shipping
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile?tab=settings')}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Mobile Navigation */}
@@ -426,39 +443,43 @@ const ShopDashboard = () => {
                   <span className="font-medium">Gift Someone</span>
                 </Link>
                 
-                <Link 
-                  to="/shipping"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                    <Truck className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="font-medium">Track Orders</span>
-                </Link>
-                
-                <button 
-                  onClick={() => { setShowProfile(true); setMobileMenuOpen(false); }}
+                <button
+                  onClick={() => { navigate('/profile?tab=profile'); setMobileMenuOpen(false); }}
                   className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full"
                 >
                   <Avatar className="w-8 h-8 border-2 border-orange-200">
                     <AvatarImage src={user?.avatar_url} />
                     <AvatarFallback className="bg-orange-100 text-orange-600">{user?.email?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
                   </Avatar>
-                  <span className="font-medium">Profile</span>
+                  <span className="font-medium">View Profile</span>
                 </button>
-                
-                <button 
-                  onClick={async () => {
-                    await supabase.auth.signOut();
-                    setMobileMenuOpen(false);
-                    toast({ title: "Signed out", description: "You have been logged out." });
-                    navigate("/");
-                  }}
+
+                <button
+                  onClick={() => { navigate('/shipping'); setMobileMenuOpen(false); }}
+                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                    <Truck className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium">My Shipping</span>
+                </button>
+
+                <button
+                  onClick={() => { navigate('/profile?tab=settings'); setMobileMenuOpen(false); }}
                   className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full"
                 >
                   <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <LogOut className="w-4 h-4 text-gray-600" />
+                    <Settings className="w-4 h-4 text-gray-600" />
+                  </div>
+                  <span className="font-medium">Settings</span>
+                </button>
+
+                <button
+                  onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                  className="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors w-full"
+                >
+                  <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                    <LogOut className="w-4 h-4 text-red-600" />
                   </div>
                   <span className="font-medium">Sign Out</span>
                 </button>
@@ -769,20 +790,7 @@ const ShopDashboard = () => {
         </Dialog>
       )}
 
-      {/* Profile Modal */}
-      {showProfile && (
-        <Dialog open={showProfile} onOpenChange={setShowProfile}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Your Profile</DialogTitle>
-              <DialogDescription className="sr-only">
-                View and edit your profile information.
-              </DialogDescription>
-            </DialogHeader>
-            <ProfileForm user={user} onClose={() => setShowProfile(false)} />
-          </DialogContent>
-        </Dialog>
-      )}
+
 
       {/* Cart Modal */}
       <CartModal
@@ -875,93 +883,3 @@ const ShopDashboard = () => {
 };
 
 export default ShopDashboard;
-
-function ProfileForm({ user, onClose }: { user: any, onClose: () => void }) {
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      if (error) {
-        toast({ title: 'Error', description: 'Failed to load profile' });
-      } else {
-        setProfile(data);
-      }
-      setLoading(false);
-    };
-    fetchProfile();
-  }, [user.id]);
-
-  const handleChange = (field: string, value: string) => {
-    setProfile((prev: any) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        phone_number: profile.phone_number,
-        gender: profile.gender,
-        location: profile.location,
-      })
-      .eq('id', user.id);
-    setSaving(false);
-    if (error) {
-      toast({ title: 'Error', description: 'Failed to update profile' });
-    } else {
-      toast({ title: 'Profile updated', description: 'Your profile was updated successfully.' });
-      onClose();
-    }
-  };
-
-  if (loading || !profile) return <div className="py-8 text-center">Loading...</div>;
-
-  return (
-    <form className="space-y-4" onSubmit={e => { e.preventDefault(); handleSave(); }}>
-      <div>
-        <Label>First Name</Label>
-        <Input value={profile.first_name || ''} onChange={e => handleChange('first_name', e.target.value)} />
-      </div>
-      <div>
-        <Label>Last Name</Label>
-        <Input value={profile.last_name || ''} onChange={e => handleChange('last_name', e.target.value)} />
-      </div>
-      <div>
-        <Label>Email</Label>
-        <Input value={profile.email || ''} disabled />
-      </div>
-      <div>
-        <Label>Phone Number</Label>
-        <Input value={profile.phone_number || ''} onChange={e => handleChange('phone_number', e.target.value)} />
-      </div>
-      <div>
-        <Label>Gender</Label>
-        <select value={profile.gender || ''} onChange={e => handleChange('gender', e.target.value)} className="w-full p-2 border rounded-md">
-          <option value="">Select Gender</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-      <div>
-        <Label>Location</Label>
-        <Input value={profile.location || ''} onChange={e => handleChange('location', e.target.value)} />
-      </div>
-      <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-        <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save'}</Button>
-      </div>
-    </form>
-  );
-}
