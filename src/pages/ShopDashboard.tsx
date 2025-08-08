@@ -7,16 +7,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X, Truck, Settings, Wallet, CreditCard } from "lucide-react";
+import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X, Truck, Settings, Wallet, CreditCard, Crown, Globe } from "lucide-react";
 import { ProductService } from "@/services/productService";
 import { OrderService } from "@/services/orderService";
+import { SubscriptionService } from "@/services/subscriptionService";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AuthDialog from "@/components/auth/AuthDialog";
 import CartModal from "@/components/CartModal";
 import AccountSetupModal from "@/components/AccountSetupModal";
+import SubscriptionManager from "@/components/subscription/SubscriptionManager";
 import { useNavigate, Link } from "react-router-dom";
 
 const categories = ["All", "Electronics", "Fashion", "Home", "Beauty", "Sports", "Books"];
@@ -44,6 +47,9 @@ const ShopDashboard = () => {
   const [showAccountSetup, setShowAccountSetup] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showSubscriptionManager, setShowSubscriptionManager] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('KES');
+  const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -82,8 +88,20 @@ const ShopDashboard = () => {
       loadProducts();
       loadCart();
       loadWishlist();
+      loadSubscription();
     }
   }, [user, selectedCategory, searchQuery, priceRange]);
+
+  // Load user subscription
+  const loadSubscription = async () => {
+    if (!user?.id) return;
+    try {
+      const subscription = await SubscriptionService.getUserSubscription(user.id);
+      setCurrentSubscription(subscription);
+    } catch (error) {
+      console.error('Error loading subscription:', error);
+    }
+  };
 
   const loadProducts = async () => {
     setProductLoading(true);
@@ -254,6 +272,19 @@ const ShopDashboard = () => {
     }
   };
 
+  const formatPrice = (price: number, currency: string) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(price);
+  };
+
+  const getConvertedPrice = (priceKES: number) => {
+    return SubscriptionService.convertPrice(priceKES, 'KES', selectedCurrency);
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-xl">Loading...</div>;
   }
@@ -294,6 +325,22 @@ const ShopDashboard = () => {
             
             {/* Desktop Navigation Icons */}
             <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
+              {/* Currency Selector */}
+              <div className="flex items-center space-x-2">
+                <Globe className="w-4 h-4 text-gray-600" />
+                <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+                  <SelectTrigger className="w-20 h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="KES">KES</SelectItem>
+                    <SelectItem value="USD">USD</SelectItem>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                    <SelectItem value="GBP">GBP</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Link to="/chat">
                 <Button variant="ghost" className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg px-3 py-2">
                   <MessageCircle className="w-5 h-5" />
@@ -369,9 +416,9 @@ const ShopDashboard = () => {
                     My Shipping
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/profile?tab=subscription')}>
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Subscription
+                  <DropdownMenuItem onClick={() => setShowSubscriptionManager(true)}>
+                    <Crown className="w-4 h-4 mr-2" />
+                    Manage Subscription
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/profile?tab=settings')}>
                     <Settings className="w-4 h-4 mr-2" />
@@ -388,6 +435,19 @@ const ShopDashboard = () => {
 
             {/* Mobile Navigation */}
             <div className="md:hidden flex items-center space-x-2">
+              {/* Currency Selector for Mobile */}
+              <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+                <SelectTrigger className="w-16 h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="KES">KES</SelectItem>
+                  <SelectItem value="USD">USD</SelectItem>
+                  <SelectItem value="EUR">EUR</SelectItem>
+                  <SelectItem value="GBP">GBP</SelectItem>
+                </SelectContent>
+              </Select>
+
               {/* Cart and Wishlist buttons for quick access */}
               <Button 
                 variant="ghost" 
@@ -497,13 +557,13 @@ const ShopDashboard = () => {
                 </button>
 
                 <button
-                  onClick={() => { navigate('/subscription'); setMobileMenuOpen(false); }}
+                  onClick={() => { setShowSubscriptionManager(true); setMobileMenuOpen(false); }}
                   className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                    <CreditCard className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-lg flex items-center justify-center">
+                    <Crown className="w-4 h-4 text-white" />
                   </div>
-                  <span className="font-medium">Subscription</span>
+                  <span className="font-medium">Manage Subscription</span>
                 </button>
 
                 <button
@@ -553,6 +613,58 @@ const ShopDashboard = () => {
                 size="sm"
               >
                 Complete Setup
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Subscription Banner */}
+        {currentSubscription && (
+          <div className="mb-6 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                  <Crown className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-purple-800">Premium Subscription Active</h3>
+                  <p className="text-sm text-purple-700">
+                    Enjoy unlimited AI assistance, ad-free browsing, and exclusive features
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowSubscriptionManager(true)}
+                className="bg-purple-500 hover:bg-purple-600 text-white"
+                size="sm"
+              >
+                Manage
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Upgrade to Premium Banner */}
+        {!currentSubscription && (
+          <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Crown className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-blue-800">Upgrade to Premium</h3>
+                  <p className="text-sm text-blue-700">
+                    Get unlimited AI assistance, ad-free browsing, and exclusive features
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowSubscriptionManager(true)}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+                size="sm"
+              >
+                Upgrade Now
               </Button>
             </div>
           </div>
@@ -725,11 +837,11 @@ const ShopDashboard = () => {
                       <div className="flex items-center justify-between">
                         <div className="space-y-1">
                           <div className="text-2xl font-bold text-gray-900">
-                            KES {product.price?.toLocaleString()}
+                            {formatPrice(getConvertedPrice(product.price || 0), selectedCurrency)}
                           </div>
                           {product.original_price && product.original_price > product.price && (
                             <div className="text-sm text-gray-500 line-through">
-                              KES {product.original_price.toLocaleString()}
+                              {formatPrice(getConvertedPrice(product.original_price), selectedCurrency)}
                             </div>
                           )}
                         </div>
@@ -920,6 +1032,18 @@ const ShopDashboard = () => {
         onOpenChange={setShowAccountSetup}
         user={user}
       />
+
+      {/* Subscription Manager */}
+      {user && (
+        <SubscriptionManager
+          userId={user.id}
+          isOpen={showSubscriptionManager}
+          onClose={() => {
+            setShowSubscriptionManager(false);
+            loadSubscription(); // Reload subscription data when modal closes
+          }}
+        />
+      )}
     </div>
   );
 };

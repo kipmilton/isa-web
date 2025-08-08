@@ -333,13 +333,16 @@ const Profile = () => {
             <CardContent className="space-y-6">
               <div className="text-center p-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
                 <CreditCard className="w-16 h-16 text-orange-500 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Coming Soon</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Manage Your Subscription</h2>
                 <p className="text-gray-600 mb-6">
-                  We're working on bringing you amazing subscription features. Stay tuned!
+                  Access your subscription management from the shop dashboard for a better experience.
                 </p>
-                <Badge variant="outline" className="text-orange-600 border-orange-300">
-                  Premium Features Coming Soon
-                </Badge>
+                <Button 
+                  onClick={() => navigate('/shop')}
+                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                >
+                  Go to Shop Dashboard
+                </Button>
               </div>
             </CardContent>
           </Card>
