@@ -11,8 +11,10 @@ import { MessageCircle, Search, ShoppingBag, Smartphone, Apple, Play, Quote, Sta
 import AuthDialog from "@/components/auth/AuthDialog";
 import DeliverySignupDialog from "@/components/auth/DeliverySignupDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
+  const { user, loading } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [authType, setAuthType] = useState<'customer' | 'vendor'>('customer');
   const [isDarkTheme, setIsDarkTheme] = useState(false);
@@ -105,6 +107,15 @@ const Index = () => {
     setShowDeliverySignup(true);
   };
 
+  const handleShopOnWeb = () => {
+    if (user) {
+      navigate('/shop');
+    } else {
+      setAuthType('customer');
+      setShowAuth(true);
+    }
+  };
+
   const scrollToVendors = () => {
     vendorsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -180,13 +191,6 @@ const Index = () => {
               >
                 Join as Vendor
               </Button>
-              <Button 
-                onClick={handleDeliverySignup} 
-                variant="outline" 
-                className="border-blue-500 text-blue-600 hover:bg-blue-50"
-              >
-                Join ISA Delivery
-              </Button>
               <Button onClick={handleSignIn} variant="outline" className="border-orange-500 text-orange-600 hover:bg-orange-50">
                 Sign In
               </Button>
@@ -246,12 +250,6 @@ const Index = () => {
                 Join as Vendor
               </button>
               <button
-                onClick={() => { setMobileMenuOpen(false); handleDeliverySignup(); }}
-                className="py-2 text-left text-blue-600 border-b border-gray-100 hover:bg-blue-50 rounded"
-              >
-                Join ISA Delivery
-              </button>
-              <button
                 onClick={() => { setMobileMenuOpen(false); handleSignIn(); }}
                 className="py-2 text-left text-orange-600 border-b border-gray-100 hover:bg-orange-50 rounded"
               >
@@ -280,15 +278,14 @@ const Index = () => {
                 Try ISA Free
               </Button>
             </Link>
-            <Link to="/shop">
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="border-orange-500 text-orange-600 hover:bg-orange-50 px-8 py-3 hover-scale"
-              >
-                Shop On The Web
-              </Button>
-            </Link>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-orange-500 text-orange-600 hover:bg-orange-50 px-8 py-3 hover-scale"
+              onClick={handleShopOnWeb}
+            >
+              Shop On The Web
+            </Button>
           </div>
           <p className="text-sm text-gray-500 mt-4 animate-fade-in">
             Powered by AI. Designed for Trust. Built for Africa.
@@ -568,7 +565,10 @@ const Index = () => {
               <button className="hover:text-orange-600 transition-colors bg-transparent border-none p-0 m-0" onClick={() => { setAuthDefaultVendor(true); setShowAuth(true); }}>
                 Become a Vendor
               </button>
-              <a href="#" className="hover:text-orange-600 transition-colors">Contact us</a>
+              <button className="hover:text-blue-600 transition-colors bg-transparent border-none p-0 m-0" onClick={() => setShowDeliverySignup(true)}>
+                Join ISA Delivery
+              </button>
+              <a href="mailto:isashoppingai@gmail.com" className="hover:text-orange-600 transition-colors">Contact us</a>
               <button className="hover:text-orange-600 transition-colors bg-transparent border-none p-0 m-0" onClick={() => setShowTerms(true)}>
                 Terms and Conditions
               </button>
