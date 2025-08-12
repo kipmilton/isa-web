@@ -37,6 +37,8 @@ const AdminSidebar = ({ activeSection, onSectionChange, onLogout, userName }: Ad
     { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },
     { id: 'style-quiz', label: 'Style Quiz', icon: Star },
     { id: 'delivery', label: 'Manage Delivery', icon: Truck },
+    { id: 'roles', label: 'Admin Roles', icon: Shield },
+    { id: 'training', label: 'Training Modules', icon: Users },
   ];
 
   return (

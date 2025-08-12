@@ -24,6 +24,10 @@ interface QuizQuestion {
   id: string;
   question_text: string;
   question_order: number;
+  gender: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
   options: Array<{
     text: string;
     value: string;
@@ -71,7 +75,12 @@ const StyleQuiz = ({ user, onComplete }: StyleQuizProps) => {
       }
 
       if (questionsData) {
-        setQuestions(questionsData);
+        setQuestions(questionsData.map(q => ({
+          ...q,
+          options: Array.isArray(q.options) ? q.options.map((opt: any) => 
+            typeof opt === 'object' && opt.text && opt.value ? opt : { text: String(opt), value: String(opt) }
+          ) : []
+        })));
       }
     } catch (error) {
       console.error('Error loading quiz:', error);

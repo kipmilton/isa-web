@@ -14,10 +14,10 @@ export interface SubscriptionPlan {
 export interface UserSubscription {
   id: string;
   user_id: string;
-  plan_type: 'free' | 'premium';
-  billing_cycle: 'weekly' | 'monthly' | 'yearly';
+  plan_type: string;
+  billing_cycle: string;
   price_kes: number;
-  status: 'active' | 'cancelled' | 'expired';
+  status: string;
   started_at: string;
   expires_at: string | null;
   auto_renew: boolean;
