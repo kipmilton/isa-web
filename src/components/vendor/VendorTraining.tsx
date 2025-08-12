@@ -40,9 +40,10 @@ interface TrainingProgress {
 interface VendorTrainingProps {
   userId: string;
   onComplete: () => void;
+  onProgressChange?: (progress: number) => void;
 }
 
-const VendorTraining = ({ userId, onComplete }: VendorTrainingProps) => {
+const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTrainingProps) => {
   const [modules, setModules] = useState<TrainingModule[]>([]);
   const [progress, setProgress] = useState<TrainingProgress[]>([]);
   const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
@@ -214,6 +215,11 @@ const VendorTraining = ({ userId, onComplete }: VendorTrainingProps) => {
 
   const completedCount = modules.filter(module => isModuleCompleted(module.id)).length;
   const progressPercentage = modules.length > 0 ? (completedCount / modules.length) * 100 : 0;
+
+  // Update parent progress
+  useEffect(() => {
+    onProgressChange?.(progressPercentage);
+  }, [progressPercentage, onProgressChange]);
 
   if (loading) {
     return (

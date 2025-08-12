@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import LocationSelect from "@/components/auth/LocationSelect";
 import { 
   User, 
   Building, 
@@ -22,9 +23,10 @@ import {
 interface VendorApplicationFormProps {
   userId: string;
   onComplete: () => void;
+  onProgressChange?: (progress: number) => void;
 }
 
-const VendorApplicationForm = ({ userId, onComplete }: VendorApplicationFormProps) => {
+const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorApplicationFormProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     accountType: '',
@@ -33,7 +35,9 @@ const VendorApplicationForm = ({ userId, onComplete }: VendorApplicationFormProp
     email: '',
     phone: '',
     businessType: '',
+    otherBusinessType: '',
     description: '',
+    location: { county: '', constituency: '' },
     documents: {
       idCard: null as File | null,
       businessCert: null as File | null,
@@ -49,6 +53,15 @@ const VendorApplicationForm = ({ userId, onComplete }: VendorApplicationFormProp
       ...prev,
       [field]: value
     }));
+    updateProgress();
+  };
+
+  const handleLocationChange = (county: string, constituency: string) => {
+    setFormData(prev => ({
+      ...prev,
+      location: { county, constituency }
+    }));
+    updateProgress();
   };
 
   const handleDocumentUpload = (field: string, file: File | null) => {
@@ -59,6 +72,39 @@ const VendorApplicationForm = ({ userId, onComplete }: VendorApplicationFormProp
         [field]: file
       }
     }));
+    updateProgress();
+  };
+
+  const updateProgress = () => {
+    let completedFields = 0;
+    let totalFields = 0;
+
+    // Step 1: Account Type (2 fields)
+    totalFields += 2;
+    if (formData.accountType) completedFields++;
+    if (formData.businessName) completedFields++;
+    if (formData.contactPerson) completedFields++;
+
+    // Step 2: Contact Details (4 fields)
+    totalFields += 4;
+    if (formData.email) completedFields++;
+    if (formData.phone) completedFields++;
+    if (formData.businessType) completedFields++;
+    if (formData.businessType === 'other' ? formData.otherBusinessType : true) completedFields++;
+    if (formData.location.county) completedFields++;
+    if (formData.location.constituency) completedFields++;
+
+    // Step 3: Business Description (1 field)
+    totalFields += 1;
+    if (formData.description) completedFields++;
+
+    // Step 4: Documents (2 required fields)
+    totalFields += 2;
+    if (formData.documents.idCard) completedFields++;
+    if (formData.documents.bankDetails) completedFields++;
+
+    const progress = Math.round((completedFields / totalFields) * 100);
+    onProgressChange?.(progress);
   };
 
   const uploadDocument = async (file: File, fileName: string) => {
@@ -100,11 +146,14 @@ const VendorApplicationForm = ({ userId, onComplete }: VendorApplicationFormProp
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
+          first_name: formData.contactPerson.split(' ')[0] || formData.contactPerson,
+          last_name: formData.contactPerson.split(' ').slice(1).join(' ') || '',
           company: formData.businessName,
-          business_type: formData.businessType,
+          business_type: formData.businessType === 'other' ? formData.otherBusinessType : formData.businessType,
           phone_number: formData.phone,
           user_type: 'vendor',
-          status: 'pending'
+          status: 'pending',
+          location: `${formData.location.county}, ${formData.location.constituency}`
         })
         .eq('id', userId);
 
@@ -152,7 +201,9 @@ const VendorApplicationForm = ({ userId, onComplete }: VendorApplicationFormProp
       case 1:
         return formData.accountType && formData.businessName && formData.contactPerson;
       case 2:
-        return formData.email && formData.phone && formData.businessType;
+        return formData.email && formData.phone && formData.businessType && 
+               (formData.businessType !== 'other' || formData.otherBusinessType) &&
+               formData.location.county && formData.location.constituency;
       case 3:
         return formData.description;
       case 4:
@@ -252,6 +303,26 @@ const VendorApplicationForm = ({ userId, onComplete }: VendorApplicationFormProp
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {formData.businessType === 'other' && (
+              <div>
+                <Label htmlFor="otherBusinessType">Please specify your business type</Label>
+                <Input
+                  id="otherBusinessType"
+                  value={formData.otherBusinessType}
+                  onChange={(e) => handleInputChange('otherBusinessType', e.target.value)}
+                  placeholder="e.g., Food & Beverage, Health & Wellness, etc."
+                />
+              </div>
+            )}
+
+            <div>
+              <Label className="text-base font-medium">Business Location</Label>
+              <LocationSelect 
+                onLocationChange={handleLocationChange}
+                required
+              />
             </div>
           </div>
         );

@@ -24,6 +24,7 @@ import DeliveryRejection from "./pages/DeliveryRejection";
 import Shipping from "./pages/Shipping";
 import Profile from "./pages/Profile";
 import { Analytics } from "@vercel/analytics/react";
+import VendorOnboarding from "./pages/VendorOnboarding";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,11 @@ const App = () => (
             <Route path="/vendor-status" element={
               <AuthGuard requireAuth={true} allowedUserTypes={['vendor']} allowedVendorStatuses={['pending']}>
                 <VendorStatus />
+              </AuthGuard>
+            } />
+            <Route path="/vendor-onboarding" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['vendor']} allowedVendorStatuses={['pending']}>
+                <VendorOnboarding />
               </AuthGuard>
             } />
             <Route path="/vendor-rejection" element={

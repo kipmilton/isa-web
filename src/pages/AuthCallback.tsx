@@ -62,7 +62,20 @@ const AuthCallback = () => {
               if (profile.status === 'approved') {
                 navigate('/vendor-dashboard');
               } else {
-                navigate('/vendor-status');
+                // Check if vendor has completed application form
+                const { data: applicationStep } = await supabase
+                  .from('vendor_application_steps')
+                  .select('is_completed')
+                  .eq('user_id', session.user.id)
+                  .eq('step_name', 'application_form')
+                  .single();
+
+                if (!applicationStep?.is_completed) {
+                  // Redirect to onboarding if application not completed
+                  navigate('/vendor-onboarding');
+                } else {
+                  navigate('/vendor-status');
+                }
               }
             } else if (profile.user_type === 'delivery') {
               // Check delivery personnel status

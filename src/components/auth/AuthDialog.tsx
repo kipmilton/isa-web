@@ -34,16 +34,6 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
     confirmPassword: ""
   });
 
-  const [vendorData, setVendorData] = useState({
-    company: "",
-    businessType: "",
-    firstName: "",
-    lastName: "",
-    phoneNumber: "",
-    taxId: "",
-    companyWebsite: ""
-  });
-
   const [customerData, setCustomerData] = useState({
     firstName: "",
     lastName: "",
@@ -52,6 +42,11 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
     constituency: "",
     gender: "",
     phoneNumber: "",
+  });
+
+  const [vendorData, setVendorData] = useState({
+    firstName: "",
+    lastName: "",
   });
 
   const [signInData, setSignInData] = useState({
@@ -73,12 +68,12 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
     }
   };
 
-  const handleVendorInputChange = (field: string, value: string) => {
-    setVendorData(prev => ({ ...prev, [field]: value }));
-  };
-
   const handleCustomerInputChange = (field: string, value: string) => {
     setCustomerData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleVendorInputChange = (field: string, value: string) => {
+    setVendorData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSignInInputChange = (field: string, value: string) => {
@@ -146,14 +141,20 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           return;
         }
 
-        // Sign up flow
-        const data = userType === 'vendor' ? vendorData : customerData;
-        
         // Validate password confirmation
         if (signUpData.password !== signUpData.confirmPassword) {
           toast.error("Passwords don't match!");
           setIsLoading(false);
           return;
+        }
+
+        // Validate vendor data
+        if (userType === 'vendor') {
+          if (!vendorData.firstName.trim() || !vendorData.lastName.trim()) {
+            toast.error("Please provide your first and last name");
+            setIsLoading(false);
+            return;
+          }
         }
 
         // Create user account
@@ -162,21 +163,19 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           password: signUpData.password,
           options: {
             data: {
-              first_name: data.firstName,
-              last_name: data.lastName,
-              phone_number: data.phoneNumber,
               user_type: userType, // Use userType for signup
-              ...(userType === 'vendor' ? {
-                company: vendorData.company,
-                business_type: vendorData.businessType,
-                tax_id: vendorData.taxId,
-                company_website: vendorData.companyWebsite,
-                location: `${location.county}, ${location.constituency}`
-              } : {
+              ...(userType === 'customer' ? {
+                first_name: customerData.firstName,
+                last_name: customerData.lastName,
+                phone_number: customerData.phoneNumber,
                 date_of_birth: customerData.dob,
                 gender: customerData.gender,
                 location: `${customerData.county}, ${customerData.constituency}`
-              })
+              } : userType === 'vendor' ? {
+                first_name: vendorData.firstName,
+                last_name: vendorData.lastName,
+              } : {})
+              // For vendors, we don't include business details here - they'll be collected in onboarding
             }
           }
         });
@@ -194,22 +193,23 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             .insert({
               id: authData.user.id,
               email: signUpData.email,
-              first_name: data.firstName,
-              last_name: data.lastName,
-              phone_number: data.phoneNumber,
               user_type: userType,
-              account_setup_completed: true, // Regular signup users have completed setup
-              ...(userType === 'vendor' ? {
-                company: vendorData.company,
-                business_type: vendorData.businessType,
-                tax_id: vendorData.taxId,
-                company_website: vendorData.companyWebsite,
-                location: `${location.county}, ${location.constituency}`,
-                status: 'pending'
-              } : {
+              account_setup_completed: userType === 'customer', // Only customers have completed setup
+              ...(userType === 'customer' ? {
+                first_name: customerData.firstName,
+                last_name: customerData.lastName,
+                phone_number: customerData.phoneNumber,
                 date_of_birth: customerData.dob,
                 gender: customerData.gender,
                 location: `${customerData.county}, ${customerData.constituency}`
+              } : userType === 'vendor' ? {
+                first_name: vendorData.firstName,
+                last_name: vendorData.lastName,
+                // For vendors, set minimal profile data - business details will be added during onboarding
+                status: 'pending'
+              } : {
+                // For vendors, set minimal profile data - business details will be added during onboarding
+                status: 'pending'
               })
             });
 
@@ -226,12 +226,13 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
         if (userType === 'vendor') {
           setIsVendor(true);
           setVendorStatus('pending');
-          navigate('/vendor-status');
+          // Redirect to the new structured onboarding flow
+          navigate('/vendor-onboarding');
         } else {
           navigate('/shop');
         }
       } else {
-        // Sign in flow
+        // Sign in flow remains the same
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
           email: signInData.email,
           password: signInData.password
@@ -271,7 +272,20 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           if (profile?.status === 'approved') {
             navigate('/vendor-dashboard');
           } else {
-            navigate('/vendor-status');
+            // Check if vendor has completed application form
+            const { data: applicationStep } = await supabase
+              .from('vendor_application_steps')
+              .select('is_completed')
+              .eq('user_id', authData.user.id)
+              .eq('step_name', 'application_form')
+              .single();
+
+            if (!applicationStep?.is_completed) {
+              // Redirect to onboarding if application not completed
+              navigate('/vendor-onboarding');
+            } else {
+              navigate('/vendor-status');
+            }
           }
         } else if (profile?.user_type === 'delivery') {
           console.log('AuthDialog - Delivery user detected, checking status...');
@@ -557,24 +571,13 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                       </div>
                     )}
 
-                    {userType === 'vendor' && (
+                    {userType === 'vendor' && isSignUp && (
                       <>
-                        <div>
-                          <Label htmlFor="company">Company Name</Label>
-                          <Input 
-                            id="company" 
-                            required 
-                            className="mt-1"
-                            value={vendorData.company}
-                            onChange={(e) => handleVendorInputChange('company', e.target.value)}
-                          />
-                        </div>
-                        
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <Label htmlFor="firstName">Company Rep's First Name</Label>
+                            <Label htmlFor="vendorFirstName">Company Reps First Name</Label>
                             <Input 
-                              id="firstName" 
+                              id="vendorFirstName" 
                               required 
                               className="mt-1"
                               value={vendorData.firstName}
@@ -582,9 +585,9 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                             />
                           </div>
                           <div>
-                            <Label htmlFor="lastName">Company Rep's Last Name</Label>
+                            <Label htmlFor="vendorLastName">Company Reps Last Name</Label>
                             <Input 
-                              id="lastName" 
+                              id="vendorLastName" 
                               required 
                               className="mt-1"
                               value={vendorData.lastName}
@@ -593,56 +596,19 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                           </div>
                         </div>
                         
-                        <div>
-                          <Label htmlFor="businessType">Type of Business/Products</Label>
-                          <Input 
-                            id="businessType" 
-                            required 
-                            className="mt-1"
-                            value={vendorData.businessType}
-                            onChange={(e) => handleVendorInputChange('businessType', e.target.value)}
-                          />
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-start space-x-3">
+                            <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-sm font-bold">i</span>
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-blue-800 mb-1">Vendor Account Setup</h4>
+                              <p className="text-sm text-blue-700">
+                                Your account will be created with basic information. You'll complete your business details and training in the next step.
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                        
-                        <div>
-                          <Label htmlFor="phoneNumber">Phone Number</Label>
-                          <Input 
-                            id="phoneNumber" 
-                            type="tel" 
-                            required 
-                            className="mt-1"
-                            value={vendorData.phoneNumber}
-                            onChange={(e) => handleVendorInputChange('phoneNumber', e.target.value)}
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="taxId">Tax ID/KRA PIN</Label>
-                          <Input 
-                            id="taxId" 
-                            required 
-                            className="mt-1"
-                            value={vendorData.taxId}
-                            onChange={(e) => handleVendorInputChange('taxId', e.target.value)}
-                            placeholder="Enter your Tax ID or KRA PIN"
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="companyWebsite">Your Website/Social Media Page Links</Label>
-                          <Input 
-                            id="companyWebsite" 
-                            type="url" 
-                            required 
-                            className="mt-1"
-                            value={vendorData.companyWebsite}
-                            onChange={(e) => handleVendorInputChange('companyWebsite', e.target.value)}
-                            placeholder="Enter your website or social media links"
-                          />
-                        </div>
-                        
-                        <LocationSelect onLocationChange={handleLocationChange} required />
-                        
                       </>
                     )}
 
