@@ -57,7 +57,7 @@ const AdminRoles = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch admin roles with profile data from auth.users
+      // Fetch admin roles with profile data
       const { data: rolesData, error: rolesError } = await supabase
         .from('admin_roles')
         .select(`
@@ -70,7 +70,13 @@ const AdminRoles = () => {
         `)
         .order('assigned_at', { ascending: false });
 
-      if (rolesError) throw rolesError;
+      if (rolesError) {
+        console.error('Admin roles error:', rolesError);
+        // Continue with empty data if no roles exist
+        setAdminRoles([]);
+      } else {
+        setAdminRoles(rolesData || []);
+      }
 
       // Fetch support requests with profile data
       const { data: requestsData, error: requestsError } = await supabase
@@ -85,10 +91,13 @@ const AdminRoles = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (requestsError) throw requestsError;
-
-      setAdminRoles(rolesData || []);
-      setSupportRequests(requestsData || []);
+      if (requestsError) {
+        console.error('Support requests error:', requestsError);
+        // Continue with empty data if no requests exist
+        setSupportRequests([]);
+      } else {
+        setSupportRequests(requestsData || []);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({
@@ -331,15 +340,22 @@ const AdminRoles = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {adminRoles.map((role) => (
-                    <TableRow key={role.id}>
-                      <TableCell>
-                        {role.profiles?.first_name || role.profiles?.last_name 
-                          ? `${role.profiles.first_name || ''} ${role.profiles.last_name || ''}`.trim()
-                          : 'Unknown User'
-                        }
+                  {adminRoles.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                        No admin roles assigned yet
                       </TableCell>
-                      <TableCell>{role.profiles?.email || 'N/A'}</TableCell>
+                    </TableRow>
+                  ) : (
+                    adminRoles.map((role) => (
+                      <TableRow key={role.id}>
+                        <TableCell>
+                          {role.profiles?.first_name || role.profiles?.last_name 
+                            ? `${role.profiles.first_name || ''} ${role.profiles.last_name || ''}`.trim()
+                            : 'Unknown User'
+                          }
+                        </TableCell>
+                        <TableCell>{role.profiles?.email || 'N/A'}</TableCell>
                       <TableCell>
                         <Badge className={`${getRoleBadgeColor(role.role)} text-white`}>
                           {role.role.replace('_', ' ').toUpperCase()}
@@ -375,7 +391,7 @@ const AdminRoles = () => {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )))}
                 </TableBody>
               </Table>
             </CardContent>
@@ -403,19 +419,26 @@ const AdminRoles = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {supportRequests.map((request) => (
-                    <TableRow key={request.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {request.profiles?.first_name || request.profiles?.last_name 
-                              ? `${request.profiles.first_name || ''} ${request.profiles.last_name || ''}`.trim()
-                              : 'Unknown User'
-                            }
-                          </div>
-                          <div className="text-sm text-gray-500">{request.profiles?.email}</div>
-                        </div>
+                  {supportRequests.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                        No support requests found
                       </TableCell>
+                    </TableRow>
+                  ) : (
+                    supportRequests.map((request) => (
+                      <TableRow key={request.id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">
+                              {request.profiles?.first_name || request.profiles?.last_name 
+                                ? `${request.profiles.first_name || ''} ${request.profiles.last_name || ''}`.trim()
+                                : 'Unknown User'
+                              }
+                            </div>
+                            <div className="text-sm text-gray-500">{request.profiles?.email}</div>
+                          </div>
+                        </TableCell>
                       <TableCell>{request.phone_number}</TableCell>
                       <TableCell className="max-w-xs truncate">{request.message}</TableCell>
                       <TableCell>
@@ -451,7 +474,7 @@ const AdminRoles = () => {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )))}
                 </TableBody>
               </Table>
             </CardContent>

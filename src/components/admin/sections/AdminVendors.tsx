@@ -75,7 +75,7 @@ const AdminVendors = () => {
     try {
       setLoading(true);
       
-      // Fetch pending applications with application steps data
+      // Fetch pending applications with optional application steps data
       const { data: pending, error: pendingError } = await supabase
         .from('profiles')
         .select(`
@@ -93,7 +93,7 @@ const AdminVendors = () => {
 
       if (pendingError) throw pendingError;
 
-      // Fetch approved vendors
+      // Fetch approved vendors with optional application steps data
       const { data: approved, error: approvedError } = await supabase
         .from('profiles')
         .select(`
@@ -111,7 +111,7 @@ const AdminVendors = () => {
 
       if (approvedError) throw approvedError;
 
-      // Fetch rejected applications
+      // Fetch rejected applications with optional application steps data
       const { data: rejected, error: rejectedError } = await supabase
         .from('profiles')
         .select(`
