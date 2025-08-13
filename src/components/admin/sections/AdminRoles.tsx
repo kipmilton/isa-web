@@ -57,46 +57,60 @@ const AdminRoles = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch admin roles with profile data
+      // Fetch admin roles without profile data first
       const { data: rolesData, error: rolesError } = await supabase
         .from('admin_roles')
-        .select(`
-          *,
-          profiles (
-            first_name,
-            last_name,
-            email
-          )
-        `)
+        .select('*')
         .order('assigned_at', { ascending: false });
 
       if (rolesError) {
         console.error('Admin roles error:', rolesError);
-        // Continue with empty data if no roles exist
         setAdminRoles([]);
       } else {
-        setAdminRoles(rolesData || []);
+        // Fetch profile data for each admin role
+        const rolesWithProfiles = await Promise.all(
+          (rolesData || []).map(async (role) => {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('first_name, last_name, email')
+              .eq('id', role.user_id)
+              .single();
+            
+            return {
+              ...role,
+              profiles: profileData
+            };
+          })
+        );
+        setAdminRoles(rolesWithProfiles);
       }
 
-      // Fetch support requests with profile data
+      // Fetch support requests without profile data first
       const { data: requestsData, error: requestsError } = await supabase
         .from('support_requests')
-        .select(`
-          *,
-          profiles (
-            first_name,
-            last_name,
-            email
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (requestsError) {
         console.error('Support requests error:', requestsError);
-        // Continue with empty data if no requests exist
         setSupportRequests([]);
       } else {
-        setSupportRequests(requestsData || []);
+        // Fetch profile data for each support request
+        const requestsWithProfiles = await Promise.all(
+          (requestsData || []).map(async (request) => {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('first_name, last_name, email')
+              .eq('id', request.user_id)
+              .single();
+            
+            return {
+              ...request,
+              profiles: profileData
+            };
+          })
+        );
+        setSupportRequests(requestsWithProfiles);
       }
     } catch (error) {
       console.error('Error fetching data:', error);

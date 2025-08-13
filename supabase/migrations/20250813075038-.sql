@@ -64,3 +64,88 @@ WHERE pr.rating IS NOT NULL;
 
 -- Grant access to the public view
 GRANT SELECT ON public.reviews_public TO authenticated, anon;
+
+-- Fix infinite recursion in admin_roles RLS policies
+-- The issue is that the policy references the admin_roles table within its own policy check
+
+-- Drop the problematic policy that causes infinite recursion
+DROP POLICY IF EXISTS "Main admins can manage all admin roles" ON public.admin_roles;
+
+-- Create a new policy that uses profiles table instead of admin_roles table
+-- This avoids the infinite recursion issue
+CREATE POLICY "Main admins can manage all admin roles"
+ON public.admin_roles
+FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE profiles.id = auth.uid() 
+    AND profiles.user_type = 'admin'
+  )
+  OR
+  EXISTS (
+    SELECT 1 FROM public.user_roles 
+    WHERE user_roles.user_id = auth.uid() 
+    AND user_roles.role = 'admin'
+  )
+);
+
+-- Also fix the support_requests policy that has the same issue
+DROP POLICY IF EXISTS "Admins can view all support requests" ON public.support_requests;
+
+CREATE POLICY "Admins can view all support requests"
+ON public.support_requests
+FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE profiles.id = auth.uid() 
+    AND profiles.user_type = 'admin'
+  )
+  OR
+  EXISTS (
+    SELECT 1 FROM public.user_roles 
+    WHERE user_roles.user_id = auth.uid() 
+    AND user_roles.role = 'admin'
+  )
+);
+
+-- Fix vendor_application_steps policy
+DROP POLICY IF EXISTS "Admins can view all application steps" ON public.vendor_application_steps;
+
+CREATE POLICY "Admins can view all application steps"
+ON public.vendor_application_steps
+FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE profiles.id = auth.uid() 
+    AND profiles.user_type = 'admin'
+  )
+  OR
+  EXISTS (
+    SELECT 1 FROM public.user_roles 
+    WHERE user_roles.user_id = auth.uid() 
+    AND user_roles.role = 'admin'
+  )
+);
+
+-- Fix training_modules policy
+DROP POLICY IF EXISTS "Main admins can manage training modules" ON public.training_modules;
+
+CREATE POLICY "Main admins can manage training modules"
+ON public.training_modules
+FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE profiles.id = auth.uid() 
+    AND profiles.user_type = 'admin'
+  )
+  OR
+  EXISTS (
+    SELECT 1 FROM public.user_roles 
+    WHERE user_roles.user_id = auth.uid() 
+    AND user_roles.role = 'admin'
+  )
+);

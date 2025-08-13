@@ -16,6 +16,8 @@ const VendorOnboarding = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     checkUserAndProgress();
   }, []);
@@ -30,29 +32,37 @@ const VendorOnboarding = () => {
 
       setUserId(session.user.id);
 
-      // Check application progress
-      const { data: applicationStep } = await supabase
+      // Check application progress - use a more robust query
+      const { data: applicationSteps, error: applicationError } = await supabase
         .from('vendor_application_steps')
-        .select('is_completed')
+        .select('*')
         .eq('user_id', session.user.id)
-        .eq('step_name', 'application_form')
-        .single();
+        .eq('step_name', 'application_form');
 
-      if (applicationStep?.is_completed) {
-        setApplicationCompleted(true);
-        setCurrentStep('training');
+      if (applicationError) {
+        console.error('Error checking application progress:', applicationError);
+      } else if (applicationSteps && applicationSteps.length > 0) {
+        const applicationStep = applicationSteps[0];
+        if (applicationStep.is_completed) {
+          setApplicationCompleted(true);
+          setCurrentStep('training');
+        }
       }
 
-      // Check training progress
-      const { data: trainingStep } = await supabase
+      // Check training progress - use a more robust query
+      const { data: trainingSteps, error: trainingError } = await supabase
         .from('vendor_application_steps')
-        .select('is_completed')
+        .select('*')
         .eq('user_id', session.user.id)
-        .eq('step_name', 'training_completed')
-        .single();
+        .eq('step_name', 'training_completed');
 
-      if (trainingStep?.is_completed) {
-        setTrainingCompleted(true);
+      if (trainingError) {
+        console.error('Error checking training progress:', trainingError);
+      } else if (trainingSteps && trainingSteps.length > 0) {
+        const trainingStep = trainingSteps[0];
+        if (trainingStep.is_completed) {
+          setTrainingCompleted(true);
+        }
       }
 
     } catch (error) {
@@ -72,8 +82,6 @@ const VendorOnboarding = () => {
     // Redirect to status page after training completion
     navigate('/vendor-status');
   };
-
-  const navigate = useNavigate();
 
   if (loading) {
     return (

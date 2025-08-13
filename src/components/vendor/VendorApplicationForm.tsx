@@ -108,38 +108,72 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
   };
 
   const uploadDocument = async (file: File, fileName: string) => {
-    const fileExt = file.name.split('.').pop();
-    const filePath = `vendor-documents/${userId}/${fileName}.${fileExt}`;
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `vendor-documents/${userId}/${fileName}.${fileExt}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('product-images')
-      .upload(filePath, file);
+      // Try to upload directly first
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-    if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        
+        // If bucket doesn't exist, try to create it or use a different approach
+        if (uploadError.message.includes('bucket') || uploadError.message.includes('not found')) {
+          throw new Error('Storage bucket not configured. Please contact support.');
+        }
+        
+        throw uploadError;
+      }
 
-    const { data } = supabase.storage
-      .from('product-images')
-      .getPublicUrl(filePath);
+      const { data } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
 
-    return data.publicUrl;
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Document upload failed:', error);
+      throw error;
+    }
   };
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      // Upload documents
+      // Upload documents (optional - continue even if uploads fail)
       const documentUrls: Record<string, string> = {};
+      let uploadWarnings: string[] = [];
       
       if (formData.documents.idCard) {
-        documentUrls.idCard = await uploadDocument(formData.documents.idCard, 'id-card');
+        try {
+          documentUrls.idCard = await uploadDocument(formData.documents.idCard, 'id-card');
+        } catch (error) {
+          console.error('Failed to upload ID card:', error);
+          uploadWarnings.push('ID card upload failed');
+        }
       }
       
       if (formData.documents.businessCert) {
-        documentUrls.businessCert = await uploadDocument(formData.documents.businessCert, 'business-cert');
+        try {
+          documentUrls.businessCert = await uploadDocument(formData.documents.businessCert, 'business-cert');
+        } catch (error) {
+          console.error('Failed to upload business certificate:', error);
+          uploadWarnings.push('Business certificate upload failed');
+        }
       }
       
       if (formData.documents.pinCert) {
-        documentUrls.pinCert = await uploadDocument(formData.documents.pinCert, 'pin-cert');
+        try {
+          documentUrls.pinCert = await uploadDocument(formData.documents.pinCert, 'pin-cert');
+        } catch (error) {
+          console.error('Failed to upload PIN certificate:', error);
+          uploadWarnings.push('PIN certificate upload failed');
+        }
       }
 
       // Update profile with vendor application data
@@ -157,7 +191,10 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
         })
         .eq('id', userId);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        throw profileError;
+      }
 
       // Save application step data
       const { error: stepError } = await supabase
@@ -176,19 +213,43 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
           completed_at: new Date().toISOString()
         });
 
-      if (stepError) throw stepError;
+      if (stepError) {
+        console.error('Step save error:', stepError);
+        throw stepError;
+      }
 
-      toast({
-        title: "Application Submitted",
-        description: "Your vendor application has been submitted successfully!"
-      });
+      // Show success message with any upload warnings
+      if (uploadWarnings.length > 0) {
+        toast({
+          title: "Application Submitted with Warnings",
+          description: `Your application was submitted successfully, but some documents couldn't be uploaded: ${uploadWarnings.join(', ')}. You can upload them later.`
+        });
+      } else {
+        toast({
+          title: "Application Submitted",
+          description: "Your vendor application has been submitted successfully!"
+        });
+      }
 
       onComplete();
     } catch (error) {
       console.error('Error submitting application:', error);
+      
+      // Provide more specific error messages
+      let errorMessage = "Failed to submit application. Please try again.";
+      if (error instanceof Error) {
+        if (error.message.includes('Storage')) {
+          errorMessage = "Failed to upload documents. Please check your files and try again.";
+        } else if (error.message.includes('profile')) {
+          errorMessage = "Failed to update profile information. Please try again.";
+        } else if (error.message.includes('step')) {
+          errorMessage = "Failed to save application progress. Please try again.";
+        }
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to submit application. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -207,7 +268,8 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
       case 3:
         return formData.description;
       case 4:
-        return formData.documents.idCard && formData.documents.bankDetails;
+        // Make documents optional - only require bank details
+        return formData.documents.bankDetails;
       default:
         return false;
     }
@@ -355,35 +417,38 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="idCard">National ID / Passport *</Label>
+                <Label htmlFor="idCard">National ID / Passport (Optional)</Label>
                 <Input
                   id="idCard"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
                   onChange={(e) => handleDocumentUpload('idCard', e.target.files?.[0] || null)}
                 />
+                <p className="text-xs text-gray-500 mt-1">You can upload this later if needed</p>
               </div>
 
               {formData.accountType === 'corporate' && (
                 <>
                   <div>
-                    <Label htmlFor="businessCert">Certificate of Incorporation</Label>
+                    <Label htmlFor="businessCert">Certificate of Incorporation (Optional)</Label>
                     <Input
                       id="businessCert"
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
                       onChange={(e) => handleDocumentUpload('businessCert', e.target.files?.[0] || null)}
                     />
+                    <p className="text-xs text-gray-500 mt-1">You can upload this later if needed</p>
                   </div>
 
                   <div>
-                    <Label htmlFor="pinCert">PIN/VAT Certificate</Label>
+                    <Label htmlFor="pinCert">PIN/VAT Certificate (Optional)</Label>
                     <Input
                       id="pinCert"
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
                       onChange={(e) => handleDocumentUpload('pinCert', e.target.files?.[0] || null)}
                     />
+                    <p className="text-xs text-gray-500 mt-1">You can upload this later if needed</p>
                   </div>
                 </>
               )}
@@ -400,6 +465,7 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
                   placeholder="Bank name, account number, account holder name..."
                   rows={3}
                 />
+                <p className="text-xs text-gray-500 mt-1">Required for payment processing</p>
               </div>
             </div>
           </div>
