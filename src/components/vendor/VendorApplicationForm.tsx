@@ -19,6 +19,7 @@ import {
   CheckCircle,
   ArrowRight
 } from "lucide-react";
+import imageCompression from 'browser-image-compression';
 
 interface VendorApplicationFormProps {
   userId: string;
@@ -48,6 +49,26 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+  const maxFileSize = 10 * 1024 * 1024; // 10MB
+
+  const [fileErrors, setFileErrors] = useState({
+    idCard: '',
+    businessCert: '',
+    pinCert: ''
+  });
+
+  const validateFile = (file: File | null, field: string) => {
+    if (!file) return '';
+    if (!allowedTypes.includes(file.type)) {
+      return 'Only JPG, PNG, and PDF files are allowed.';
+    }
+    if (file.size > maxFileSize) {
+      return 'File is too large. Please upload a file under 10MB.';
+    }
+    return '';
+  };
+
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -64,12 +85,25 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
     updateProgress();
   };
 
-  const handleDocumentUpload = (field: string, file: File | null) => {
+  const handleDocumentUpload = async (field: string, file: File | null) => {
+    let error = validateFile(file, field);
+    if (!error && file && file.type.startsWith('image/')) {
+      try {
+        file = await imageCompression(file, {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1200,
+          useWebWorker: true,
+        });
+      } catch (e) {
+        error = 'Image compression failed. Please try another image.';
+      }
+    }
+    setFileErrors(prev => ({ ...prev, [field]: error }));
     setFormData(prev => ({
       ...prev,
       documents: {
         ...prev.documents,
-        [field]: file
+        [field]: error ? null : file
       }
     }));
     updateProgress();
@@ -268,7 +302,16 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
       case 3:
         return formData.description;
       case 4:
-        // Make documents optional - only require bank details
+        // Require valid files for all uploaded docs
+        if (formData.accountType === 'corporate') {
+          if (fileErrors.idCard || fileErrors.businessCert || fileErrors.pinCert) return false;
+          if ((formData.documents.idCard && fileErrors.idCard) ||
+              (formData.documents.businessCert && fileErrors.businessCert) ||
+              (formData.documents.pinCert && fileErrors.pinCert)) return false;
+        } else {
+          if (fileErrors.idCard) return false;
+          if (formData.documents.idCard && fileErrors.idCard) return false;
+        }
         return formData.documents.bankDetails;
       default:
         return false;
@@ -422,9 +465,10 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
                   id="idCard"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) => handleDocumentUpload('idCard', e.target.files?.[0] || null)}
+                  onChange={async (e) => await handleDocumentUpload('idCard', e.target.files?.[0] || null)}
                 />
                 <p className="text-xs text-gray-500 mt-1">You can upload this later if needed</p>
+                {fileErrors.idCard && <p className="text-xs text-red-500 mt-1">{fileErrors.idCard}</p>}
               </div>
 
               {formData.accountType === 'corporate' && (
@@ -435,9 +479,10 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
                       id="businessCert"
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleDocumentUpload('businessCert', e.target.files?.[0] || null)}
+                      onChange={async (e) => await handleDocumentUpload('businessCert', e.target.files?.[0] || null)}
                     />
                     <p className="text-xs text-gray-500 mt-1">You can upload this later if needed</p>
+                    {fileErrors.businessCert && <p className="text-xs text-red-500 mt-1">{fileErrors.businessCert}</p>}
                   </div>
 
                   <div>
@@ -446,9 +491,10 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
                       id="pinCert"
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleDocumentUpload('pinCert', e.target.files?.[0] || null)}
+                      onChange={async (e) => await handleDocumentUpload('pinCert', e.target.files?.[0] || null)}
                     />
                     <p className="text-xs text-gray-500 mt-1">You can upload this later if needed</p>
+                    {fileErrors.pinCert && <p className="text-xs text-red-500 mt-1">{fileErrors.pinCert}</p>}
                   </div>
                 </>
               )}
