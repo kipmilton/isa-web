@@ -22,6 +22,10 @@ const AdminProducts = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [stockFilter, setStockFilter] = useState("all");
+  const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [approvalProduct, setApprovalProduct] = useState<any>(null);
+  const [rejectionDialogOpen, setRejectionDialogOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -80,6 +84,15 @@ const AdminProducts = () => {
     // Status filter
     if (statusFilter !== "all") {
       switch (statusFilter) {
+        case "pending":
+          filtered = filtered.filter(product => product.status === 'pending');
+          break;
+        case "approved":
+          filtered = filtered.filter(product => product.status === 'approved');
+          break;
+        case "rejected":
+          filtered = filtered.filter(product => product.status === 'rejected');
+          break;
         case "active":
           filtered = filtered.filter(product => product.is_active && !product.banned);
           break;
@@ -216,6 +229,39 @@ const AdminProducts = () => {
     }
   };
 
+  const handleApproveProduct = async (product: any) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ status: 'approved', rejection_reason: null, is_active: true })
+        .eq('id', product.id);
+      if (error) throw error;
+      toast({ title: 'Product Approved', description: 'Product is now live.' });
+      fetchProducts();
+      setApprovalDialogOpen(false);
+      setApprovalProduct(null);
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to approve product', variant: 'destructive' });
+    }
+  };
+  const handleRejectProduct = async () => {
+    if (!approvalProduct || !rejectionReason.trim()) return;
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ status: 'rejected', rejection_reason: rejectionReason.trim(), is_active: false })
+        .eq('id', approvalProduct.id);
+      if (error) throw error;
+      toast({ title: 'Product Rejected', description: 'Vendor will see the rejection reason.' });
+      fetchProducts();
+      setRejectionDialogOpen(false);
+      setApprovalProduct(null);
+      setRejectionReason("");
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to reject product', variant: 'destructive' });
+    }
+  };
+
   const getUniqueCategories = () => {
     const categories = products.map(product => product.category).filter(Boolean);
     return [...new Set(categories)];
@@ -278,6 +324,9 @@ const AdminProducts = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
                 <SelectItem value="banned">Banned</SelectItem>
@@ -340,6 +389,7 @@ const AdminProducts = () => {
                 <TableHead>Vendor</TableHead>
                 <TableHead>Stock</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Approval</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -384,20 +434,33 @@ const AdminProducts = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {product.banned ? (
-                        <div>
-                          <Badge variant="destructive">Banned</Badge>
-                          {product.banned_reason && (
-                            <p className="text-xs text-gray-500 mt-1 max-w-48 truncate" title={product.banned_reason}>
-                              Reason: {product.banned_reason}
-                            </p>
-                          )}
-                        </div>
+                      {product.status === 'pending' ? (
+                        <Badge variant="secondary">Pending</Badge>
+                      ) : product.status === 'approved' ? (
+                        <Badge variant="default">Approved</Badge>
+                      ) : product.status === 'rejected' ? (
+                        <Badge variant="destructive">Rejected</Badge>
+                      ) : product.banned ? (
+                        <Badge variant="destructive">Banned</Badge>
                       ) : (
                         <Badge variant={product.is_active ? 'default' : 'secondary'}>
                           {product.is_active ? 'Active' : 'Inactive'}
                         </Badge>
                       )}
+                      {product.status === 'rejected' && product.rejection_reason && (
+                        <p className="text-xs text-gray-500 mt-1 max-w-48 truncate" title={product.rejection_reason}>
+                          Reason: {product.rejection_reason}
+                        </p>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {product.status === 'pending' ? (
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" onClick={() => { setApprovalProduct(product); setApprovalDialogOpen(true); }}>View Details</Button>
+                          <Button size="sm" variant="default" onClick={() => handleApproveProduct(product)}>Approve</Button>
+                          <Button size="sm" variant="destructive" onClick={() => { setApprovalProduct(product); setRejectionDialogOpen(true); }}>Reject</Button>
+                        </div>
+                      ) : null}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
@@ -491,6 +554,60 @@ const AdminProducts = () => {
               >
                 Ban Product
               </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Approval Dialog */}
+      <Dialog open={approvalDialogOpen} onOpenChange={setApprovalDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Product Details</DialogTitle>
+          </DialogHeader>
+          {approvalProduct && (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Product:</label>
+                <p className="text-sm text-gray-600">{approvalProduct.name}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description:</label>
+                <p className="text-sm text-gray-600">{approvalProduct.description}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Images:</label>
+                <div className="flex gap-2 flex-wrap">
+                  {(approvalProduct.images || []).map((img: string, idx: number) => (
+                    <img key={idx} src={img} alt="Product" className="w-24 h-24 object-cover rounded border" />
+                  ))}
+                  {!approvalProduct.images?.length && <span className="text-xs text-gray-400">No images</span>}
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setApprovalDialogOpen(false)}>Close</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      {/* Rejection Dialog */}
+      <Dialog open={rejectionDialogOpen} onOpenChange={setRejectionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Product</DialogTitle>
+            <DialogDescription>Provide a reason for rejection. The vendor will see this reason.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              value={rejectionReason}
+              onChange={e => setRejectionReason(e.target.value)}
+              placeholder="Enter reason for rejection..."
+              rows={4}
+              required
+            />
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setRejectionDialogOpen(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleRejectProduct} disabled={!rejectionReason.trim()}>Reject Product</Button>
             </div>
           </div>
         </DialogContent>

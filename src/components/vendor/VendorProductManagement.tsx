@@ -211,6 +211,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
   const { user: authUser } = useAuth();
   const [banReasonDialogOpen, setBanReasonDialogOpen] = useState(false);
   const [banReasonText, setBanReasonText] = useState("");
+  const [statusFilter, setStatusFilter] = useState('All');
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
@@ -339,14 +340,20 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
       let productId: string;
 
       if (editingProduct) {
-        const result = await ProductService.updateProduct(editingProduct.id, productData, user.id);
+        // If rejected, set status back to pending and clear rejection_reason
+        const updates = { ...productData };
+        if (editingProduct.status === 'rejected') {
+          updates.status = 'pending';
+          updates.rejection_reason = null;
+        }
+        const result = await ProductService.updateProduct(editingProduct.id, updates, user.id);
         if (result.error) {
           throw new Error(result.error.message);
         }
         productId = editingProduct.id;
         toast({
           title: "Success",
-          description: "Product updated successfully"
+          description: "Product updated and resubmitted for approval"
         });
       } else {
         const result = await ProductService.createProduct(productData);
@@ -530,7 +537,8 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                          product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          product.brand?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesStatus = statusFilter === 'All' || product.status === statusFilter;
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
   const formatPrice = (price: number) => {
@@ -631,6 +639,17 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-48 text-sm sm:text-base">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -656,7 +675,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                       variant="secondary"
                       className="w-7 h-7 sm:w-8 sm:h-8 bg-white/90 hover:bg-white"
                       onClick={() => handleEdit(product)}
-                      disabled={product.banned}
+                      disabled={product.status === 'approved' || product.banned}
                     >
                       <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
@@ -670,12 +689,28 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                       <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
                   </div>
-                  <div className="absolute top-2 left-2 flex gap-1">
-                    {product.is_featured && (
-                      <Badge className="bg-yellow-500 text-white text-xs">Featured</Badge>
+                  <div className="absolute top-2 left-2 flex flex-col gap-1">
+                    {product.status === 'pending' && (
+                      <Badge variant="secondary" className="text-xs">Pending Approval</Badge>
                     )}
-                    {!product.is_active && (
-                      <Badge variant="destructive" className="text-xs">Inactive</Badge>
+                    {product.status === 'approved' && (
+                      <Badge variant="default" className="text-xs">Approved</Badge>
+                    )}
+                    {product.status === 'rejected' && (
+                      <Badge variant="destructive" className="text-xs">Rejected</Badge>
+                    )}
+                    {product.status === 'rejected' && product.rejection_reason && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 border-red-400 hover:bg-red-50 text-xs mt-1"
+                        onClick={() => {
+                          setBanReasonText(product.rejection_reason || "");
+                          setBanReasonDialogOpen(true);
+                        }}
+                      >
+                        View Reason
+                      </Button>
                     )}
                     {product.banned && (
                       <Badge className="bg-red-600 text-white text-xs">Banned</Badge>

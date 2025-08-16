@@ -34,7 +34,7 @@ export class ProductService {
   static async createProduct(product: Omit<Product, 'id'>) {
     return await supabase
       .from('products')
-      .insert([product])
+      .insert([{ ...product, status: 'pending' }])
       .select();
   }
 
@@ -219,5 +219,26 @@ export class ProductService {
       return null;
     }
     return data;
+  }
+
+  static async fetchNotificationsByVendor(vendorId: string) {
+    return await supabase
+      .from('notifications')
+      .select('*')
+      .eq('vendor_id', vendorId)
+      .order('created_at', { ascending: false });
+  }
+
+  static async markNotificationAsRead(notificationId: string) {
+    return await supabase
+      .from('notifications')
+      .update({ read: true, updated_at: new Date().toISOString() })
+      .eq('id', notificationId);
+  }
+
+  static async createNotification({ product_id, vendor_id, type, message }: { product_id: string, vendor_id: string, type: string, message: string }) {
+    return await supabase
+      .from('notifications')
+      .insert([{ product_id, vendor_id, type, message, read: false }]);
   }
 }

@@ -332,7 +332,7 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="individual" id="individual" />
-                  <Label htmlFor="individual">Individual Seller (small business or single person)</Label>
+                  <Label htmlFor="individual"> </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="corporate" id="corporate" />

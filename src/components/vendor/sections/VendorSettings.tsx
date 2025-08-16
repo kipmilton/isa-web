@@ -376,6 +376,60 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
     toast({ title: 'Plan Upgraded', description: 'Your plan has been upgraded successfully.' });
   };
 
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  const handlePasswordChange = async () => {
+    if (!passwordData.currentPassword) {
+      toast({ 
+        title: 'Error', 
+        description: 'Please enter your current password', 
+        variant: 'destructive' 
+      });
+      return;
+    }
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast({ 
+        title: 'Error', 
+        description: 'New passwords do not match', 
+        variant: 'destructive' 
+      });
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      toast({ 
+        title: 'Error', 
+        description: 'Password must be at least 6 characters long', 
+        variant: 'destructive' 
+      });
+      return;
+    }
+    setSavingPassword(true);
+    try {
+      // Optionally, you could re-authenticate the user here if needed
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword
+      });
+      if (error) throw error;
+      toast({ title: 'Success', description: 'Password updated successfully!' });
+      setShowPasswordForm(false);
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (error: any) {
+      toast({ 
+        title: 'Error', 
+        description: error.message || 'Failed to update password', 
+        variant: 'destructive' 
+      });
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Settings</h1>
@@ -484,6 +538,54 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
               >
                 {loading ? 'Saving...' : 'Save Changes'}
               </Button>
+              <div className="mt-8">
+                {!showPasswordForm ? (
+                  <Button variant="outline" onClick={() => setShowPasswordForm(true)}>
+                    Change Password
+                  </Button>
+                ) : (
+                  <div className="space-y-4 max-w-md">
+                    <div>
+                      <Label htmlFor="currentPassword">Current Password</Label>
+                      <Input
+                        id="currentPassword"
+                        type="password"
+                        value={passwordData.currentPassword}
+                        onChange={e => setPasswordData(d => ({ ...d, currentPassword: e.target.value }))}
+                        autoComplete="current-password"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        value={passwordData.newPassword}
+                        onChange={e => setPasswordData(d => ({ ...d, newPassword: e.target.value }))}
+                        autoComplete="new-password"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={passwordData.confirmPassword}
+                        onChange={e => setPasswordData(d => ({ ...d, confirmPassword: e.target.value }))}
+                        autoComplete="new-password"
+                      />
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      <Button onClick={handlePasswordChange} disabled={savingPassword}>
+                        {savingPassword ? 'Saving...' : 'Update Password'}
+                      </Button>
+                      <Button variant="outline" onClick={() => setShowPasswordForm(false)} disabled={savingPassword}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

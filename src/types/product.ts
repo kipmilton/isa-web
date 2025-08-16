@@ -40,6 +40,8 @@ export interface Product {
   updated_at?: string;
   banned?: boolean;
   banned_reason?: string | null;
+  status?: 'pending' | 'approved' | 'rejected';
+  rejection_reason?: string | null;
 }
 
 export interface ProductAttribute {

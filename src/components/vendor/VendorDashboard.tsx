@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, Menu, X } from "lucide-react";
+import { AlertTriangle, Menu, X, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import VendorSidebar from "./VendorSidebar";
 import VendorHome from "./sections/VendorHome";
@@ -11,6 +11,7 @@ import VendorPayments from "./sections/VendorPayments";
 import VendorWallet from "./sections/VendorWallet";
 import VendorSettings from "./sections/VendorSettings";
 import { Button } from "@/components/ui/button";
+import { ProductService } from "@/services/productService";
 
 interface VendorDashboardProps {
   user: any;
@@ -25,6 +26,10 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeFromBanner, setUpgradeFromBanner] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const PLAN_LIMITS: Record<string, number> = {
     free: 5,
@@ -36,6 +41,7 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
 
   useEffect(() => {
     fetchPlanAndProducts();
+    fetchNotifications();
   }, [user.id]);
 
   const fetchPlanAndProducts = async () => {
@@ -64,6 +70,26 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
       .select('id')
       .eq('vendor_id', user.id);
     setProductCount(products?.length || 0);
+  };
+
+  const fetchNotifications = async () => {
+    setNotificationsLoading(true);
+    const result = await ProductService.fetchNotificationsByVendor(user.id);
+    if (!result.error && result.data) {
+      setNotifications(result.data);
+      setUnreadCount(result.data.filter((n: any) => !n.read).length);
+    }
+    setNotificationsLoading(false);
+  };
+
+  const handleOpenNotifications = async () => {
+    setNotificationsOpen((open) => !open);
+    if (!notificationsOpen) {
+      // Mark all unread as read
+      const unread = notifications.filter((n: any) => !n.read);
+      await Promise.all(unread.map((n: any) => ProductService.markNotificationAsRead(n.id)));
+      fetchNotifications();
+    }
   };
 
   const handleUpgradeClick = () => {
@@ -184,6 +210,44 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
               </button>
             </div>
           )}
+          {/* Add notification bell to the top right of the dashboard (desktop and mobile) */}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">Vendor Portal</h1>
+              <p className="text-sm text-gray-600">{user.name}</p>
+            </div>
+            <div className="relative">
+              <Button variant="ghost" size="icon" onClick={handleOpenNotifications}>
+                <Bell className="w-6 h-6 text-gray-700" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                )}
+              </Button>
+              {notificationsOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded shadow-lg z-50 max-h-96 overflow-y-auto">
+                  <div className="p-4 border-b font-semibold text-gray-900 flex items-center justify-between">
+                    Notifications
+                    <Button variant="ghost" size="sm" onClick={() => setNotificationsOpen(false)}>Close</Button>
+                  </div>
+                  {notificationsLoading ? (
+                    <div className="p-4 text-gray-500">Loading...</div>
+                  ) : notifications.length === 0 ? (
+                    <div className="p-4 text-gray-500">No notifications</div>
+                  ) : (
+                    notifications.map((n, idx) => (
+                      <div key={n.id} className={`p-4 border-b last:border-b-0 ${!n.read ? 'bg-blue-50' : ''}`}>
+                        <div className="font-medium text-gray-800 mb-1">
+                          {n.type === 'product_approved' ? 'Product Approved' : 'Action Needed'}
+                        </div>
+                        <div className="text-gray-700 text-sm mb-1">{n.message}</div>
+                        <div className="text-xs text-gray-400">{new Date(n.created_at).toLocaleString()}</div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
           {renderContent()}
           {/* Upgrade Modal Placeholder */}
           {showUpgrade && (
