@@ -106,6 +106,8 @@ const ShopDashboard = () => {
   const loadProducts = async () => {
     setProductLoading(true);
     let data = await ProductService.getProductsFiltered(selectedCategory, searchQuery);
+    // Only show approved products
+    data = data.filter((product: any) => product.status === 'approved');
     
     // Apply price range filter
     data = data.filter((product: any) => 

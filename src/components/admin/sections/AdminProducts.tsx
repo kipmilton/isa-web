@@ -455,11 +455,7 @@ const AdminProducts = () => {
                     </TableCell>
                     <TableCell>
                       {product.status === 'pending' ? (
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => { setApprovalProduct(product); setApprovalDialogOpen(true); }}>View Details</Button>
-                          <Button size="sm" variant="default" onClick={() => handleApproveProduct(product)}>Approve</Button>
-                          <Button size="sm" variant="destructive" onClick={() => { setApprovalProduct(product); setRejectionDialogOpen(true); }}>Reject</Button>
-                        </div>
+                        <Button size="sm" variant="outline" onClick={() => { setApprovalProduct(product); setApprovalDialogOpen(true); }}>View Details</Button>
                       ) : null}
                     </TableCell>
                     <TableCell>
@@ -585,6 +581,8 @@ const AdminProducts = () => {
               </div>
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" onClick={() => setApprovalDialogOpen(false)}>Close</Button>
+                <Button variant="default" onClick={() => handleApproveProduct(approvalProduct)}>Approve</Button>
+                <Button variant="destructive" onClick={() => { setRejectionDialogOpen(true); setApprovalDialogOpen(false); }}>Reject</Button>
               </div>
             </div>
           )}
