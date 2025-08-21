@@ -231,34 +231,55 @@ const AdminProducts = () => {
 
   const handleApproveProduct = async (product: any) => {
     try {
-      const { error } = await supabase
-        .from('products')
-        .update({ status: 'approved', rejection_reason: null, is_active: true })
-        .eq('id', product.id);
-      if (error) throw error;
+      // Get current user session
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('Current user ID:', user?.id);
+      console.log('Attempting to approve product:', product.id);
+      const { error, data } = await supabase.rpc('approve_product', { product_id: product.id });
+      console.log('Approve response:', { error, data });
+      if (error) {
+        console.error('Supabase approve error:', error);
+        throw error;
+      }
       toast({ title: 'Product Approved', description: 'Product is now live.' });
       fetchProducts();
       setApprovalDialogOpen(false);
       setApprovalProduct(null);
-    } catch (error) {
-      toast({ title: 'Error', description: 'Failed to approve product', variant: 'destructive' });
+    } catch (error: any) {
+      console.error('Full approve error:', error);
+      toast({ 
+        title: 'Error', 
+        description: error?.message || 'Failed to approve product', 
+        variant: 'destructive' 
+      });
     }
   };
+
   const handleRejectProduct = async () => {
     if (!approvalProduct || !rejectionReason.trim()) return;
     try {
-      const { error } = await supabase
-        .from('products')
-        .update({ status: 'rejected', rejection_reason: rejectionReason.trim(), is_active: false })
-        .eq('id', approvalProduct.id);
-      if (error) throw error;
+      console.log('Attempting to reject product:', approvalProduct.id, 'with reason:', rejectionReason);
+      const { error, data } = await supabase.rpc('reject_product', { 
+        product_id: approvalProduct.id, 
+        reason: rejectionReason.trim() 
+      });
+      console.log('Reject response:', { error, data });
+      if (error) {
+        console.error('Supabase reject error:', error);
+        throw error;
+      }
       toast({ title: 'Product Rejected', description: 'Vendor will see the rejection reason.' });
       fetchProducts();
       setRejectionDialogOpen(false);
       setApprovalProduct(null);
       setRejectionReason("");
-    } catch (error) {
-      toast({ title: 'Error', description: 'Failed to reject product', variant: 'destructive' });
+    } catch (error: any) {
+      console.error('Full reject error:', error);
+      toast({ 
+        title: 'Error', 
+        description: error?.message || 'Failed to reject product', 
+        variant: 'destructive' 
+      });
     }
   };
 
@@ -559,6 +580,9 @@ const AdminProducts = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Product Details</DialogTitle>
+            <DialogDescription>
+              Review the product details before approving or rejecting.
+            </DialogDescription>
           </DialogHeader>
           {approvalProduct && (
             <div className="space-y-4">
