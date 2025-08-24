@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, Menu, X, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSearchParams } from "react-router-dom";
 import VendorSidebar from "./VendorSidebar";
 import VendorHome from "./sections/VendorHome";
 import VendorProductManagement from "./VendorProductManagement";
@@ -9,6 +10,7 @@ import VendorOrders from "./sections/VendorOrders";
 import VendorReviews from "./sections/VendorReviews";
 import VendorPayments from "./sections/VendorPayments";
 import VendorWallet from "./sections/VendorWallet";
+import VendorSubscription from "./VendorSubscription";
 import VendorSettings from "./sections/VendorSettings";
 import { Button } from "@/components/ui/button";
 import { ProductService } from "@/services/productService";
@@ -19,6 +21,7 @@ interface VendorDashboardProps {
 }
 
 const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
+  const [searchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState("home");
   const [plan, setPlan] = useState('free');
   const [planExpiry, setPlanExpiry] = useState<string | null>(null);
@@ -32,17 +35,23 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const PLAN_LIMITS: Record<string, number> = {
-    free: 5,
-    premium_weekly: 20,
-    premium_monthly: 20,
-    premium_yearly: 20,
+    free: Infinity,
+    premium_weekly: Infinity,
+    premium_monthly: Infinity,
+    premium_yearly: Infinity,
     pro: Infinity
   };
 
   useEffect(() => {
     fetchPlanAndProducts();
     fetchNotifications();
-  }, [user.id]);
+    
+    // Check for section parameter in URL
+    const sectionParam = searchParams.get('section');
+    if (sectionParam) {
+      setActiveSection(sectionParam);
+    }
+  }, [user.id, searchParams]);
 
   const fetchPlanAndProducts = async () => {
     // Fetch plan from profiles.preferences
@@ -104,41 +113,118 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
   };
 
   const renderContent = () => {
+    const UpgradeButton = () => (
+      <div className="mb-6 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-orange-600 font-semibold">🚀 Premium Features Coming Soon!</span>
+              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Early Access</span>
+            </div>
+            <div className="text-sm text-gray-600 space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-green-500">✓</span>
+                <span>Marketing promotions & customer notifications</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-green-500">✓</span>
+                <span>Reduced commission rates for higher profits</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-green-500">✓</span>
+                <span>Priority support & advanced analytics</span>
+              </div>
+            </div>
+          </div>
+          <button
+            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded shadow text-sm whitespace-nowrap cursor-not-allowed opacity-60 ml-4"
+            disabled={true}
+          >
+            Upgrade Coming Soon
+          </button>
+        </div>
+      </div>
+    );
+
     switch (activeSection) {
       case "home":
-        return <VendorHome vendorId={user.id} plan={plan} planExpiry={planExpiry} productCount={productCount} onUpgrade={handleUpgradeClick} />;
+        return (
+          <div>
+            <UpgradeButton />
+            <VendorHome vendorId={user.id} plan={plan} planExpiry={planExpiry} productCount={productCount} onUpgrade={handleUpgradeClick} />
+          </div>
+        );
       case "products":
         return (
           <div>
+            <UpgradeButton />
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">My Products</h1>
             <VendorProductManagement user={user} />
           </div>
         );
       case "orders":
-        return <VendorOrders vendorId={user.id} />;
+        return (
+          <div>
+            <UpgradeButton />
+            <VendorOrders vendorId={user.id} />
+          </div>
+        );
       case "store":
         return (
           <div>
+            <UpgradeButton />
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">My Store</h1>
             <VendorProductManagement user={user} />
           </div>
         );
       case "payments":
-        return <VendorPayments vendorId={user.id} />;
+        return (
+          <div>
+            <UpgradeButton />
+            <VendorPayments vendorId={user.id} />
+          </div>
+        );
       case "reviews":
-        return <VendorReviews vendorId={user.id} />;
+        return (
+          <div>
+            <UpgradeButton />
+            <VendorReviews vendorId={user.id} />
+          </div>
+        );
       case "wallet":
-        return <VendorWallet vendorId={user.id} />;
+        return (
+          <div>
+            <UpgradeButton />
+            <VendorWallet vendorId={user.id} />
+          </div>
+        );
+      case "subscription":
+        return (
+          <div>
+            <UpgradeButton />
+            <VendorSubscription />
+          </div>
+        );
       case "settings":
-        return <VendorSettings vendorId={user.id} defaultTab="billing" showUpgradeModal={upgradeFromBanner} onCloseUpgradeModal={() => setUpgradeFromBanner(false)} />;
+        return (
+          <div>
+            <UpgradeButton />
+            <VendorSettings vendorId={user.id} defaultTab="billing" showUpgradeModal={upgradeFromBanner} onCloseUpgradeModal={() => setUpgradeFromBanner(false)} />
+          </div>
+        );
       default:
-        return <VendorHome vendorId={user.id} plan={plan} planExpiry={planExpiry} productCount={productCount} onUpgrade={handleUpgradeClick} />;
+        return (
+          <div>
+            <UpgradeButton />
+            <VendorHome vendorId={user.id} plan={plan} planExpiry={planExpiry} productCount={productCount} onUpgrade={handleUpgradeClick} />
+          </div>
+        );
     }
   };
 
   // Orange banner
   const productLimit = PLAN_LIMITS[plan] === Infinity ? 'Unlimited' : PLAN_LIMITS[plan];
-  const showBanner = plan === 'free' || plan === 'premium_weekly' || plan === 'premium_monthly' || plan === 'premium_yearly';
+  const showBanner = false; // Hide banner since all plans now have unlimited products
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -206,7 +292,7 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
                 className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded shadow text-sm whitespace-nowrap"
                 onClick={handleUpgradeClick}
               >
-                Upgrade
+                Upgrade Coming Soon
               </button>
             </div>
           )}

@@ -33,6 +33,7 @@ const UserWallet = ({ user }: UserWalletProps) => {
   const [redeemAmount, setRedeemAmount] = useState("");
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [redemptionEnabled, setRedemptionEnabled] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -95,6 +96,7 @@ const UserWallet = ({ user }: UserWalletProps) => {
 
       if (!configError && configData) {
         setPointsConfig(configData);
+        setRedemptionEnabled(configData.redemption_enabled || false);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -253,7 +255,7 @@ const UserWallet = ({ user }: UserWalletProps) => {
               className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               <Gift className="w-4 h-4 mr-2" />
-              Redeem Points
+              {redemptionEnabled ? 'Redeem Points' : 'Redeem Points (Coming Soon!)'}
             </Button>
             <Button 
               variant="outline" 
@@ -273,6 +275,24 @@ const UserWallet = ({ user }: UserWalletProps) => {
               )}
             </Button>
           </div>
+          
+          {/* Coming Soon Notice */}
+          {!redemptionEnabled && (
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">!</span>
+                </div>
+                <div>
+                  <div className="font-semibold text-blue-800">Points Redemption Coming Soon!</div>
+                  <div className="text-sm text-blue-600">
+                    Keep earning points now and you'll be able to redeem them for purchases very soon. 
+                    Your points are safe and will be ready when redemption launches!
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -329,12 +349,19 @@ const UserWallet = ({ user }: UserWalletProps) => {
       {/* Redemption Values */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Gift className="w-5 h-5 text-orange-600" />
-            <span>Redemption Values</span>
-          </CardTitle>
+                  <CardTitle className="flex items-center space-x-2">
+          <Gift className="w-5 h-5 text-orange-600" />
+          <span>Redemption Values {!redemptionEnabled && '(Coming Soon)'}</span>
+        </CardTitle>
         </CardHeader>
         <CardContent>
+          {!redemptionEnabled && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="text-sm text-blue-800 text-center">
+                🎉 <strong>Coming Soon!</strong> These will be the redemption values when we launch.
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { points: 100, value: 10 },
@@ -342,10 +369,17 @@ const UserWallet = ({ user }: UserWalletProps) => {
               { points: 1000, value: 100 },
               { points: 5000, value: 500 }
             ].map((tier) => (
-              <div key={tier.points} className="text-center p-4 bg-gray-50 rounded-lg">
+              <div key={tier.points} className={`text-center p-4 rounded-lg ${
+                redemptionEnabled 
+                  ? 'bg-green-50 border-2 border-green-200' 
+                  : 'bg-gray-50 border-2 border-dashed border-gray-300'
+              }`}>
                 <div className="text-2xl font-bold text-orange-600">{tier.points}</div>
                 <div className="text-sm text-gray-600">points</div>
                 <div className="text-lg font-semibold text-green-600">KES {tier.value}</div>
+                {!redemptionEnabled && (
+                  <div className="text-xs text-gray-500 mt-1">Coming Soon</div>
+                )}
               </div>
             ))}
           </div>
@@ -388,48 +422,123 @@ const UserWallet = ({ user }: UserWalletProps) => {
         </CardContent>
       </Card>
 
-      {/* Redeem Points Dialog */}
+      {/* Redemption Dialog */}
       <Dialog open={showRedeemDialog} onOpenChange={setShowRedeemDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Redeem Points</DialogTitle>
+            <DialogTitle className="flex items-center space-x-2">
+              <Gift className="w-5 h-5 text-orange-600" />
+              <span>{redemptionEnabled ? 'Redeem Points' : 'Points Redemption Coming Soon!'}</span>
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="redeemAmount">Number of Points to Redeem</Label>
-              <Input
-                id="redeemAmount"
-                type="number"
-                value={redeemAmount}
-                onChange={(e) => setRedeemAmount(e.target.value)}
-                placeholder="Enter points to redeem"
-                min="100"
-                max={userPoints?.available_points || 0}
-              />
-            </div>
-            {redeemAmount && (
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <div className="text-sm text-blue-800">
-                  Value: KES {(parseInt(redeemAmount) * (pointsConfig?.point_value_kes || 0.1)).toFixed(2)}
+          <div className="space-y-6">
+            {redemptionEnabled ? (
+              // Actual redemption form
+              <>
+                <div>
+                  <Label htmlFor="redeemAmount">Number of Points to Redeem</Label>
+                  <Input
+                    id="redeemAmount"
+                    type="number"
+                    value={redeemAmount}
+                    onChange={(e) => setRedeemAmount(e.target.value)}
+                    placeholder="Enter points to redeem"
+                    min="100"
+                    max={userPoints?.available_points || 0}
+                  />
+                </div>
+                {redeemAmount && (
+                  <div className="p-3 bg-blue-50 rounded-lg">
+                    <div className="text-sm text-blue-800">
+                      Value: KES {(parseInt(redeemAmount) * (pointsConfig?.point_value_kes || 0.1)).toFixed(2)}
+                    </div>
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={handleRedeemPoints}
+                    disabled={!redeemAmount || parseInt(redeemAmount) <= 0 || parseInt(redeemAmount) > (userPoints?.available_points || 0)}
+                    className="flex-1 bg-orange-500 hover:bg-orange-600"
+                  >
+                    Redeem Points
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowRedeemDialog(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            ) : (
+              // Coming soon content
+              <>
+                {/* Coming Soon Illustration */}
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Gift className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    Get Ready to Redeem!
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    We're working hard to bring you the best redemption experience. 
+                    Your points are safe and growing!
+                  </p>
+                </div>
+
+                          {/* Current Points Status */}
+              <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600 mb-1">
+                    {userPoints?.available_points || 0} Points
+                  </div>
+                  <div className="text-sm text-green-700">
+                    Ready to redeem when we launch!
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Current value: KES {((userPoints?.available_points || 0) * (pointsConfig?.point_value_kes || 0.1)).toFixed(2)}
+                  </div>
                 </div>
               </div>
+
+              {/* What's Coming */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-gray-800">What you'll be able to do:</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm">Redeem points for discounts on purchases</span>
+                  </div>
+                  <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm">Get exclusive member-only deals</span>
+                  </div>
+                  <div className="flex items-center space-x-3 p-2 bg-gray-50 rounded">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm">Convert points to store credit</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Keep Earning Notice */}
+              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="text-sm text-orange-800">
+                  💡 <strong>Pro tip:</strong> Keep earning points now so you'll have more to redeem when we launch!
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => setShowRedeemDialog(false)}
+                  className="flex-1 bg-orange-500 hover:bg-orange-600"
+                >
+                  Got it!
+                </Button>
+              </div>
+              </>
             )}
-            <div className="flex gap-3">
-              <Button 
-                onClick={handleRedeemPoints}
-                disabled={!redeemAmount || parseInt(redeemAmount) <= 0 || parseInt(redeemAmount) > (userPoints?.available_points || 0)}
-                className="flex-1 bg-orange-500 hover:bg-orange-600"
-              >
-                Redeem Points
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowRedeemDialog(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-            </div>
           </div>
         </DialogContent>
       </Dialog>

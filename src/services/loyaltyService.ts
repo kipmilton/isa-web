@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { NotificationService } from "./notificationService";
 
 export class LoyaltyService {
   // Get user points balance
@@ -123,6 +124,21 @@ export class LoyaltyService {
         });
 
       if (updateError) throw updateError;
+      
+      // Send notification about points earned
+      try {
+        await NotificationService.notifyPointsEarned(userId, pointsToAward, 'completing the style quiz');
+        
+        // Check for milestone achievements
+        const userPoints = await this.getUserPoints(userId);
+        if (userPoints) {
+          await this.checkMilestones(userId, userPoints.available_points);
+        }
+      } catch (notificationError) {
+        console.error('Error sending notification:', notificationError);
+        // Don't throw error for notification failure
+      }
+      
       return pointsToAward;
     } catch (error) {
       console.error('Error awarding quiz points:', error);
@@ -162,6 +178,21 @@ export class LoyaltyService {
         });
 
       if (updateError) throw updateError;
+      
+      // Send notification about points earned
+      try {
+        await NotificationService.notifyPointsEarned(userId, pointsToAward, 'your first purchase');
+        
+        // Check for milestone achievements
+        const userPoints = await this.getUserPoints(userId);
+        if (userPoints) {
+          await this.checkMilestones(userId, userPoints.available_points);
+        }
+      } catch (notificationError) {
+        console.error('Error sending notification:', notificationError);
+        // Don't throw error for notification failure
+      }
+      
       return pointsToAward;
     } catch (error) {
       console.error('Error awarding first purchase points:', error);
@@ -183,6 +214,40 @@ export class LoyaltyService {
     } catch (error) {
       console.error('Error redeeming points:', error);
       throw error;
+    }
+  }
+
+  // Check and notify milestone achievements
+  static async checkMilestones(userId: string, currentPoints: number) {
+    try {
+      const milestones = [
+        { points: 100, name: '100 Points' },
+        { points: 500, name: '500 Points' },
+        { points: 1000, name: '1,000 Points' },
+        { points: 2500, name: '2,500 Points' },
+        { points: 5000, name: '5,000 Points' },
+        { points: 10000, name: '10,000 Points' }
+      ];
+
+      for (const milestone of milestones) {
+        if (currentPoints >= milestone.points) {
+          // Check if we've already notified for this milestone
+          const { data: existingNotification } = await supabase
+            .from('user_notifications')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('title', `🏆 Milestone Achieved: ${milestone.name}!`)
+            .limit(1);
+
+          if (!existingNotification || existingNotification.length === 0) {
+            // Send milestone notification
+            await NotificationService.notifyMilestone(userId, milestone.name, currentPoints);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking milestones:', error);
+      // Don't throw error for milestone checking failure
     }
   }
 

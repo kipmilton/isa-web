@@ -285,13 +285,13 @@ const SubscriptionManager = ({ userId, isOpen, onClose }: SubscriptionManagerPro
                             )}
                           </div>
 
-                          <Button 
-                            onClick={() => handleUpgrade(plan.id)}
-                            className="w-full"
-                            variant={plan.id === 'premium_monthly' ? 'default' : 'outline'}
-                          >
-                            {currentSubscription?.plan_type === 'premium' ? 'Change Plan' : 'Upgrade'}
-                          </Button>
+                                                     <Button 
+                             onClick={() => handleUpgrade(plan.id)}
+                             className="w-full"
+                             variant={plan.id === 'premium_monthly' ? 'default' : 'outline'}
+                           >
+                             {currentSubscription?.plan_type === 'premium' ? 'Change Plan' : 'Upgrade'}
+                           </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -431,18 +431,18 @@ const SubscriptionManager = ({ userId, isOpen, onClose }: SubscriptionManagerPro
               </div>
             )}
 
-            <div className="flex gap-2 pt-4">
-              <Button variant="outline" onClick={() => setShowUpgradeDialog(false)} className="flex-1">
-                Cancel
-              </Button>
-              <Button 
-                onClick={handlePayment} 
-                disabled={isProcessing}
-                className="flex-1"
-              >
-                {isProcessing ? 'Processing...' : 'Pay Now'}
-              </Button>
-            </div>
+                         <div className="flex gap-2 pt-4">
+               <Button variant="outline" onClick={() => setShowUpgradeDialog(false)} className="flex-1">
+                 Cancel
+               </Button>
+               <Button 
+                 onClick={handlePayment} 
+                 disabled={isProcessing}
+                 className="flex-1"
+               >
+                 {isProcessing ? 'Processing...' : 'Pay & Upgrade'}
+               </Button>
+             </div>
           </div>
         </DialogContent>
       </Dialog>

@@ -22,13 +22,16 @@ import {
   DollarSign,
   Star,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  Crown
 } from "lucide-react";
 import { Product, ProductAttribute, ProductImage } from "@/types/product";
 import { ProductService } from "@/services/productService";
 import { ImageUploadService } from "@/services/imageUploadService";
+import { CommissionService, CommissionInfo } from "@/services/commissionService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import ImageUpload from "./ImageUpload";
 import ProductAttributes from "./ProductAttributes";
 
@@ -56,6 +59,8 @@ interface ProductFormData {
   commission_percentage?: number;
   pickup_location?: string;
   pickup_phone_number?: string;
+  status?: "pending" | "approved" | "rejected";
+  rejection_reason?: string | null;
 }
 
 // 1. Add the full category tree and types at the top
@@ -78,42 +83,33 @@ export const CATEGORY_TREE: CategoryNode[] = [
         { name: "Power Banks" }
       ] }
     ] },
-    { name: "Computers & Accessories", sub: [
+    { name: "Computers & Laptops", sub: [
       { name: "Laptops" },
-      { name: "Desktops" },
-      { name: "Monitors" },
-      { name: "Keyboards & Mice" },
-      { name: "Printers & Scanners" },
-      { name: "Computer Components", sub: [
-        { name: "RAM" },
-        { name: "Hard Drives or SSD" },
-        { name: "Graphics Cards" }
-      ] }
+      { name: "Desktop Computers" },
+      { name: "Computer Accessories" }
     ] },
-    { name: "TV, Audio & Video", sub: [
-      { name: "Televisions" },
-      { name: "Home Theaters" },
+    { name: "Audio & Video", sub: [
+      { name: "Headphones" },
       { name: "Speakers" },
-      { name: "Projectors" },
-      { name: "Soundbars" }
+      { name: "TVs & Monitors" }
     ] },
-    { name: "Cameras & Accessories", sub: [
-      { name: "Digital Cameras" },
-      { name: "DSLR & Mirrorless Cameras" },
-      { name: "Camera Lenses" },
-      { name: "Tripods & Stabilizers" },
-      { name: "Security Cameras" }
+    { name: "Gaming", sub: [
+      { name: "Gaming Consoles" },
+      { name: "Gaming Accessories" }
     ] }
   ], extraFields: ["RAM", "Storage", "Processor", "Display Size"] },
   { name: "Fashion", sub: [
-    { name: "Women's Fashion", sub: [
-      { name: "Clothing" }, { name: "Shoes" }, { name: "Handbags & Wallets" }, { name: "Jewelry & Watches" }, { name: "Lingerie & Sleepwear" }
+    { name: "Men's Clothing", sub: [
+      { name: "T-Shirts" }, { name: "Shirts" }, { name: "Jeans" }, { name: "Pants" }, { name: "Jackets" }, { name: "Suits" }
     ] },
-    { name: "Men's Fashion", sub: [
-      { name: "Clothing" }, { name: "Shoes" }, { name: "Belts & Wallets" }, { name: "Watches" }
+    { name: "Women's Clothing", sub: [
+      { name: "Dresses" }, { name: "Tops" }, { name: "Skirts" }, { name: "Jeans" }, { name: "Pants" }, { name: "Jackets" }
     ] },
-    { name: "Kids & Baby Fashion", sub: [
-      { name: "Girls' Clothing" }, { name: "Boys' Clothing" }, { name: "Baby Clothing" }, { name: "School Uniforms" }, { name: "Shoes" }
+    { name: "Shoes", sub: [
+      { name: "Men's Shoes" }, { name: "Women's Shoes" }, { name: "Sports Shoes" }
+    ] },
+    { name: "Accessories", sub: [
+      { name: "Bags" }, { name: "Watches" }, { name: "Jewelry" }, { name: "Belts" }
     ] }
   ] },
   { name: "Swimwear", sub: [
@@ -130,41 +126,146 @@ export const CATEGORY_TREE: CategoryNode[] = [
       { name: "Swimming Goggles" }, { name: "Swim Caps" }, { name: "Beach Towels" }, { name: "Flip-Flops" }, { name: "Swim Bags" }, { name: "UV Protection Swimwear" }
     ] }
   ] },
-  { name: "Home & Living", sub: [
+  { name: "Home & Garden", sub: [
     { name: "Furniture", sub: [
-      { name: "Beds & Mattresses" }, { name: "Sofas & Couches" }, { name: "Dining Sets" }, { name: "Wardrobes" }, { name: "Office Desks" }
+      { name: "Living Room" }, { name: "Bedroom" }, { name: "Kitchen & Dining" }, { name: "Office" }
     ] },
-    { name: "Home Décor", sub: [
-      { name: "Curtains" }, { name: "Wall Art" }, { name: "Rugs & Carpets" }, { name: "Lighting" }, { name: "Clocks" }
+    { name: "Decor", sub: [
+      { name: "Wall Art" }, { name: "Cushions & Throws" }, { name: "Vases & Planters" }
     ] },
-    { name: "Kitchen & Dining", sub: [
-      { name: "Cookware" }, { name: "Bakeware" }, { name: "Dinner Sets" }, { name: "Utensils" }, { name: "Storage Containers" }
+    { name: "Kitchen", sub: [
+      { name: "Cookware" }, { name: "Small Appliances" }, { name: "Kitchen Accessories" }
     ] },
-    { name: "Home Essentials", sub: [
-      { name: "Brooms & Mops" }, { name: "Laundry Baskets" }, { name: "Buckets & Basins" }, { name: "Dustbins" }
+    { name: "Garden", sub: [
+      { name: "Plants" }, { name: "Garden Tools" }, { name: "Outdoor Furniture" }
     ] }
   ] },
-  { name: "Books & Stationery", sub: [
-    { name: "Academic Books" }, { name: "Novels" }, { name: "Religious Books" }, { name: "Notebooks & Diaries" }, { name: "Pens & Pencils" }, { name: "Calculators" }, { name: "Art Supplies" }
-  ] },
-  { name: "Baby Products", sub: [
-    { name: "Diapers & Wipes" }, { name: "Baby Food" }, { name: "Baby Bath & Skincare" }, { name: "Nursing & Feeding" }, { name: "Baby Gear", sub: [
-      { name: "Strollers" }, { name: "Car Seats" }, { name: "Baby Carriers" }
+  { name: "Sports & Outdoors", sub: [
+    { name: "Fitness", sub: [
+      { name: "Gym Equipment" }, { name: "Yoga & Pilates" }, { name: "Running" }
+    ] },
+    { name: "Team Sports", sub: [
+      { name: "Football" }, { name: "Basketball" }, { name: "Cricket" }
+    ] },
+    { name: "Outdoor Activities", sub: [
+      { name: "Camping" }, { name: "Hiking" }, { name: "Cycling" }
+    ] },
+    { name: "Water Sports", sub: [
+      { name: "Swimming" }, { name: "Fishing" }
     ] }
   ] },
-  { name: "Health & Beauty", sub: [
-    { name: "Beauty", sub: [
-      { name: "Makeup" }, { name: "Skincare" }, { name: "Haircare" }, { name: "Fragrances" }, { name: "Beauty Tools" }
+  { name: "Books & Media", sub: [
+    { name: "Books", sub: [
+      { name: "Fiction" }, { name: "Non-Fiction" }, { name: "Academic" }, { name: "Children's Books" }
+    ] },
+    { name: "Music", sub: [
+      { name: "CDs" }, { name: "Vinyl Records" }
+    ] },
+    { name: "Movies & TV", sub: [
+      { name: "DVDs" }, { name: "Blu-rays" }
+    ] },
+    { name: "Gaming", sub: [
+      { name: "Video Games" }, { name: "Board Games" }
+    ] }
+  ] },
+  { name: "Toys & Games", sub: [
+    { name: "Educational Toys", sub: [
+      { name: "STEM Toys" }, { name: "Learning Toys" }
+    ] },
+    { name: "Action Figures", sub: [
+      { name: "Superheroes" }, { name: "Anime & Manga" }
+    ] },
+    { name: "Dolls", sub: [
+      { name: "Fashion Dolls" }, { name: "Baby Dolls" }
+    ] },
+    { name: "Building Sets", sub: [
+      { name: "LEGO" }, { name: "Other Building Sets" }
+    ] },
+    { name: "Arts & Crafts", sub: [
+      { name: "Drawing & Painting" }, { name: "Craft Kits" }
+    ] },
+    { name: "Outdoor Toys", sub: [
+      { name: "Ride-On Toys" }, { name: "Play Equipment" }
+    ] }
+  ] },
+  { name: "Health & Wellness", sub: [
+    { name: "Vitamins & Supplements", sub: [
+      { name: "Multivitamins" }, { name: "Protein Supplements" }, { name: "Herbal Supplements" }
+    ] },
+    { name: "Medical Devices", sub: [
+      { name: "Blood Pressure Monitors" }, { name: "Thermometers" }, { name: "First Aid" }
+    ] },
+    { name: "Fitness Equipment", sub: [
+      { name: "Cardio Equipment" }, { name: "Strength Training" }, { name: "Yoga Equipment" }
+    ] },
+    { name: "Personal Care", sub: [
+      { name: "Hair Removal" }, { name: "Oral Care" }, { name: "Skin Care" }
+    ] }
+  ] },
+  { name: "Baby & Kids", sub: [
+    { name: "Baby Clothing", sub: [
+      { name: "Newborn (0-3 months)" }, { name: "3-6 months" }, { name: "6-12 months" }, { name: "12-24 months" }
+    ] },
+    { name: "Kids Clothing", sub: [
+      { name: "Boys (2-8 years)" }, { name: "Girls (2-8 years)" }, { name: "Boys (8-16 years)" }, { name: "Girls (8-16 years)" }
+    ] },
+    { name: "Baby Care", sub: [
+      { name: "Diapers & Wipes" }, { name: "Baby Food" }, { name: "Baby Bath & Skincare" }
+    ] },
+    { name: "Baby Gear", sub: [
+      { name: "Strollers" }, { name: "Car Seats" }, { name: "High Chairs" }
+    ] },
+    { name: "Toys", sub: [
+      { name: "Baby Toys" }, { name: "Educational Toys" }, { name: "Outdoor Toys" }
+    ] }
+  ] },
+  { name: "Pet Supplies", sub: [
+    { name: "Dogs", sub: [
+      { name: "Food" }, { name: "Toys" }, { name: "Grooming" }, { name: "Health & Care" }
+    ] },
+    { name: "Cats", sub: [
+      { name: "Food" }, { name: "Toys" }, { name: "Grooming" }, { name: "Health & Care" }
+    ] },
+    { name: "Other Pets", sub: [
+      { name: "Birds" }, { name: "Fish" }, { name: "Small Animals" }
+    ] },
+    { name: "Pet Accessories", sub: [
+      { name: "Beds & Furniture" }, { name: "Collars & Leashes" }, { name: "Carriers & Travel" }
+    ] }
+  ] },
+  { name: "Beauty & Personal Care", sub: [
+    { name: "Skincare", sub: [
+      { name: "Face Care" }, { name: "Body Care" }, { name: "Sun Care" }
+    ] },
+    { name: "Makeup", sub: [
+      { name: "Face Makeup" }, { name: "Eye Makeup" }, { name: "Lip Makeup" }
+    ] },
+    { name: "Hair Care", sub: [
+      { name: "Shampoo & Conditioner" }, { name: "Hair Styling" }, { name: "Hair Accessories" }
+    ] },
+    { name: "Fragrances", sub: [
+      { name: "Men's Fragrances" }, { name: "Women's Fragrances" }
+    ] },
+    { name: "Personal Care", sub: [
+      { name: "Oral Care" }, { name: "Bath & Body" }
     ] }
   ] },
   { name: "Tools & Home Improvement", sub: [
     { name: "Power Tools" }, { name: "Hand Tools" }, { name: "Plumbing Supplies" }, { name: "Electrical Fixtures" }, { name: "Paint & Wall Treatments" }
   ] },
   { name: "Automotive", sub: [
-    { name: "Car Accessories", sub: [
-      { name: "Seat Covers" }, { name: "Air Fresheners" }, { name: "Car Vacuum Cleaners" }
+    { name: "Car Parts", sub: [
+      { name: "Engine Parts" }, { name: "Brake System" }, { name: "Suspension" }, { name: "Electrical" }
     ] },
-    { name: "Spear parts" }, { name: "Motor Oil & Fluids" }, { name: "Tyres & Rims" }, { name: "Motorcycles & Scooters" }, { name: "Helmets & Riding Gear" }
+    { name: "Car Accessories", sub: [
+      { name: "Interior" }, { name: "Exterior" }, { name: "Audio & Video" }
+    ] },
+    { name: "Motorcycle Parts", sub: [
+      { name: "Engine Parts" }, { name: "Body Parts" }, { name: "Accessories" }
+    ] },
+    { name: "Tools & Equipment", sub: [
+      { name: "Hand Tools" }, { name: "Power Tools" }, { name: "Diagnostic Tools" }
+    ] }
   ] },
   { name: "Travel & Luggage", sub: [
     { name: "Suitcases" }, { name: "Travel Backpacks" }, { name: "Duffel Bags" }, { name: "Travel Accessories" }
@@ -209,6 +310,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
   const [categories, setCategories] = useState<string[]>([]);
   const { toast } = useToast();
   const { user: authUser } = useAuth();
+  const navigate = useNavigate();
   const [banReasonDialogOpen, setBanReasonDialogOpen] = useState(false);
   const [banReasonText, setBanReasonText] = useState("");
   const [statusFilter, setStatusFilter] = useState('All');
@@ -245,6 +347,10 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
   const [subCategory, setSubCategory] = useState<string>("");
   const [subSubCategory, setSubSubCategory] = useState<string>("");
   const [extraFields, setExtraFields] = useState<{ [key: string]: string }>({});
+
+  // Commission-related state
+  const [commissionInfo, setCommissionInfo] = useState<CommissionInfo | null>(null);
+  const [showCommissionInfo, setShowCommissionInfo] = useState(false);
 
   // 3. Helper to get subcategories for a given main category
   const getSubcategories = (main: string) => {
@@ -301,6 +407,20 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
     }
   };
 
+  // Calculate commission when category or price changes
+  const calculateCommission = async () => {
+    if (mainCategory && formData.price > 0) {
+      const categoryPath = CommissionService.buildCategoryPath(mainCategory, subCategory, subSubCategory);
+      const commission = await CommissionService.getCommissionInfo(user.id, categoryPath, formData.price);
+      setCommissionInfo(commission);
+    }
+  };
+
+  // Update commission when category or price changes
+  useEffect(() => {
+    calculateCommission();
+  }, [mainCategory, subCategory, subSubCategory, formData.price]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -324,6 +444,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
         category: mainCategory,
         subcategory: subCategory,
         sub_subcategory: subSubCategory,
+        status: 'pending' as const,
         ...(mainCategory === 'Electronics' ? {
           ram: extraFields['RAM'] || null,
           storage: extraFields['Storage'] || null,
@@ -341,11 +462,11 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
 
       if (editingProduct) {
         // If rejected, set status back to pending and clear rejection_reason
-        const updates = { ...productData };
-        if (editingProduct.status === 'rejected') {
-          updates.status = 'pending';
-          updates.rejection_reason = null;
-        }
+        const updates = { 
+          ...productData,
+          status: editingProduct.status === 'rejected' ? 'pending' : productData.status,
+          rejection_reason: editingProduct.status === 'rejected' ? null : productData.rejection_reason
+        };
         const result = await ProductService.updateProduct(editingProduct.id, updates, user.id);
         if (result.error) {
           throw new Error(result.error.message);
@@ -979,11 +1100,11 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                         placeholder="e.g. 19500"
                         className="pl-14 mb-1"
                       />
-                      {formData.price > 0 && (
-                        <div className="text-xs text-gray-600 mt-1">
-                          You will receive <span className="font-semibold">{Math.floor(formData.price * 0.9)}</span>Ksh, <span className="font-semibold">{Math.ceil(formData.price * 0.1)}</span>Ksh goes to ISA maintenance
-                        </div>
-                      )}
+                                             {formData.price > 0 && commissionInfo && (
+                         <div className="text-xs text-gray-600 mt-1">
+                           You will receive <span className="font-semibold">Ksh {commissionInfo.vendor_earnings.toFixed(2)}</span>, <span className="font-semibold">Ksh {commissionInfo.isa_commission.toFixed(2)}</span> goes to ISA commission
+                         </div>
+                       )}
                     </div>
                   </div>
                   <div>
@@ -1016,6 +1137,75 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                     className="mb-4"
                   />
                 </div>
+                
+                                 {/* Commission Information Display */}
+                 {commissionInfo && mainCategory && (
+                   <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
+                     <div className="flex items-center justify-between mb-3">
+                       <h4 className="font-semibold text-gray-800 flex items-center">
+                         <TrendingUp className="w-4 h-4 mr-2" />
+                         Earnings Breakdown
+                       </h4>
+                       <Badge variant={commissionInfo.plan === 'premium' ? 'default' : 'secondary'} className="flex items-center">
+                         <Crown className="w-3 h-3 mr-1" />
+                         {commissionInfo.plan === 'premium' ? 'Premium' : 'Freemium'}
+                       </Badge>
+                     </div>
+                     <div className="grid grid-cols-2 gap-4 text-sm">
+                       <div>
+                         <span className="text-gray-600">Product Price:</span>
+                         <span className="font-semibold ml-1 text-gray-800">Ksh {formData.price.toLocaleString()}</span>
+                       </div>
+                       <div>
+                         <span className="text-gray-600">ISA Commission ({commissionInfo.rate}%):</span>
+                         <span className="font-semibold ml-1 text-red-600">Ksh {commissionInfo.isa_commission.toFixed(2)}</span>
+                       </div>
+                       <div className="col-span-2">
+                         <span className="text-gray-600">Your Earnings:</span>
+                         <span className="font-semibold ml-1 text-green-600 text-lg">Ksh {commissionInfo.vendor_earnings.toFixed(2)}</span>
+                       </div>
+                     </div>
+                     <div className="mt-2 text-xs text-gray-500">
+                       Category: {commissionInfo.category_path}
+                     </div>
+                     
+                     {/* Upgrade Call-to-Action for Freemium Users */}
+                     {commissionInfo.plan === 'freemium' && (
+                       <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                         <div className="flex items-center justify-between">
+                           <div className="flex-1">
+                             <h5 className="font-semibold text-blue-800 flex items-center mb-1">
+                               <Crown className="w-4 h-4 mr-2 text-yellow-500" />
+                               Upgrade to Premium
+                             </h5>
+                             <p className="text-xs text-blue-700 mb-2">
+                               Reduce commission from {commissionInfo.rate}% down to around 5% and earn more!
+                             </p>
+                             <div className="text-xs text-blue-600">
+                               <span className="font-semibold">Premium earnings:</span> Ksh {(formData.price * 0.95).toFixed(2)} 
+                               <span className="text-green-600 ml-2">(+Ksh {(formData.price * 0.05).toFixed(2)} more)</span>
+                             </div>
+                           </div>
+                                                       <Button 
+                              size="sm" 
+                              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs px-3 py-1"
+                              onClick={() => {
+                                // Navigate to subscription section in dashboard
+                                navigate('/vendor-dashboard?section=subscription');
+                                toast({
+                                  title: "Premium Upgrade",
+                                  description: "Redirecting to subscription plans...",
+                                  variant: "default"
+                                });
+                              }}
+                            >
+                              Upgrade Now
+                            </Button>
+                         </div>
+                       </div>
+                     )}
+                   </div>
+                 )}
               </TabsContent>
 
               <TabsContent value="media" className="space-y-4">

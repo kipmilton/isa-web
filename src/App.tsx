@@ -23,6 +23,8 @@ import DeliveryPending from "./pages/DeliveryPending";
 import DeliveryRejection from "./pages/DeliveryRejection";
 import Shipping from "./pages/Shipping";
 import Profile from "./pages/Profile";
+import CustomerPremium from "./components/customer/CustomerPremium";
+import VendorSubscription from "./components/vendor/VendorSubscription";
 import { Analytics } from "@vercel/analytics/react";
 import VendorOnboarding from "./pages/VendorOnboarding";
 
@@ -61,6 +63,11 @@ const App = () => (
                 <VendorRejection />
               </AuthGuard>
             } />
+            <Route path="/vendor-subscription" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['vendor']} allowedVendorStatuses={['approved']}>
+                <VendorSubscription />
+              </AuthGuard>
+            } />
             <Route path="/shop" element={
               <AuthGuard requireAuth={true} allowedUserTypes={['customer']}>
                 <ShopDashboard />
@@ -95,6 +102,11 @@ const App = () => (
             <Route path="/profile" element={
               <AuthGuard requireAuth={true} allowedUserTypes={['customer']}>
                 <Profile />
+              </AuthGuard>
+            } />
+            <Route path="/premium" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['customer']}>
+                <CustomerPremium />
               </AuthGuard>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -54,69 +54,62 @@ export class SubscriptionService {
     },
     {
       id: 'premium_weekly',
-      name: 'Premium Weekly',
+      name: 'Premium Plan',
       type: 'premium',
       billingCycle: 'weekly',
-      priceKES: 199,
-      priceUSD: 1.99,
+      priceKES: 99,
+      priceUSD: 0.75,
       features: [
-        'Unlimited AI shopping assistance',
-        'Virtual try-on & personal styling',
-        'Exclusive early access to drops',
+        'Unlimited AI shopping assistance (no brand/category limits)',
+        'Virtual try-on experience & Personal styling',
+        'Exclusive early access to product drops and limited edition items',
         'Ad-free browsing',
-        'Multiple wishlists',
-        'Priority customer support',
-        'Free delivery on orders over KES 2,000'
+        'Multiple wishlists (e.g., "Vacation", "Workwear", "Gift Ideas")',
+        'Advanced personalization across style, budget, and mood (personal stylist)'
       ],
-      description: 'Try premium features for a week'
+      description: 'For shoppers who want the full, ad-free ISA experience'
     },
     {
       id: 'premium_monthly',
-      name: 'Premium Monthly',
+      name: 'Premium Plan',
       type: 'premium',
       billingCycle: 'monthly',
-      priceKES: 699,
-      priceUSD: 6.99,
+      priceKES: 499,
+      priceUSD: 3.75,
       features: [
-        'Unlimited AI shopping assistance',
-        'Virtual try-on & personal styling',
-        'Exclusive early access to drops',
+        'Unlimited AI shopping assistance (no brand/category limits)',
+        'Virtual try-on experience & Personal styling',
+        'Exclusive early access to product drops and limited edition items',
         'Ad-free browsing',
-        'Multiple wishlists',
-        'Priority customer support',
-        'Free delivery on orders over KES 2,000',
-        'Monthly style recommendations'
+        'Multiple wishlists (e.g., "Vacation", "Workwear", "Gift Ideas")',
+        'Advanced personalization across style, budget, and mood (personal stylist)'
       ],
-      description: 'Most popular choice for regular shoppers'
+      description: 'For shoppers who want the full, ad-free ISA experience'
     },
     {
       id: 'premium_yearly',
-      name: 'Premium Yearly',
+      name: 'Premium Plan',
       type: 'premium',
       billingCycle: 'yearly',
-      priceKES: 6999,
-      priceUSD: 69.99,
+      priceKES: 4999,
+      priceUSD: 37.50,
       features: [
-        'Unlimited AI shopping assistance',
-        'Virtual try-on & personal styling',
-        'Exclusive early access to drops',
+        'Unlimited AI shopping assistance (no brand/category limits)',
+        'Virtual try-on experience & Personal styling',
+        'Exclusive early access to product drops and limited edition items',
         'Ad-free browsing',
-        'Multiple wishlists',
-        'Priority customer support',
-        'Free delivery on all orders',
-        'Monthly style recommendations',
-        'Exclusive member events',
-        '2 months free compared to monthly'
+        'Multiple wishlists (e.g., "Vacation", "Workwear", "Gift Ideas")',
+        'Advanced personalization across style, budget, and mood (personal stylist)'
       ],
-      description: 'Best value for long-term users'
+      description: 'For shoppers who want the full, ad-free ISA experience'
     }
   ];
 
   // Currency conversion rates (simplified - in production, use real API)
   static readonly EXCHANGE_RATES = {
-    USD: 100, // 1 USD = 100 KES (approximate)
-    EUR: 110, // 1 EUR = 110 KES
-    GBP: 130, // 1 GBP = 130 KES
+    USD: 133, // 1 USD = 133 KES (approximate)
+    EUR: 145, // 1 EUR = 145 KES
+    GBP: 170, // 1 GBP = 170 KES
     KES: 1
   };
 

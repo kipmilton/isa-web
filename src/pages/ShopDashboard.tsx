@@ -20,6 +20,7 @@ import AuthDialog from "@/components/auth/AuthDialog";
 import CartModal from "@/components/CartModal";
 import AccountSetupModal from "@/components/AccountSetupModal";
 import SubscriptionManager from "@/components/subscription/SubscriptionManager";
+import NotificationBell from "@/components/ui/notification-bell";
 import { useNavigate, Link } from "react-router-dom";
 
 const categories = ["All", "Electronics", "Fashion", "Home", "Beauty", "Sports", "Books"];
@@ -357,6 +358,14 @@ const ShopDashboard = () => {
                 </Button>
               </Link>
               
+              {/* Notification Bell */}
+              {user && (
+                <NotificationBell 
+                  userId={user.id} 
+                  className="text-orange-600 hover:bg-orange-50 hover:text-orange-700"
+                />
+              )}
+              
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -401,6 +410,12 @@ const ShopDashboard = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
+                  {/* Premium Status Indicator */}
+                  {currentSubscription?.plan_type === 'premium' && (
+                    <div className="px-2 py-1.5 text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-medium rounded-t-md text-center">
+                      ⭐ Premium Member
+                    </div>
+                  )}
                   <DropdownMenuItem onClick={() => navigate('/profile?tab=profile')}>
                     <User className="w-4 h-4 mr-2" />
                     View Profile
@@ -418,6 +433,10 @@ const ShopDashboard = () => {
                     My Shipping
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/premium')}>
+                    <Crown className="w-4 h-4 mr-2" />
+                    Premium Plans
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setShowSubscriptionManager(true)}>
                     <Crown className="w-4 h-4 mr-2" />
                     Manage Subscription
@@ -478,6 +497,14 @@ const ShopDashboard = () => {
                   </Badge>
                 )}
               </Button>
+              
+              {/* Notification Bell for Mobile */}
+              {user && (
+                <NotificationBell 
+                  userId={user.id} 
+                  className="text-orange-600 hover:bg-orange-50 hover:text-orange-700"
+                />
+              )}
 
               {/* Mobile Menu Button */}
               <Button 

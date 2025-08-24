@@ -12,7 +12,8 @@ import {
   Receipt,
   ChevronRight,
   LogOut,
-  X
+  X,
+  Crown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,7 @@ const VendorSidebar = ({ activeSection, onSectionChange, onLogout, userName, isM
     { id: 'payments', label: 'Payments', icon: CreditCard },
     { id: 'reviews', label: 'Customer Reviews', icon: Star },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
+    { id: 'subscription', label: 'Subscription', icon: Crown },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 

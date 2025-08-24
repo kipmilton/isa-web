@@ -235,7 +235,18 @@ const AdminProducts = () => {
       const { data: { user } } = await supabase.auth.getUser();
       console.log('Current user ID:', user?.id);
       console.log('Attempting to approve product:', product.id);
-      const { error, data } = await supabase.rpc('approve_product', { product_id: product.id });
+      
+      // Update product status directly since RPC function doesn't exist
+      const { error, data } = await supabase
+        .from('products')
+        .update({ 
+          status: 'approved',
+          approved_at: new Date().toISOString(),
+          approved_by: user?.id,
+          is_active: true
+        })
+        .eq('id', product.id);
+        
       console.log('Approve response:', { error, data });
       if (error) {
         console.error('Supabase approve error:', error);
@@ -259,10 +270,18 @@ const AdminProducts = () => {
     if (!approvalProduct || !rejectionReason.trim()) return;
     try {
       console.log('Attempting to reject product:', approvalProduct.id, 'with reason:', rejectionReason);
-      const { error, data } = await supabase.rpc('reject_product', { 
-        product_id: approvalProduct.id, 
-        reason: rejectionReason.trim() 
-      });
+      
+      // Update product status directly since RPC function doesn't exist
+      const { error, data } = await supabase
+        .from('products')
+        .update({ 
+          status: 'rejected',
+          rejection_reason: rejectionReason.trim(),
+          rejected_at: new Date().toISOString(),
+          is_active: false
+        })
+        .eq('id', approvalProduct.id);
+        
       console.log('Reject response:', { error, data });
       if (error) {
         console.error('Supabase reject error:', error);

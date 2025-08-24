@@ -54,12 +54,13 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [plan, setPlan] = useState('free');
   const [planExpiry, setPlanExpiry] = useState<string | null>(null);
+  const [subscriptionEnabled, setSubscriptionEnabled] = useState(false);
   // Plan options with price
   const PLAN_OPTIONS = [
     { value: 'premium_weekly', label: 'Premium Weekly (199 KES)', price: 199 },
     { value: 'premium_monthly', label: 'Premium Monthly (699 KES)', price: 699 },
     { value: 'premium_yearly', label: 'Premium Yearly (8999 KES)', price: 8999 },
-    { value: 'pro', label: 'Pro Unlimited (9999 KES)', price: 9999 },
+    { value: 'pro', label: 'Pro Executive (9999 KES)', price: 9999 },
   ];
 
   // Helper to determine plan order for downgrade restriction
@@ -80,6 +81,7 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
     fetchPayoutSettings();
     fetchPaymentMethods();
     fetchPlan();
+    checkSubscriptionStatus();
   }, [vendorId]);
 
   const parsePreferences = (prefs: any) => {
@@ -287,8 +289,33 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
     }
   };
 
+  const checkSubscriptionStatus = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('points_config')
+        .select('vendor_subscription_enabled')
+        .single();
+      
+      if (error) {
+        console.error('Error fetching subscription status:', error);
+        return;
+      }
+      
+      setSubscriptionEnabled(data?.vendor_subscription_enabled || false);
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+      setSubscriptionEnabled(false);
+    }
+  };
+
   const handleUpgradePlan = async (newPlan: string) => {
     setPlanMessage(null);
+    
+    if (!subscriptionEnabled) {
+      setPlanMessage('Vendor subscriptions are not available yet. You will be notified when they become available.');
+      return;
+    }
+    
     if (isDowngrade(plan, newPlan)) {
       setPlanMessage('Downgrades are not allowed. Please contact support for assistance.');
       return;
@@ -669,18 +696,35 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Current Plan</CardTitle>
+                <CardTitle>Current Plan {!subscriptionEnabled && '(Coming Soon)'}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div>
                     <h3 className="text-lg font-medium">{PLAN_OPTIONS.find(p => p.value === plan)?.label || 'Free Plan'}</h3>
-                    <p className="text-gray-600">{plan === 'free' ? 'Basic vendor features' : 'Premium features enabled'}</p>
+                    <p className="text-gray-600">
+                      {plan === 'free' && 'Basic vendor features with unlimited products'}
+                      {plan === 'premium_weekly' && 'Premium features with unlimited products'}
+                      {plan === 'premium_monthly' && 'Premium features with unlimited products'}
+                      {plan === 'premium_yearly' && 'Premium features with unlimited products'}
+                      {plan === 'pro' && 'Executive features: Marketing promotions, customer notifications, reduced commission rates'}
+                    </p>
                     {planExpiry && (
                       <div className="text-xs text-gray-500 mt-1">Expiry: {new Date(planExpiry).toLocaleDateString()}</div>
                     )}
                     {planMessage && (
                       <div className="text-xs text-red-600 mt-2">{planMessage}</div>
+                    )}
+                    {!subscriptionEnabled && (
+                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center gap-2 text-blue-800">
+                          <span className="text-lg">🚀</span>
+                          <span className="font-medium">Coming Soon!</span>
+                        </div>
+                        <p className="text-sm text-blue-700 mt-1">
+                          Vendor subscriptions will be available soon. You'll be notified when you can upgrade your plan and access premium features.
+                        </p>
+                      </div>
                     )}
                   </div>
                   <div className="flex flex-col gap-2 items-end">
@@ -689,25 +733,65 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
                       className="border rounded px-3 py-2"
                       value={plan}
                       onChange={e => handleUpgradePlan(e.target.value)}
-                      disabled={loading || paymentMethods.length === 0}
+                      disabled={!subscriptionEnabled}
                     >
                       {PLAN_OPTIONS.map(opt => (
                         <option
                           key={opt.value}
                           value={opt.value}
-                          disabled={isDowngrade(plan, opt.value) || (isUpgrade(plan, opt.value) && paymentMethods.length === 0)}
+                          disabled={!subscriptionEnabled}
                         >
                           {opt.label}
                         </option>
                       ))}
                     </select>
-                    {paymentMethods.length === 0 && (
-                      <div className="text-xs text-yellow-600 mt-1">Add a card to enable plan upgrades.</div>
-                    )}
+                    <div className="text-xs text-gray-500 mt-1">
+                      {subscriptionEnabled ? 'Select a plan to upgrade' : 'Plan upgrades will be available soon.'}
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+            {!subscriptionEnabled && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Available Plans (Coming Soon)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {PLAN_OPTIONS.map((planOption) => (
+                      <div key={planOption.value} className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        <div className="text-lg font-semibold text-gray-700">{planOption.label.split(' (')[0]}</div>
+                        <div className="text-2xl font-bold text-blue-600 mt-2">{planOption.price} KES</div>
+                        <div className="text-sm text-gray-500 mt-2">
+                          {planOption.value === 'premium_weekly' && 'Weekly premium features'}
+                          {planOption.value === 'premium_monthly' && 'Monthly premium features'}
+                          {planOption.value === 'premium_yearly' && 'Yearly premium features'}
+                          {planOption.value === 'pro' && 'Executive features & reduced commissions'}
+                        </div>
+                        <div className="mt-3">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            Coming Soon
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-yellow-800">
+                      <span className="text-lg">💡</span>
+                      <span className="font-medium">Premium Benefits</span>
+                    </div>
+                    <ul className="text-sm text-yellow-700 mt-2 space-y-1">
+                      <li>• Reduced commission rates (5% vs 15% for free plan)</li>
+                      <li>• Priority customer support</li>
+                      <li>• Advanced analytics and insights</li>
+                      <li>• Marketing promotions and customer notifications</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             <Card>
               <CardHeader>
                 <CardTitle>Payment Methods</CardTitle>
@@ -858,9 +942,9 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
                       <button
                         className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded shadow w-full mb-2 disabled:opacity-60"
                         onClick={handleUpgradePayment}
-                        disabled={upgradeLoading}
+                        disabled={true}
                       >
-                        {upgradeLoading ? 'Processing...' : 'Pay & Upgrade'}
+                        Coming Soon
                       </button>
                       <button
                         className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded shadow w-full"
