@@ -12,6 +12,7 @@ import AdminStyleQuiz from "./sections/AdminStyleQuiz";
 import AdminDelivery from "./sections/AdminDelivery";
 import AdminRoles from "./sections/AdminRoles";
 import AdminTraining from "./sections/AdminTraining";
+import AdminNotifications from "./sections/AdminNotifications";
 
 interface AdminDashboardProps {
   user: any;
@@ -47,6 +48,8 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
         return <AdminRoles />;
       case "training":
         return <AdminTraining />;
+      case "notifications":
+        return <AdminNotifications />;
       default:
         return <AdminHome />;
     }
