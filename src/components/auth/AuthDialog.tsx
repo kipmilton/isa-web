@@ -779,7 +779,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             
             <div className="text-center max-w-sm">
               <img 
-                src="/lovable-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" 
+                src="/isa-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" 
                 alt="ISA Logo" 
                 className="h-20 w-20 mx-auto mb-6 bg-white rounded-full p-3"
               />

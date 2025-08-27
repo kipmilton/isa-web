@@ -656,7 +656,7 @@ const Profile = () => {
               </Link>
               <div className="flex items-center space-x-3">
                 <img 
-                  src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" 
+                  src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" 
                   alt="ISA Logo" 
                   className="w-8 h-8 rounded-full shadow-md"
                 />

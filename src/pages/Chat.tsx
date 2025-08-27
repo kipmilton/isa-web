@@ -156,7 +156,7 @@ const Chat = () => {
         <Sidebar className="border-r border-gray-200">
           <SidebarHeader className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
-              <img src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-6 w-6" />
+                              <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-6 w-6" />
               <span className="font-semibold text-gray-800">ISA Chat</span>
             </div>
             <Button 
@@ -206,7 +206,7 @@ const Chat = () => {
               <div className="flex items-center space-x-3">
                 <SidebarTrigger />
                 <div className="flex items-center space-x-2">
-                  <img src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-6 w-6" />
+                  <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-6 w-6" />
                   <h1 className="text-xl font-semibold text-gray-800">Ask ISA</h1>
                 </div>
               </div>
@@ -227,7 +227,7 @@ const Chat = () => {
             <ScrollArea className="flex-1 p-4">
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <img src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-16 w-16 mb-4" />
+                  <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-16 w-16 mb-4" />
                   <h2 className="text-2xl font-semibold text-gray-800 mb-2">
                     Hi! I'm ISA 👋
                   </h2>
@@ -270,7 +270,7 @@ const Chat = () => {
                       >
                         {message.type === 'isa' && (
                           <div className="flex items-center space-x-2 mb-2">
-                            <img src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-4 w-4" />
+                            <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-4 w-4" />
                             <span className="text-xs font-medium text-orange-600">ISA</span>
                           </div>
                         )}

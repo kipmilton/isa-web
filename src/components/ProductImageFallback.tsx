@@ -45,7 +45,7 @@ const ProductImageFallback = ({ product, className = "", alt = "", onClick }: Pr
   };
 
   const availableImages = getAvailableImages();
-  const logoFallback = "/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png";
+  const logoFallback = "/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png";
 
   // Debug logging
   console.log('ProductImageFallback - Available images:', availableImages);

@@ -172,7 +172,7 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img src="/lovable-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-10 w-10" />
+              <img src="/isa-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-10 w-10" />
               <span className="text-2xl font-bold text-gray-800">ISA</span>
             </div>
             {/* Desktop Nav */}
@@ -264,7 +264,7 @@ const Index = () => {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <div className="flex justify-center mb-6 animate-fade-in">
-            <img src="/lovable-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-20 w-20" />
+            <img src="/isa-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-20 w-20" />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-fade-in">
             Shop Smarter, Buy Better
@@ -429,7 +429,7 @@ const Index = () => {
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg overflow-hidden hover:shadow-lg transition-shadow hover-scale">
               <div className="h-48 bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center">
                 <img 
-                  src="/lovable-uploads/9d50b380-2e89-46c9-a242-8f5c708309df.png" 
+                  src="/isa-uploads/9d50b380-2e89-46c9-a242-8f5c708309df.png" 
                   alt="ISA mobile app launch"
                   className="w-full h-full object-cover"
                 />
@@ -447,7 +447,7 @@ const Index = () => {
             <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg overflow-hidden hover:shadow-lg transition-shadow hover-scale">
               <div className="h-48 bg-gradient-to-br from-green-200 to-green-300 flex items-center justify-center">
                 <img 
-                  src="/lovable-uploads/ce883482-92de-4adf-a3c6-a0c82b907ebe.png" 
+                  src="/isa-uploads/ce883482-92de-4adf-a3c6-a0c82b907ebe.png" 
                   alt="NVIDIA investing in Africa"
                   className="w-full h-full object-cover"
                 />
@@ -465,7 +465,7 @@ const Index = () => {
             <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg overflow-hidden hover:shadow-lg transition-shadow hover-scale">
               <div className="h-48 bg-gradient-to-br from-orange-200 to-orange-300 flex items-center justify-center">
                 <img 
-                  src="/lovable-uploads/94a65745-ea22-43d2-a47c-5a99be9bfa56.png" 
+                  src="/isa-uploads/94a65745-ea22-43d2-a47c-5a99be9bfa56.png" 
                   alt="Jumia partnership"
                   className="w-full h-full object-cover"
                 />
@@ -558,7 +558,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <img src="/lovable-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-8 w-8" />
+              <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-8 w-8" />
               <span className="text-xl font-bold text-gray-800">ISA</span>
             </div>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-sm text-gray-500">
