@@ -22,6 +22,7 @@ import AccountSetupModal from "@/components/AccountSetupModal";
 import SubscriptionManager from "@/components/subscription/SubscriptionManager";
 import NotificationBell from "@/components/ui/notification-bell";
 import { useNavigate, Link } from "react-router-dom";
+import ProductImageFallback from "@/components/ProductImageFallback";
 
 const categories = ["All", "Electronics", "Fashion", "Home", "Beauty", "Sports", "Books"];
 
@@ -74,8 +75,29 @@ const ShopDashboard = () => {
         if (!error && profile) {
           setUserProfile(profile);
           // Show account setup modal if user hasn't completed setup
-          if (!(profile as any).account_setup_completed && profile.user_type === 'customer') {
-            setShowAccountSetup(true);
+          // Check if user is a customer and hasn't completed account setup
+          if (profile.user_type === 'customer' && !profile.account_setup_completed) {
+            // Double-check if they actually have all required data
+            const hasCompleteData = profile.first_name && 
+              profile.last_name && 
+              profile.phone_number && 
+              profile.date_of_birth && 
+              profile.gender && 
+              profile.location;
+            
+            if (!hasCompleteData) {
+              setShowAccountSetup(true);
+            } else {
+              // They have all data but account_setup_completed is false, update it
+              const { error: updateError } = await supabase
+                .from('profiles')
+                .update({ account_setup_completed: true })
+                .eq('id', user.id);
+              
+              if (!updateError) {
+                setUserProfile({ ...profile, account_setup_completed: true });
+              }
+            }
           }
         }
       }
@@ -804,18 +826,12 @@ const ShopDashboard = () => {
                 return (
                   <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white rounded-xl overflow-hidden border-0 shadow-md">
                     <div className="relative h-48 overflow-hidden">
-                      {product.main_image ? (
-                        <img 
-                          src={product.main_image} 
-                          alt={product.name} 
-                          className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer" 
-                          onClick={() => navigate(`/product/${product.id}`)}
-                        />
-                      ) : (
-                        <div className="h-full w-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                          <span className="text-gray-400 text-sm">No Image</span>
-                        </div>
-                      )}
+                      <ProductImageFallback
+                        product={product}
+                        className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
+                        alt={product.name}
+                        onClick={() => navigate(`/product/${product.id}`)}
+                      />
                       
                       {/* Floating heart button */}
                       <Button

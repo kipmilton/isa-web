@@ -62,7 +62,7 @@ const NotificationBell = ({ userId, className }: NotificationBellProps) => {
   const handleMarkAllAsRead = async () => {
     try {
       setLoading(true);
-      const updatedCount = await NotificationService.markAllAsRead();
+      const updatedCount = await NotificationService.markAllAsRead(userId);
       if (updatedCount > 0) {
         setNotifications(prev => 
           prev.map(notif => ({ ...notif, is_read: true }))

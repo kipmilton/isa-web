@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +20,7 @@ const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    age: "",
+    dateOfBirth: "",
     gender: "",
     phoneNumber: "",
     county: "",
@@ -38,6 +38,19 @@ const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps)
     }
   }, [user, open]);
 
+  // Calculate age from date of birth
+  const calculateAge = (dateOfBirth: string) => {
+    if (!dateOfBirth) return null;
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const handleLocationChange = (county: string, constituency: string) => {
     setLocation({ county, constituency });
     setFormData(prev => ({ ...prev, county, constituency }));
@@ -53,7 +66,7 @@ const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps)
 
     try {
       // Validate required fields
-      const requiredFields = ['firstName', 'lastName', 'age', 'gender', 'phoneNumber', 'county', 'constituency'];
+      const requiredFields = ['firstName', 'lastName', 'dateOfBirth', 'gender', 'phoneNumber', 'county', 'constituency'];
       const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
       
       if (missingFields.length > 0) {
@@ -62,13 +75,17 @@ const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps)
         return;
       }
 
+      // Calculate age from date of birth
+      const calculatedAge = calculateAge(formData.dateOfBirth);
+
       // Update profile
       const { error } = await supabase
         .from('profiles')
         .update({
           first_name: formData.firstName,
           last_name: formData.lastName,
-          age: parseInt(formData.age),
+          date_of_birth: formData.dateOfBirth,
+          age: calculatedAge,
           gender: formData.gender,
           phone_number: formData.phoneNumber,
           location: `${formData.county}, ${formData.constituency}`,
@@ -98,9 +115,9 @@ const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps)
           <DialogTitle className="text-2xl font-bold text-center">
             Complete Your Profile Setup
           </DialogTitle>
-          <p className="text-center text-gray-600 mt-2">
+          <DialogDescription className="text-center text-gray-600 mt-2">
             Help us provide you with more accurate and personalized product recommendations
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
@@ -129,17 +146,15 @@ const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps)
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="age">Age *</Label>
+              <Label htmlFor="dateOfBirth">Date of Birth *</Label>
               <Input
-                id="age"
-                type="number"
-                min="13"
-                max="120"
+                id="dateOfBirth"
+                type="date"
                 required
-                value={formData.age}
-                onChange={(e) => handleInputChange('age', e.target.value)}
+                value={formData.dateOfBirth}
+                onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                 className="mt-1"
-                placeholder="Enter your age"
+                max={new Date().toISOString().split('T')[0]}
               />
             </div>
             <div>

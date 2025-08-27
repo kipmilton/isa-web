@@ -24,6 +24,7 @@ import { OrderService } from "@/services/orderService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import ProductImageFallback from "@/components/ProductImageFallback";
 
 const ProductDetail = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -339,10 +340,14 @@ const ProductDetail = () => {
           {/* Product Images */}
           <div className="space-y-4">
             <div className="relative aspect-square bg-white rounded-lg overflow-hidden shadow-lg">
-              <img
-                src={productImages[currentImageIndex]?.image_url || product.main_image || '/placeholder.svg'}
-                alt={productImages[currentImageIndex]?.image_description || product.name}
+              <ProductImageFallback
+                product={{
+                  ...product,
+                  product_images: productImages,
+                  main_image: productImages[currentImageIndex]?.image_url || product.main_image
+                }}
                 className="w-full h-full object-cover cursor-pointer"
+                alt={productImages[currentImageIndex]?.image_description || product.name}
                 onClick={() => setShowImageModal(true)}
               />
               
@@ -378,10 +383,13 @@ const ProductDetail = () => {
                     }`}
                     onClick={() => setCurrentImageIndex(index)}
                   >
-                    <img
-                      src={image.image_url}
-                      alt={image.image_description || `Image ${index + 1}`}
+                    <ProductImageFallback
+                      product={{
+                        main_image: image.image_url,
+                        name: image.image_description || `Image ${index + 1}`
+                      }}
                       className="w-full h-full object-cover"
+                      alt={image.image_description || `Image ${index + 1}`}
                     />
                   </div>
                 ))}

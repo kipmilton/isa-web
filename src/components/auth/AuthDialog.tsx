@@ -188,30 +188,63 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
         // Create profile for new user
         if (authData.user) {
+          // Calculate age from date of birth for customers
+          let calculatedAge = null;
+          if (userType === 'customer' && customerData.dob) {
+            const birthDate = new Date(customerData.dob);
+            const today = new Date();
+            calculatedAge = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+              calculatedAge--;
+            }
+          }
+
+          // Check if customer has all required fields for complete setup
+          const hasCompleteCustomerData = userType === 'customer' && 
+            customerData.firstName && 
+            customerData.lastName && 
+            customerData.phoneNumber && 
+            customerData.dob && 
+            customerData.gender && 
+            customerData.county && 
+            customerData.constituency;
+
+          // Prepare profile data with proper defaults
+          const profileData = {
+            id: authData.user.id,
+            email: signUpData.email,
+            user_type: userType,
+            account_setup_completed: hasCompleteCustomerData,
+            first_name: '',
+            last_name: '',
+            phone_number: '',
+            date_of_birth: null,
+            age: null,
+            gender: '',
+            location: '',
+            status: 'pending'
+          };
+
+          // Add customer-specific data if user is customer
+          if (userType === 'customer') {
+            profileData.first_name = customerData.firstName || '';
+            profileData.last_name = customerData.lastName || '';
+            profileData.phone_number = customerData.phoneNumber || '';
+            profileData.date_of_birth = customerData.dob || null;
+            profileData.age = calculatedAge;
+            profileData.gender = customerData.gender || '';
+            profileData.location = customerData.county && customerData.constituency 
+              ? `${customerData.constituency}, ${customerData.county}` 
+              : '';
+          } else if (userType === 'vendor') {
+            profileData.first_name = vendorData.firstName || '';
+            profileData.last_name = vendorData.lastName || '';
+          }
+
           const { error: profileError } = await supabase
             .from('profiles')
-            .insert({
-              id: authData.user.id,
-              email: signUpData.email,
-              user_type: userType,
-              account_setup_completed: userType === 'customer', // Only customers have completed setup
-              ...(userType === 'customer' ? {
-                first_name: customerData.firstName,
-                last_name: customerData.lastName,
-                phone_number: customerData.phoneNumber,
-                date_of_birth: customerData.dob,
-                gender: customerData.gender,
-                location: `${customerData.county}, ${customerData.constituency}`
-              } : userType === 'vendor' ? {
-                first_name: vendorData.firstName,
-                last_name: vendorData.lastName,
-                // For vendors, set minimal profile data - business details will be added during onboarding
-                status: 'pending'
-              } : {
-                // For vendors, set minimal profile data - business details will be added during onboarding
-                status: 'pending'
-              })
-            });
+            .insert(profileData);
 
           if (profileError) {
             console.error('Error creating profile:', profileError);
