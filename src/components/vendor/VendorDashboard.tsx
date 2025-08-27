@@ -205,7 +205,21 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
             <VendorSubscription />
           </div>
         );
-      case "settings":
+      case "settings-account":
+        return (
+          <div>
+            <UpgradeButton />
+            <VendorSettings vendorId={user.id} defaultTab="account" showUpgradeModal={upgradeFromBanner} onCloseUpgradeModal={() => setUpgradeFromBanner(false)} />
+          </div>
+        );
+      case "settings-payout":
+        return (
+          <div>
+            <UpgradeButton />
+            <VendorSettings vendorId={user.id} defaultTab="payout" showUpgradeModal={upgradeFromBanner} onCloseUpgradeModal={() => setUpgradeFromBanner(false)} />
+          </div>
+        );
+      case "settings-billing":
         return (
           <div>
             <UpgradeButton />

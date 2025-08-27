@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import LocationSelect from "./auth/LocationSelect";
 
+
 interface AccountSetupModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

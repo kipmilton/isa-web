@@ -25,13 +25,16 @@ import {
 
 interface VendorApplicationData {
   accountType: string;
+  heardAboutUs: string;
+  otherHeardAboutUs?: string;
   businessName: string;
-  contactPerson: string;
+  brandName: string;
   email: string;
   phone: string;
   businessType: string;
   otherBusinessType?: string;
   description: string;
+  websiteUrl: string;
   location: {
     county: string;
     constituency: string;
@@ -40,7 +43,9 @@ interface VendorApplicationData {
     idCard?: string;
     businessCert?: string;
     pinCert?: string;
-    bankDetails: string;
+    bankName: string;
+    accountNumber: string;
+    accountHolderName: string;
   };
 }
 
@@ -487,12 +492,26 @@ const AdminVendors = () => {
                         <p className="text-sm text-gray-600 capitalize">{vendorApplicationData.accountType}</p>
                       </div>
                       <div>
+                        <strong>How did you hear about us:</strong>
+                        <p className="text-sm text-gray-600 capitalize">
+                          {vendorApplicationData.heardAboutUs === 'isa_contact' ? 'I was contacted by ISA' :
+                           vendorApplicationData.heardAboutUs === 'tiktok' ? 'TikTok' :
+                           vendorApplicationData.heardAboutUs === 'facebook' ? 'Facebook' :
+                           vendorApplicationData.heardAboutUs === 'instagram' ? 'Instagram' :
+                           vendorApplicationData.heardAboutUs === 'twitter' ? 'X (Twitter)' :
+                           vendorApplicationData.heardAboutUs === 'tv_ads' ? 'TV Ads' :
+                           vendorApplicationData.heardAboutUs === 'friend_referral' ? 'Referred by friend' :
+                           vendorApplicationData.heardAboutUs === 'other' ? `Other: ${vendorApplicationData.otherHeardAboutUs}` :
+                           vendorApplicationData.heardAboutUs}
+                        </p>
+                      </div>
+                      <div>
                         <strong>Business Name:</strong>
                         <p className="text-sm text-gray-600">{vendorApplicationData.businessName}</p>
                       </div>
                       <div>
-                        <strong>Contact Person:</strong>
-                        <p className="text-sm text-gray-600">{vendorApplicationData.contactPerson}</p>
+                        <strong>Brand Name:</strong>
+                        <p className="text-sm text-gray-600">{vendorApplicationData.brandName}</p>
                       </div>
                       <div>
                         <strong>Email:</strong>
@@ -503,9 +522,19 @@ const AdminVendors = () => {
                         <p className="text-sm text-gray-600">{vendorApplicationData.phone}</p>
                       </div>
                       <div>
-                        <strong>Business Type:</strong>
+                        <strong>Business Industry:</strong>
                         <p className="text-sm text-gray-600">
-                          {vendorApplicationData.businessType}
+                          {vendorApplicationData.businessType === 'fashion' ? 'Fashion & Clothing' :
+                           vendorApplicationData.businessType === 'electronics' ? 'Electronics' :
+                           vendorApplicationData.businessType === 'home' ? 'Home & Garden' :
+                           vendorApplicationData.businessType === 'beauty' ? 'Beauty & Personal Care' :
+                           vendorApplicationData.businessType === 'sports' ? 'Sports & Outdoors' :
+                           vendorApplicationData.businessType === 'books' ? 'Books & Media' :
+                           vendorApplicationData.businessType === 'toys' ? 'Toys & Games' :
+                           vendorApplicationData.businessType === 'automotive' ? 'Automotive' :
+                           vendorApplicationData.businessType === 'food' ? 'Food & Beverage' :
+                           vendorApplicationData.businessType === 'health' ? 'Health & Wellness' :
+                           vendorApplicationData.businessType}
                           {vendorApplicationData.otherBusinessType && (
                             <span className="text-xs text-gray-500 block">
                               ({vendorApplicationData.otherBusinessType})
@@ -517,6 +546,14 @@ const AdminVendors = () => {
                         <strong>Location:</strong>
                         <p className="text-sm text-gray-600">
                           {vendorApplicationData.location.county}, {vendorApplicationData.location.constituency}
+                        </p>
+                      </div>
+                      <div>
+                        <strong>Website/Social Media URL:</strong>
+                        <p className="text-sm text-gray-600">
+                          <a href={vendorApplicationData.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                            {vendorApplicationData.websiteUrl}
+                          </a>
                         </p>
                       </div>
                     </div>
@@ -626,9 +663,20 @@ const AdminVendors = () => {
                           <FileText className="w-4 h-4 text-gray-500" />
                           <strong>Bank Account Details</strong>
                         </div>
-                        <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                          {vendorApplicationData.documents.bankDetails}
-                        </p>
+                        <div className="space-y-2">
+                          <div>
+                            <strong>Bank Name:</strong>
+                            <p className="text-sm text-gray-600">{vendorApplicationData.documents.bankName}</p>
+                          </div>
+                          <div>
+                            <strong>Account Number:</strong>
+                            <p className="text-sm text-gray-600">{vendorApplicationData.documents.accountNumber}</p>
+                          </div>
+                          <div>
+                            <strong>Account Holder Name:</strong>
+                            <p className="text-sm text-gray-600">{vendorApplicationData.documents.accountHolderName}</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

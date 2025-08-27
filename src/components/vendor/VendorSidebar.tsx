@@ -11,9 +11,11 @@ import {
   User,
   Receipt,
   ChevronRight,
+  ChevronDown,
   LogOut,
   X,
-  Crown
+  Crown,
+  Building
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -28,6 +30,7 @@ interface VendorSidebarProps {
 
 const VendorSidebar = ({ activeSection, onSectionChange, onLogout, userName, isMobile = false }: VendorSidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
 
   const menuItems = [
     { id: 'home', label: 'Home', icon: Home },
@@ -38,8 +41,16 @@ const VendorSidebar = ({ activeSection, onSectionChange, onLogout, userName, isM
     { id: 'reviews', label: 'Customer Reviews', icon: Star },
     { id: 'wallet', label: 'Wallet', icon: Wallet },
     { id: 'subscription', label: 'Subscription', icon: Crown },
-    { id: 'settings', label: 'Settings', icon: Settings },
   ];
+
+  const settingsSubItems = [
+    { id: 'settings-account', label: 'Account', icon: User },
+    { id: 'settings-payout', label: 'Payout', icon: Building },
+    { id: 'settings-billing', label: 'Billing', icon: CreditCard },
+  ];
+
+  const isSettingsActive = activeSection.startsWith('settings-');
+  const isSettingsExpanded = settingsExpanded || isSettingsActive;
 
   return (
     <div className={cn(
@@ -106,6 +117,66 @@ const VendorSidebar = ({ activeSection, onSectionChange, onLogout, userName, isM
             </Button>
           );
         })}
+
+        {/* Settings Section */}
+        <div className="space-y-1">
+          <Button
+            variant={isSettingsActive ? "default" : "ghost"}
+            className={cn(
+              "w-full justify-between h-10 px-3",
+              isSettingsActive && "bg-blue-600 text-white hover:bg-blue-700",
+              !isSettingsActive && "text-gray-700 hover:bg-gray-100",
+              !isMobile && isCollapsed && "px-2 justify-center"
+            )}
+            onClick={() => {
+              if (isCollapsed && !isMobile) {
+                onSectionChange('settings-account');
+              } else {
+                setSettingsExpanded(!settingsExpanded);
+                if (!isSettingsActive) {
+                  onSectionChange('settings-account');
+                }
+              }
+            }}
+          >
+            <div className="flex items-center">
+              <Settings className={cn("h-4 w-4", (!isCollapsed || isMobile) && "mr-3")} />
+              {(!isCollapsed || isMobile) && <span>Settings</span>}
+            </div>
+            {(!isCollapsed || isMobile) && (
+              <ChevronDown className={cn(
+                "h-4 w-4 transition-transform",
+                isSettingsExpanded ? "rotate-180" : "rotate-0"
+              )} />
+            )}
+          </Button>
+
+          {/* Settings Sub-items */}
+          {isSettingsExpanded && (!isCollapsed || isMobile) && (
+            <div className="ml-4 space-y-1">
+              {settingsSubItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeSection === item.id;
+                
+                return (
+                  <Button
+                    key={item.id}
+                    variant={isActive ? "default" : "ghost"}
+                    className={cn(
+                      "w-full justify-start h-8 px-3 text-sm",
+                      isActive && "bg-blue-600 text-white hover:bg-blue-700",
+                      !isActive && "text-gray-600 hover:bg-gray-100"
+                    )}
+                    onClick={() => onSectionChange(item.id)}
+                  >
+                    <Icon className="h-3 w-3 mr-2" />
+                    <span>{item.label}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </nav>
 
       {/* Logout */}

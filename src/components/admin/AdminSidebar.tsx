@@ -12,7 +12,8 @@ import {
   ChevronRight,
   LogOut,
   Star,
-  Bell
+  Bell,
+  MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -41,6 +42,7 @@ const AdminSidebar = ({ activeSection, onSectionChange, onLogout, userName }: Ad
     { id: 'roles', label: 'Admin Roles', icon: Shield },
     { id: 'training', label: 'Training Modules', icon: Users },
     { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'customer-support', label: 'Customer Support', icon: MessageCircle },
   ];
 
   return (

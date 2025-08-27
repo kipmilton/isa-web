@@ -370,13 +370,6 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                 <TabsContent value="signin">
                   {showPasswordReset ? (
                     <div className="space-y-4">
-                      <div className="text-center">
-                        <h3 className="text-lg font-semibold mb-2">Reset Password</h3>
-                        <p className="text-sm text-gray-600 mb-4">
-                          Enter your email address and we'll send you a link to reset your password.
-                        </p>
-                      </div>
-                      
                       {resetEmailSent ? (
                         <div className="text-center space-y-4">
                           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
@@ -402,6 +395,13 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                         </div>
                       ) : (
                         <form onSubmit={handlePasswordReset} className="space-y-4">
+                          <div className="text-center">
+                            <h3 className="text-lg font-semibold mb-2">Reset Password</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                              Enter your email address and we'll send you a link to reset your password.
+                            </p>
+                          </div>
+                          
                           <div>
                             <Label htmlFor="resetEmail">Email Address</Label>
                             <Input 

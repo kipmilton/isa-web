@@ -13,6 +13,7 @@ import AdminDelivery from "./sections/AdminDelivery";
 import AdminRoles from "./sections/AdminRoles";
 import AdminTraining from "./sections/AdminTraining";
 import AdminNotifications from "./sections/AdminNotifications";
+import AdminCustomerSupport from "./sections/AdminCustomerSupport";
 
 interface AdminDashboardProps {
   user: any;
@@ -50,6 +51,8 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
         return <AdminTraining />;
       case "notifications":
         return <AdminNotifications />;
+      case "customer-support":
+        return <AdminCustomerSupport />;
       default:
         return <AdminHome />;
     }

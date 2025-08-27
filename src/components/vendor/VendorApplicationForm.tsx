@@ -17,7 +17,9 @@ import {
   FileText, 
   Upload,
   CheckCircle,
-  ArrowRight
+  ArrowRight,
+  ChevronRight,
+  AlertCircle
 } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 
@@ -31,19 +33,24 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     accountType: '',
+    heardAboutUs: '',
+    otherHeardAboutUs: '',
     businessName: '',
-    contactPerson: '',
+    brandName: '',
     email: '',
     phone: '',
     businessType: '',
     otherBusinessType: '',
     description: '',
+    websiteUrl: '',
     location: { county: '', constituency: '' },
     documents: {
       idCard: null as File | null,
       businessCert: null as File | null,
       pinCert: null as File | null,
-      bankDetails: ''
+      bankName: '',
+      accountNumber: '',
+      accountHolderName: ''
     }
   });
   const [loading, setLoading] = useState(false);
@@ -113,29 +120,32 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
     let completedFields = 0;
     let totalFields = 0;
 
-    // Step 1: Account Type (2 fields)
-    totalFields += 2;
-    if (formData.accountType) completedFields++;
-    if (formData.businessName) completedFields++;
-    if (formData.contactPerson) completedFields++;
-
-    // Step 2: Contact Details (4 fields)
+    // Step 1: Account Type (4 fields)
     totalFields += 4;
+    if (formData.accountType) completedFields++;
+    if (formData.heardAboutUs) completedFields++;
+    if (formData.businessName) completedFields++;
+    if (formData.brandName) completedFields++;
+
+    // Step 2: Contact Details (3 fields)
+    totalFields += 3;
     if (formData.email) completedFields++;
     if (formData.phone) completedFields++;
-    if (formData.businessType) completedFields++;
-    if (formData.businessType === 'other' ? formData.otherBusinessType : true) completedFields++;
     if (formData.location.county) completedFields++;
     if (formData.location.constituency) completedFields++;
 
-    // Step 3: Business Description (1 field)
-    totalFields += 1;
+    // Step 3: Business Info (3 fields)
+    totalFields += 3;
+    if (formData.businessType) completedFields++;
     if (formData.description) completedFields++;
+    if (formData.websiteUrl) completedFields++;
 
-    // Step 4: Documents (2 required fields)
-    totalFields += 2;
+    // Step 4: Documents (4 required fields)
+    totalFields += 4;
     if (formData.documents.idCard) completedFields++;
-    if (formData.documents.bankDetails) completedFields++;
+    if (formData.documents.bankName) completedFields++;
+    if (formData.documents.accountNumber) completedFields++;
+    if (formData.documents.accountHolderName) completedFields++;
 
     const progress = Math.round((completedFields / totalFields) * 100);
     onProgressChange?.(progress);
@@ -214,8 +224,8 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          first_name: formData.contactPerson.split(' ')[0] || formData.contactPerson,
-          last_name: formData.contactPerson.split(' ').slice(1).join(' ') || '',
+          first_name: formData.brandName.split(' ')[0] || formData.brandName,
+          last_name: formData.brandName.split(' ').slice(1).join(' ') || '',
           company: formData.businessName,
           business_type: formData.businessType === 'other' ? formData.otherBusinessType : formData.businessType,
           phone_number: formData.phone,
@@ -240,7 +250,9 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
             ...formData,
             documents: {
               ...documentUrls,
-              bankDetails: formData.documents.bankDetails
+              bankName: formData.documents.bankName,
+              accountNumber: formData.documents.accountNumber,
+              accountHolderName: formData.documents.accountHolderName
             }
           },
           is_completed: true,
@@ -294,13 +306,12 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.accountType && formData.businessName && formData.contactPerson;
+        return formData.accountType && formData.heardAboutUs && formData.businessName && formData.brandName;
       case 2:
-        return formData.email && formData.phone && formData.businessType && 
-               (formData.businessType !== 'other' || formData.otherBusinessType) &&
+        return formData.email && formData.phone && 
                formData.location.county && formData.location.constituency;
       case 3:
-        return formData.description;
+        return formData.businessType && formData.description && formData.websiteUrl;
       case 4:
         // Require valid files for all uploaded docs
         if (formData.accountType === 'corporate') {
@@ -312,7 +323,7 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
           if (fileErrors.idCard) return false;
           if (formData.documents.idCard && fileErrors.idCard) return false;
         }
-        return formData.documents.bankDetails;
+        return formData.documents.bankName && formData.documents.accountNumber && formData.documents.accountHolderName;
       default:
         return false;
     }
@@ -323,42 +334,94 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
       case 1:
         return (
           <div className="space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-blue-800 mb-1">Account Type Selection</h4>
+                  <p className="text-sm text-blue-700">
+                    Choose the account type that best describes your business structure. This helps us provide the most appropriate onboarding experience.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div>
-              <Label className="text-base font-medium">Account Type</Label>
+              <Label className="text-base font-semibold text-gray-900 mb-3 block">Account Type *</Label>
               <RadioGroup 
                 value={formData.accountType} 
                 onValueChange={(value) => handleInputChange('accountType', value)}
-                className="mt-2"
+                className="space-y-3"
               >
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
                   <RadioGroupItem value="individual" id="individual" />
-                  <Label htmlFor="individual"> </Label>
+                  <Label htmlFor="individual" className="text-base cursor-pointer">
+                    <div className="font-medium">Individual Seller</div>
+                    <div className="text-sm text-gray-600">Personal account for individual sellers</div>
+                  </Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
                   <RadioGroupItem value="corporate" id="corporate" />
-                  <Label htmlFor="corporate">Corporate Seller (registered business/brand)</Label>
+                  <Label htmlFor="corporate" className="text-base cursor-pointer">
+                    <div className="font-medium">Corporate Seller</div>
+                    <div className="text-sm text-gray-600">Registered business or brand account</div>
+                  </Label>
                 </div>
               </RadioGroup>
             </div>
 
+            <div>
+              <Label htmlFor="heardAboutUs" className="text-base font-semibold text-gray-900">How did you hear about us? *</Label>
+              <Select value={formData.heardAboutUs} onValueChange={(value) => handleInputChange('heardAboutUs', value)}>
+                <SelectTrigger className="mt-2 h-12 text-base">
+                  <SelectValue placeholder="Select how you heard about us" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="isa_contact">I was contacted by ISA</SelectItem>
+                  <SelectItem value="tiktok">TikTok</SelectItem>
+                  <SelectItem value="facebook">Facebook</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="twitter">X (Twitter)</SelectItem>
+                  <SelectItem value="tv_ads">TV Ads</SelectItem>
+                  <SelectItem value="friend_referral">Referred by friend</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.heardAboutUs === 'other' && (
+              <div>
+                <Label htmlFor="otherHeardAboutUs" className="text-base font-semibold text-gray-900">Please specify *</Label>
+                <Input
+                  id="otherHeardAboutUs"
+                  value={formData.otherHeardAboutUs}
+                  onChange={(e) => handleInputChange('otherHeardAboutUs', e.target.value)}
+                  placeholder="e.g., LinkedIn, Google Search, etc."
+                  className="mt-2 h-12 text-base"
+                />
+              </div>
+            )}
+
             <div className="space-y-4">
               <div>
-                <Label htmlFor="businessName">Business/Personal Name</Label>
+                <Label htmlFor="businessName" className="text-base font-semibold text-gray-900">Business Name *</Label>
                 <Input
                   id="businessName"
                   value={formData.businessName}
                   onChange={(e) => handleInputChange('businessName', e.target.value)}
-                  placeholder="Enter your business or personal name"
+                  placeholder="Enter your business name"
+                  className="mt-2 h-12 text-base"
                 />
               </div>
 
               <div>
-                <Label htmlFor="contactPerson">Contact Person</Label>
+                <Label htmlFor="brandName" className="text-base font-semibold text-gray-900">Brand Name *</Label>
                 <Input
-                  id="contactPerson"
-                  value={formData.contactPerson}
-                  onChange={(e) => handleInputChange('contactPerson', e.target.value)}
-                  placeholder="Primary contact person name"
+                  id="brandName"
+                  value={formData.brandName}
+                  onChange={(e) => handleInputChange('brandName', e.target.value)}
+                  placeholder="Enter your brand name"
+                  className="mt-2 h-12 text-base"
                 />
               </div>
             </div>
@@ -367,34 +430,77 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
 
       case 2:
         return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                placeholder="your.email@example.com"
-              />
+          <div className="space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-blue-800 mb-1">Contact Information</h4>
+                  <p className="text-sm text-blue-700">
+                    Provide your contact details so we can reach you and keep you updated on your application status.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="email" className="text-base font-semibold text-gray-900">Email Address *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  placeholder="your.email@example.com"
+                  className="mt-2 h-12 text-base"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="phone" className="text-base font-semibold text-gray-900">Phone Number *</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  placeholder="+254 XXX XXX XXX"
+                  className="mt-2 h-12 text-base"
+                />
+              </div>
             </div>
 
             <div>
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                placeholder="+254 XXX XXX XXX"
-              />
+              <Label className="text-base font-semibold text-gray-900">Business Location *</Label>
+              <div className="mt-2">
+                <LocationSelect 
+                  onLocationChange={handleLocationChange}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-blue-800 mb-1">Business Information</h4>
+                  <p className="text-sm text-blue-700">
+                    Tell us about your business, the products you sell, and what makes you unique. This helps us better understand your business and provide relevant support.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div>
-              <Label htmlFor="businessType">Business Type</Label>
+              <Label htmlFor="businessType" className="text-base font-semibold text-gray-900">In what industry does your business operate? *</Label>
               <Select value={formData.businessType} onValueChange={(value) => handleInputChange('businessType', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select business type" />
+                <SelectTrigger className="mt-2 h-12 text-base">
+                  <SelectValue placeholder="Select your business industry" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="fashion">Fashion & Clothing</SelectItem>
@@ -405,6 +511,8 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
                   <SelectItem value="books">Books & Media</SelectItem>
                   <SelectItem value="toys">Toys & Games</SelectItem>
                   <SelectItem value="automotive">Automotive</SelectItem>
+                  <SelectItem value="food">Food & Beverage</SelectItem>
+                  <SelectItem value="health">Health & Wellness</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
@@ -412,37 +520,38 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
 
             {formData.businessType === 'other' && (
               <div>
-                <Label htmlFor="otherBusinessType">Please specify your business type</Label>
+                <Label htmlFor="otherBusinessType" className="text-base font-semibold text-gray-900">Please specify your business industry *</Label>
                 <Input
                   id="otherBusinessType"
                   value={formData.otherBusinessType}
                   onChange={(e) => handleInputChange('otherBusinessType', e.target.value)}
-                  placeholder="e.g., Food & Beverage, Health & Wellness, etc."
+                  placeholder="e.g., Education, Technology, etc."
+                  className="mt-2 h-12 text-base"
                 />
               </div>
             )}
 
             <div>
-              <Label className="text-base font-medium">Business Location</Label>
-              <LocationSelect 
-                onLocationChange={handleLocationChange}
-                required
-              />
-            </div>
-          </div>
-        );
-
-      case 3:
-        return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="description">Business Description</Label>
+              <Label htmlFor="description" className="text-base font-semibold text-gray-900">Business Description *</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 placeholder="Tell us about your business, products you sell, and what makes you unique..."
-                rows={5}
+                rows={6}
+                className="mt-2 text-base resize-none"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="websiteUrl" className="text-base font-semibold text-gray-900">Website/Social Media URL *</Label>
+              <Input
+                id="websiteUrl"
+                type="url"
+                value={formData.websiteUrl}
+                onChange={(e) => handleInputChange('websiteUrl', e.target.value)}
+                placeholder="https://your-website.com or https://instagram.com/yourbrand"
+                className="mt-2 h-12 text-base"
               />
             </div>
           </div>
@@ -451,67 +560,124 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
       case 4:
         return (
           <div className="space-y-6">
-            <div>
-              <Label className="text-base font-medium">Required Documents</Label>
-              <p className="text-sm text-gray-600 mt-1">
-                Upload the following documents based on your account type
-              </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-blue-800 mb-1">Required Documents</h4>
+                  <p className="text-sm text-blue-700">
+                    Upload the following documents based on your account type. Required documents are marked with an asterisk (*).
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="idCard">National ID / Passport (Optional)</Label>
+            <div className="space-y-6">
+              <div className="border border-gray-200 rounded-lg p-4">
+                <Label htmlFor="idCard" className="text-base font-semibold text-gray-900">National ID / Passport *</Label>
+                <p className="text-sm text-gray-600 mt-1 mb-3">Required for verification</p>
                 <Input
                   id="idCard"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
                   onChange={async (e) => await handleDocumentUpload('idCard', e.target.files?.[0] || null)}
+                  className="mt-2"
                 />
-                <p className="text-xs text-gray-500 mt-1">You can upload this later if needed</p>
-                {fileErrors.idCard && <p className="text-xs text-red-500 mt-1">{fileErrors.idCard}</p>}
+                {fileErrors.idCard && (
+                  <div className="flex items-center space-x-2 mt-2 text-red-600">
+                    <AlertCircle className="w-4 h-4" />
+                    <p className="text-sm">{fileErrors.idCard}</p>
+                  </div>
+                )}
               </div>
 
               {formData.accountType === 'corporate' && (
                 <>
-                  <div>
-                    <Label htmlFor="businessCert">Certificate of Incorporation (Optional)</Label>
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <Label htmlFor="businessCert" className="text-base font-semibold text-gray-900">Certificate of Incorporation</Label>
+                    <p className="text-sm text-gray-600 mt-1 mb-3">You can upload this later if needed</p>
                     <Input
                       id="businessCert"
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
                       onChange={async (e) => await handleDocumentUpload('businessCert', e.target.files?.[0] || null)}
+                      className="mt-2"
                     />
-                    <p className="text-xs text-gray-500 mt-1">You can upload this later if needed</p>
-                    {fileErrors.businessCert && <p className="text-xs text-red-500 mt-1">{fileErrors.businessCert}</p>}
+                    {fileErrors.businessCert && (
+                      <div className="flex items-center space-x-2 mt-2 text-red-600">
+                        <AlertCircle className="w-4 h-4" />
+                        <p className="text-sm">{fileErrors.businessCert}</p>
+                      </div>
+                    )}
                   </div>
 
-                  <div>
-                    <Label htmlFor="pinCert">PIN/VAT Certificate (Optional)</Label>
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <Label htmlFor="pinCert" className="text-base font-semibold text-gray-900">PIN/VAT Certificate</Label>
+                    <p className="text-sm text-gray-600 mt-1 mb-3">You can upload this later if needed</p>
                     <Input
                       id="pinCert"
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
                       onChange={async (e) => await handleDocumentUpload('pinCert', e.target.files?.[0] || null)}
+                      className="mt-2"
                     />
-                    <p className="text-xs text-gray-500 mt-1">You can upload this later if needed</p>
-                    {fileErrors.pinCert && <p className="text-xs text-red-500 mt-1">{fileErrors.pinCert}</p>}
+                    {fileErrors.pinCert && (
+                      <div className="flex items-center space-x-2 mt-2 text-red-600">
+                        <AlertCircle className="w-4 h-4" />
+                        <p className="text-sm">{fileErrors.pinCert}</p>
+                      </div>
+                    )}
                   </div>
                 </>
               )}
 
-              <div>
-                <Label htmlFor="bankDetails">Bank Account Details *</Label>
-                <Textarea
-                  id="bankDetails"
-                  value={formData.documents.bankDetails}
-                  onChange={(e) => handleInputChange('documents', {
-                    ...formData.documents,
-                    bankDetails: e.target.value
-                  })}
-                  placeholder="Bank name, account number, account holder name..."
-                  rows={3}
-                />
-                <p className="text-xs text-gray-500 mt-1">Required for payment processing</p>
+              <div className="border border-gray-200 rounded-lg p-4">
+                <Label className="text-base font-semibold text-gray-900">Bank Account Details *</Label>
+                <p className="text-sm text-gray-600 mt-1 mb-3">Required for payment processing</p>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="bankName" className="text-base font-semibold text-gray-900">Bank Name *</Label>
+                    <Input
+                      id="bankName"
+                      value={formData.documents.bankName}
+                      onChange={(e) => handleInputChange('documents', {
+                        ...formData.documents,
+                        bankName: e.target.value
+                      })}
+                      placeholder="e.g., Equity Bank, KCB, etc."
+                      className="mt-2 h-12 text-base"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="accountNumber" className="text-base font-semibold text-gray-900">Account Number *</Label>
+                    <Input
+                      id="accountNumber"
+                      value={formData.documents.accountNumber}
+                      onChange={(e) => handleInputChange('documents', {
+                        ...formData.documents,
+                        accountNumber: e.target.value
+                      })}
+                      placeholder="Enter your account number"
+                      className="mt-2 h-12 text-base"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="accountHolderName" className="text-base font-semibold text-gray-900">Account Holder Name *</Label>
+                    <Input
+                      id="accountHolderName"
+                      value={formData.documents.accountHolderName}
+                      onChange={(e) => handleInputChange('documents', {
+                        ...formData.documents,
+                        accountHolderName: e.target.value
+                      })}
+                      placeholder="Name as it appears on the account"
+                      className="mt-2 h-12 text-base"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -523,52 +689,55 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
   };
 
   const steps = [
-    { number: 1, title: "Account Type", icon: User },
-    { number: 2, title: "Contact Details", icon: Phone },
-    { number: 3, title: "Business Info", icon: Building },
-    { number: 4, title: "Documents", icon: FileText }
+    { number: 1, title: "Account Type", icon: User, description: "Choose your account type" },
+    { number: 2, title: "Contact Details", icon: Phone, description: "Provide contact information" },
+    { number: 3, title: "Business Info", icon: Building, description: "Describe your business" },
+    { number: 4, title: "Documents", icon: FileText, description: "Upload required documents" }
   ];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Progress Steps */}
-      <Card>
+      <Card className="border-0 shadow-sm">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
             {steps.map((step, index) => {
               const Icon = step.icon;
               const isActive = currentStep === step.number;
               const isCompleted = currentStep > step.number;
               
               return (
-                <div key={step.number} className="flex items-center">
-                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                <div key={step.number} className="flex items-center flex-1">
+                  <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-200 ${
                     isCompleted 
-                      ? 'bg-green-500 border-green-500 text-white' 
+                      ? 'bg-green-500 border-green-500 text-white shadow-md' 
                       : isActive 
-                        ? 'bg-blue-500 border-blue-500 text-white' 
-                        : 'border-gray-300 text-gray-400'
+                        ? 'bg-blue-500 border-blue-500 text-white shadow-md' 
+                        : 'border-gray-300 text-gray-400 bg-white'
                   }`}>
                     {isCompleted ? (
-                      <CheckCircle className="w-5 h-5" />
+                      <CheckCircle className="w-6 h-6" />
                     ) : (
-                      <Icon className="w-5 h-5" />
+                      <Icon className="w-6 h-6" />
                     )}
                   </div>
-                  <div className="ml-3">
-                    <div className={`text-sm font-medium ${
+                  <div className="ml-3 flex-1">
+                    <div className={`text-sm font-semibold ${
                       isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-400'
                     }`}>
                       Step {step.number}
                     </div>
-                    <div className={`text-xs ${
+                    <div className={`text-sm font-medium ${
                       isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-400'
                     }`}>
                       {step.title}
                     </div>
+                    <div className="text-xs text-gray-500 hidden md:block">
+                      {step.description}
+                    </div>
                   </div>
                   {index < steps.length - 1 && (
-                    <ArrowRight className="w-4 h-4 text-gray-300 mx-4" />
+                    <ChevronRight className="w-5 h-5 text-gray-300 mx-2 hidden md:block" />
                   )}
                 </div>
               );
@@ -578,20 +747,24 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
       </Card>
 
       {/* Form Content */}
-      <Card>
-        <CardHeader>
-          <CardTitle>
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-2xl font-bold text-gray-900">
             Step {currentStep}: {steps[currentStep - 1]?.title}
           </CardTitle>
+          <p className="text-gray-600 mt-2">
+            {steps[currentStep - 1]?.description}
+          </p>
         </CardHeader>
         <CardContent className="p-6">
           {renderStep()}
 
-          <div className="flex justify-between mt-6">
+          <div className="flex flex-col sm:flex-row justify-between gap-4 mt-8 pt-6 border-t border-gray-200">
             <Button
               variant="outline"
               onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
               disabled={currentStep === 1}
+              className="h-12 px-6 text-base"
             >
               Previous
             </Button>
@@ -600,7 +773,7 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
               <Button
                 onClick={handleSubmit}
                 disabled={!canProceed() || loading}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-green-600 hover:bg-green-700 h-12 px-8 text-base font-semibold"
               >
                 {loading ? "Submitting..." : "Submit Application"}
               </Button>
@@ -608,8 +781,9 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
               <Button
                 onClick={() => setCurrentStep(prev => prev + 1)}
                 disabled={!canProceed()}
+                className="bg-blue-600 hover:bg-blue-700 h-12 px-8 text-base font-semibold"
               >
-                Next
+                Next Step
               </Button>
             )}
           </div>

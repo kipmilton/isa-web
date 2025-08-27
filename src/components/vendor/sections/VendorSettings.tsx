@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { User, CreditCard, Settings as SettingsIcon, Phone, CreditCard as CreditCardIcon, Trash2, Edit2, Plus } from "lucide-react";
+import { User, CreditCard, Settings as SettingsIcon, Phone, CreditCard as CreditCardIcon, Trash2, Edit2, Plus, Building as BankIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -294,14 +294,17 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
       const { data, error } = await supabase
         .from('points_config')
         .select('vendor_subscription_enabled')
-        .single();
+        .limit(1);
       
       if (error) {
         console.error('Error fetching subscription status:', error);
+        setSubscriptionEnabled(false);
         return;
       }
       
-      setSubscriptionEnabled(data?.vendor_subscription_enabled || false);
+      // Use the first row if multiple rows exist
+      const firstRow = Array.isArray(data) && data.length > 0 ? data[0] : data;
+      setSubscriptionEnabled(firstRow?.vendor_subscription_enabled || false);
     } catch (error) {
       console.error('Error checking subscription status:', error);
       setSubscriptionEnabled(false);
@@ -457,510 +460,557 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
     }
   };
 
+  const [bankDetails, setBankDetails] = useState({
+    bank_name: '',
+    account_number: '',
+    account_holder_name: ''
+  });
+
+  useEffect(() => {
+    const fetchBankDetails = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('bank_name, account_number, account_holder_name')
+          .eq('id', vendorId)
+          .single();
+
+        if (error) {
+          console.error('Error fetching bank details:', error);
+          return;
+        }
+
+        if (data) {
+          setBankDetails({
+            bank_name: data.bank_name || '',
+            account_number: data.account_number || '',
+            account_holder_name: data.account_holder_name || ''
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching bank details:', error);
+      }
+    };
+    fetchBankDetails();
+  }, [vendorId]);
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Settings</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+        {defaultTab === 'account' && 'Account Settings'}
+        {defaultTab === 'payout' && 'Payout Settings'}
+        {defaultTab === 'billing' && 'Billing & Plans'}
+      </h1>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="account" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
-            <User className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>Account</span>
-          </TabsTrigger>
-          <TabsTrigger value="payout" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
-            <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>Payout</span>
-          </TabsTrigger>
-          <TabsTrigger value="billing" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
-            <CreditCard className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>Billing</span>
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="account">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Account Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="first_name" className="text-sm">First Name</Label>
-                  <Input
-                    id="first_name"
-                    value={profile.first_name}
-                    onChange={(e) => setProfile(prev => ({ ...prev, first_name: e.target.value }))}
-                    className="text-sm sm:text-base"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="last_name" className="text-sm">Last Name</Label>
-                  <Input
-                    id="last_name"
-                    value={profile.last_name}
-                    onChange={(e) => setProfile(prev => ({ ...prev, last_name: e.target.value }))}
-                    className="text-sm sm:text-base"
-                  />
-                </div>
-              </div>
-              
+      {defaultTab === 'account' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg sm:text-xl">Account Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="email" className="text-sm">Email</Label>
+                <Label htmlFor="first_name" className="text-sm">First Name</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  value={profile.email}
-                  disabled
-                  className="bg-gray-50 text-sm sm:text-base"
+                  id="first_name"
+                  value={profile.first_name}
+                  onChange={(e) => setProfile(prev => ({ ...prev, first_name: e.target.value }))}
+                  className="text-sm sm:text-base"
                 />
-                <p className="text-xs text-gray-500 mt-1">Email cannot be changed here. Contact support if needed.</p>
               </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="phone" className="text-sm">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    value={profile.phone_number}
-                    onChange={(e) => setProfile(prev => ({ ...prev, phone_number: e.target.value }))}
-                    className="text-sm sm:text-base"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="location" className="text-sm">Location</Label>
-                  <Input
-                    id="location"
-                    value={profile.location}
-                    onChange={(e) => setProfile(prev => ({ ...prev, location: e.target.value }))}
-                    className="text-sm sm:text-base"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="last_name" className="text-sm">Last Name</Label>
+                <Input
+                  id="last_name"
+                  value={profile.last_name}
+                  onChange={(e) => setProfile(prev => ({ ...prev, last_name: e.target.value }))}
+                  className="text-sm sm:text-base"
+                />
               </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="company" className="text-sm">Company Name</Label>
-                  <Input
-                    id="company"
-                    value={profile.company}
-                    onChange={(e) => setProfile(prev => ({ ...prev, company: e.target.value }))}
-                    className="text-sm sm:text-base"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="business_type" className="text-sm">Business Type</Label>
-                  <Input
-                    id="business_type"
-                    value={profile.business_type}
-                    onChange={(e) => setProfile(prev => ({ ...prev, business_type: e.target.value }))}
-                    className="text-sm sm:text-base"
-                  />
-                </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="email" className="text-sm">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={profile.email}
+                disabled
+                className="bg-gray-50 text-sm sm:text-base"
+              />
+              <p className="text-xs text-gray-500 mt-1">Email cannot be changed here. Contact support if needed.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="phone" className="text-sm">Phone Number</Label>
+                <Input
+                  id="phone"
+                  value={profile.phone_number}
+                  onChange={(e) => setProfile(prev => ({ ...prev, phone_number: e.target.value }))}
+                  className="text-sm sm:text-base"
+                />
               </div>
-              
-              <Button 
-                onClick={updateProfile} 
-                disabled={loading}
-                className="w-full sm:w-auto"
-              >
-                {loading ? 'Saving...' : 'Save Changes'}
-              </Button>
-              <div className="mt-8">
-                {!showPasswordForm ? (
-                  <Button variant="outline" onClick={() => setShowPasswordForm(true)}>
-                    Change Password
-                  </Button>
-                ) : (
-                  <div className="space-y-4 max-w-md">
-                    <div>
-                      <Label htmlFor="currentPassword">Current Password</Label>
-                      <Input
-                        id="currentPassword"
-                        type="password"
-                        value={passwordData.currentPassword}
-                        onChange={e => setPasswordData(d => ({ ...d, currentPassword: e.target.value }))}
-                        autoComplete="current-password"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="newPassword">New Password</Label>
-                      <Input
-                        id="newPassword"
-                        type="password"
-                        value={passwordData.newPassword}
-                        onChange={e => setPasswordData(d => ({ ...d, newPassword: e.target.value }))}
-                        autoComplete="new-password"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        value={passwordData.confirmPassword}
-                        onChange={e => setPasswordData(d => ({ ...d, confirmPassword: e.target.value }))}
-                        autoComplete="new-password"
-                      />
-                    </div>
-                    <div className="flex gap-2 mt-2">
-                      <Button onClick={handlePasswordChange} disabled={savingPassword}>
-                        {savingPassword ? 'Saving...' : 'Update Password'}
-                      </Button>
-                      <Button variant="outline" onClick={() => setShowPasswordForm(false)} disabled={savingPassword}>
-                        Cancel
-                      </Button>
-                    </div>
+              <div>
+                <Label htmlFor="location" className="text-sm">Location</Label>
+                <Input
+                  id="location"
+                  value={profile.location}
+                  onChange={(e) => setProfile(prev => ({ ...prev, location: e.target.value }))}
+                  className="text-sm sm:text-base"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="company" className="text-sm">Company Name</Label>
+                <Input
+                  id="company"
+                  value={profile.company}
+                  onChange={(e) => setProfile(prev => ({ ...prev, company: e.target.value }))}
+                  className="text-sm sm:text-base"
+                />
+              </div>
+              <div>
+                <Label htmlFor="business_type" className="text-sm">Business Type</Label>
+                <Input
+                  id="business_type"
+                  value={profile.business_type}
+                  onChange={(e) => setProfile(prev => ({ ...prev, business_type: e.target.value }))}
+                  className="text-sm sm:text-base"
+                />
+              </div>
+            </div>
+            
+            <Button 
+              onClick={updateProfile} 
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
+              {loading ? 'Saving...' : 'Save Changes'}
+            </Button>
+            <div className="mt-8">
+              {!showPasswordForm ? (
+                <Button variant="outline" onClick={() => setShowPasswordForm(true)}>
+                  Change Password
+                </Button>
+              ) : (
+                <div className="space-y-4 max-w-md">
+                  <div>
+                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Input
+                      id="currentPassword"
+                      type="password"
+                      value={passwordData.currentPassword}
+                      onChange={e => setPasswordData(d => ({ ...d, currentPassword: e.target.value }))}
+                      autoComplete="current-password"
+                    />
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  <div>
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={e => setPasswordData(d => ({ ...d, newPassword: e.target.value }))}
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={e => setPasswordData(d => ({ ...d, confirmPassword: e.target.value }))}
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <Button onClick={handlePasswordChange} disabled={savingPassword}>
+                      {savingPassword ? 'Saving...' : 'Update Password'}
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowPasswordForm(false)} disabled={savingPassword}>
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        <TabsContent value="payout">
+      {defaultTab === 'payout' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Payout Destination</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">M-Pesa Settings</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="mpesa_number">M-Pesa Number</Label>
+                  <Input
+                    id="mpesa_number"
+                    value={payoutSettings.mpesa_number}
+                    onChange={(e) => setPayoutSettings(prev => ({ ...prev, mpesa_number: e.target.value }))}
+                    placeholder="254712345678"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="mpesa_name">Account Name</Label>
+                  <Input
+                    id="mpesa_name"
+                    value={payoutSettings.mpesa_name}
+                    onChange={(e) => setPayoutSettings(prev => ({ ...prev, mpesa_name: e.target.value }))}
+                    placeholder="Full name as registered"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Airtel Money</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="airtel_number">Airtel Number</Label>
+                  <Input
+                    id="airtel_number"
+                    value={payoutSettings.airtel_number || ''}
+                    onChange={(e) => setPayoutSettings(prev => ({ ...prev, airtel_number: e.target.value }))}
+                    placeholder="2547XXXXXXXX"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Bank Account Details</h3>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div className="flex items-center space-x-2 mb-2">
+                  <BankIcon className="h-5 w-5 text-blue-600" />
+                  <span className="font-medium text-blue-800">Onboarding Bank Information</span>
+                </div>
+                <p className="text-sm text-blue-700 mb-3">
+                  These bank details were provided during your vendor onboarding and cannot be edited here. 
+                  Contact support if you need to update your bank information.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="onboarding_bank_name">Bank Name</Label>
+                  <Input
+                    id="onboarding_bank_name"
+                    value={bankDetails.bank_name}
+                    disabled
+                    className="bg-gray-50"
+                    placeholder="No bank details provided"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="onboarding_account_number">Account Number</Label>
+                  <Input
+                    id="onboarding_account_number"
+                    value={bankDetails.account_number}
+                    disabled
+                    className="bg-gray-50"
+                    placeholder="No account number provided"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="onboarding_account_holder">Account Holder Name</Label>
+                  <Input
+                    id="onboarding_account_holder"
+                    value={bankDetails.account_holder_name}
+                    disabled
+                    className="bg-gray-50"
+                    placeholder="No account holder name provided"
+                  />
+                </div>
+              </div>
+              {!bankDetails.bank_name && !bankDetails.account_number && !bankDetails.account_holder_name && (
+                <div className="text-center py-4 text-gray-500">
+                  <BankIcon className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                  <p>No bank details were provided during onboarding</p>
+                </div>
+              )}
+            </div>
+            <Button onClick={updatePayoutSettings} disabled={loading}>
+              {loading ? "Updating..." : "Update Payout Settings"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {defaultTab === 'billing' && (
+        <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Payout Destination</CardTitle>
+              <CardTitle>Current Plan {!subscriptionEnabled && '(Coming Soon)'}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">M-Pesa Settings</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="mpesa_number">M-Pesa Number</Label>
-                    <Input
-                      id="mpesa_number"
-                      value={payoutSettings.mpesa_number}
-                      onChange={(e) => setPayoutSettings(prev => ({ ...prev, mpesa_number: e.target.value }))}
-                      placeholder="254712345678"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="mpesa_name">Account Name</Label>
-                    <Input
-                      id="mpesa_name"
-                      value={payoutSettings.mpesa_name}
-                      onChange={(e) => setPayoutSettings(prev => ({ ...prev, mpesa_name: e.target.value }))}
-                      placeholder="Full name as registered"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Airtel Money</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="airtel_number">Airtel Number</Label>
-                    <Input
-                      id="airtel_number"
-                      value={payoutSettings.airtel_number || ''}
-                      onChange={(e) => setPayoutSettings(prev => ({ ...prev, airtel_number: e.target.value }))}
-                      placeholder="2547XXXXXXXX"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Bank Account (Coming Soon)</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="bank_account">Account Number</Label>
-                    <Input
-                      id="bank_account"
-                      value={payoutSettings.bank_account}
-                      onChange={(e) => setPayoutSettings(prev => ({ ...prev, bank_account: e.target.value }))}
-                      disabled
-                      placeholder="Coming soon"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="bank_name">Bank Name</Label>
-                    <Input
-                      id="bank_name"
-                      value={payoutSettings.bank_name}
-                      onChange={(e) => setPayoutSettings(prev => ({ ...prev, bank_name: e.target.value }))}
-                      disabled
-                      placeholder="Coming soon"
-                    />
-                  </div>
-                </div>
-              </div>
-              <Button onClick={updatePayoutSettings} disabled={loading}>
-                {loading ? "Updating..." : "Update Payout Settings"}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="billing">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Current Plan {!subscriptionEnabled && '(Coming Soon)'}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <div>
-                    <h3 className="text-lg font-medium">{PLAN_OPTIONS.find(p => p.value === plan)?.label || 'Free Plan'}</h3>
-                    <p className="text-gray-600">
-                      {plan === 'free' && 'Basic vendor features with unlimited products'}
-                      {plan === 'premium_weekly' && 'Premium features with unlimited products'}
-                      {plan === 'premium_monthly' && 'Premium features with unlimited products'}
-                      {plan === 'premium_yearly' && 'Premium features with unlimited products'}
-                      {plan === 'pro' && 'Executive features: Marketing promotions, customer notifications, reduced commission rates'}
-                    </p>
-                    {planExpiry && (
-                      <div className="text-xs text-gray-500 mt-1">Expiry: {new Date(planExpiry).toLocaleDateString()}</div>
-                    )}
-                    {planMessage && (
-                      <div className="text-xs text-red-600 mt-2">{planMessage}</div>
-                    )}
-                    {!subscriptionEnabled && (
-                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <div className="flex items-center gap-2 text-blue-800">
-                          <span className="text-lg">🚀</span>
-                          <span className="font-medium">Coming Soon!</span>
-                        </div>
-                        <p className="text-sm text-blue-700 mt-1">
-                          Vendor subscriptions will be available soon. You'll be notified when you can upgrade your plan and access premium features.
-                        </p>
+            <CardContent>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-medium">{PLAN_OPTIONS.find(p => p.value === plan)?.label || 'Free Plan'}</h3>
+                  <p className="text-gray-600">
+                    {plan === 'free' && 'Basic vendor features with unlimited products'}
+                    {plan === 'premium_weekly' && 'Premium features with unlimited products'}
+                    {plan === 'premium_monthly' && 'Premium features with unlimited products'}
+                    {plan === 'premium_yearly' && 'Premium features with unlimited products'}
+                    {plan === 'pro' && 'Executive features: Marketing promotions, customer notifications, reduced commission rates'}
+                  </p>
+                  {planExpiry && (
+                    <div className="text-xs text-gray-500 mt-1">Expiry: {new Date(planExpiry).toLocaleDateString()}</div>
+                  )}
+                  {planMessage && (
+                    <div className="text-xs text-red-600 mt-2">{planMessage}</div>
+                  )}
+                  {!subscriptionEnabled && (
+                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center gap-2 text-blue-800">
+                        <span className="text-lg">🚀</span>
+                        <span className="font-medium">Coming Soon!</span>
                       </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-2 items-end">
-                    <label className="text-sm font-medium">Change Plan</label>
-                    <select
-                      className="border rounded px-3 py-2"
-                      value={plan}
-                      onChange={e => handleUpgradePlan(e.target.value)}
-                      disabled={!subscriptionEnabled}
-                    >
-                      {PLAN_OPTIONS.map(opt => (
-                        <option
-                          key={opt.value}
-                          value={opt.value}
-                          disabled={!subscriptionEnabled}
-                        >
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {subscriptionEnabled ? 'Select a plan to upgrade' : 'Plan upgrades will be available soon.'}
+                      <p className="text-sm text-blue-700 mt-1">
+                        Vendor subscriptions will be available soon. You'll be notified when you can upgrade your plan and access premium features.
+                      </p>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            {!subscriptionEnabled && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Available Plans (Coming Soon)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {PLAN_OPTIONS.map((planOption) => (
-                      <div key={planOption.value} className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                        <div className="text-lg font-semibold text-gray-700">{planOption.label.split(' (')[0]}</div>
-                        <div className="text-2xl font-bold text-blue-600 mt-2">{planOption.price} KES</div>
-                        <div className="text-sm text-gray-500 mt-2">
-                          {planOption.value === 'premium_weekly' && 'Weekly premium features'}
-                          {planOption.value === 'premium_monthly' && 'Monthly premium features'}
-                          {planOption.value === 'premium_yearly' && 'Yearly premium features'}
-                          {planOption.value === 'pro' && 'Executive features & reduced commissions'}
-                        </div>
-                        <div className="mt-3">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            Coming Soon
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="flex items-center gap-2 text-yellow-800">
-                      <span className="text-lg">💡</span>
-                      <span className="font-medium">Premium Benefits</span>
-                    </div>
-                    <ul className="text-sm text-yellow-700 mt-2 space-y-1">
-                      <li>• Reduced commission rates (5% vs 15% for free plan)</li>
-                      <li>• Priority customer support</li>
-                      <li>• Advanced analytics and insights</li>
-                      <li>• Marketing promotions and customer notifications</li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment Methods</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {paymentMethods.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    No payment methods added yet.
-                    <div className="mt-4">
-                      <Button variant="outline" onClick={() => setCardModalOpen(true)}>
-                        <Plus className="w-4 h-4 mr-2" /> Add Payment Method
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {paymentMethods.map((card) => (
-                      <div key={card.id} className="flex items-center justify-between border rounded p-3">
-                        <div className="flex items-center gap-3">
-                          <CreditCardIcon className="w-5 h-5 text-blue-600" />
-                          <div>
-                            <div className="font-medium">**** **** **** {card.card_number.slice(-4)}</div>
-                            <div className="text-xs text-gray-500">Exp: {card.expiry} | {card.name}</div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => handleEditCard(card)}>
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <Button size="sm" variant="destructive" onClick={() => handleDeactivateCard(card.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="mt-4">
-                      <Button variant="outline" onClick={() => setCardModalOpen(true)}>
-                        <Plus className="w-4 h-4 mr-2" /> Add Another Card
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                {/* Card Modal */}
-                {cardModalOpen && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-                      <h3 className="text-lg font-bold mb-4">{cardForm.id ? 'Edit Card' : 'Add Card'}</h3>
-                      <div className="space-y-3">
-                        <div>
-                          <Label htmlFor="card_number">Card Number</Label>
-                          <Input
-                            id="card_number"
-                            value={cardForm.card_number}
-                            onChange={e => setCardForm(f => ({ ...f, card_number: e.target.value }))}
-                            placeholder="1234 5678 9012 3456"
-                            maxLength={19}
-                          />
-                        </div>
-                        <div className="flex gap-2">
-                          <div className="flex-1">
-                            <Label htmlFor="expiry">Expiry</Label>
-                            <Input
-                              id="expiry"
-                              value={cardForm.expiry}
-                              onChange={e => setCardForm(f => ({ ...f, expiry: e.target.value }))}
-                              placeholder="MM/YY"
-                              maxLength={5}
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <Label htmlFor="cvc">CVC</Label>
-                            <Input
-                              id="cvc"
-                              value={cardForm.cvc}
-                              onChange={e => setCardForm(f => ({ ...f, cvc: e.target.value }))}
-                              placeholder="123"
-                              maxLength={4}
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="name">Name on Card</Label>
-                          <Input
-                            id="name"
-                            value={cardForm.name}
-                            onChange={e => setCardForm(f => ({ ...f, name: e.target.value }))}
-                            placeholder="Cardholder Name"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-end gap-2 mt-6">
-                        <Button variant="outline" onClick={() => { setCardModalOpen(false); setCardForm({ card_number: '', expiry: '', cvc: '', name: '', id: '' }); }}>
-                          Cancel
-                        </Button>
-                        <Button onClick={handleAddOrUpdateCard}>
-                          {cardForm.id ? 'Update Card' : 'Add Card'}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            {/* Upgrade Modal */}
-            {showUpgrade && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-                  <h3 className="text-lg font-bold mb-4">Upgrade Your Plan</h3>
-                  {upgradeSuccess ? (
-                    <div className="text-center text-green-600 font-semibold py-8">Plan upgraded successfully!</div>
-                  ) : (
-                    <>
-                      <div className="mb-4">
-                        <label className="block font-medium mb-2">Select Plan</label>
-                        <select className="border rounded px-3 py-2 w-full mb-4" value={selectedPlan} onChange={e => setSelectedPlan(e.target.value)}>
-                          {PLAN_OPTIONS.map(opt => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                          ))}
-                        </select>
-                        <label className="block font-medium mb-2">Select Payment Method</label>
-                        <select className="border rounded px-3 py-2 w-full mb-4" value={selectedPaymentMethod} onChange={e => setSelectedPaymentMethod(e.target.value)}>
-                          <option value="card">Card</option>
-                          <option value="mpesa">MPESA</option>
-                          <option value="airtel">Airtel Money</option>
-                        </select>
-                        {/* Payment details fields */}
-                        {selectedPaymentMethod === 'card' && (
-                          <div className="space-y-2 mb-2">
-                            <input className="border rounded px-3 py-2 w-full" placeholder="Card Number" value={cardDetails.card_number} onChange={e => setCardDetails(d => ({ ...d, card_number: e.target.value }))} />
-                            <div className="flex gap-2">
-                              <input className="border rounded px-3 py-2 w-full" placeholder="MM/YY" value={cardDetails.expiry} onChange={e => setCardDetails(d => ({ ...d, expiry: e.target.value }))} />
-                              <input className="border rounded px-3 py-2 w-full" placeholder="CVC" value={cardDetails.cvc} onChange={e => setCardDetails(d => ({ ...d, cvc: e.target.value }))} />
-                            </div>
-                            <input className="border rounded px-3 py-2 w-full" placeholder="Name on Card" value={cardDetails.name} onChange={e => setCardDetails(d => ({ ...d, name: e.target.value }))} />
-                          </div>
-                        )}
-                        {selectedPaymentMethod === 'mpesa' && (
-                          <div className="mb-2">
-                            <input className="border rounded px-3 py-2 w-full" placeholder="MPESA Number" value={mpesaNumber} onChange={e => setMpesaNumber(e.target.value)} />
-                          </div>
-                        )}
-                        {selectedPaymentMethod === 'airtel' && (
-                          <div className="mb-2">
-                            <input className="border rounded px-3 py-2 w-full" placeholder="Airtel Money Number" value={airtelNumber} onChange={e => setAirtelNumber(e.target.value)} />
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded shadow w-full mb-2 disabled:opacity-60"
-                        onClick={handleUpgradePayment}
-                        disabled={true}
-                      >
-                        Coming Soon
-                      </button>
-                      <button
-                        className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded shadow w-full"
-                        onClick={() => { setShowUpgrade(false); setUpgradeSuccess(false); onCloseUpgradeModal && onCloseUpgradeModal(); }}
-                        disabled={upgradeLoading}
-                      >
-                        Cancel
-                      </button>
-                    </>
                   )}
                 </div>
+                <div className="flex flex-col gap-2 items-end">
+                  <label className="text-sm font-medium">Change Plan</label>
+                  <select
+                    className="border rounded px-3 py-2"
+                    value={plan}
+                    onChange={e => handleUpgradePlan(e.target.value)}
+                    disabled={!subscriptionEnabled}
+                  >
+                    {PLAN_OPTIONS.map(opt => (
+                      <option
+                        key={opt.value}
+                        value={opt.value}
+                        disabled={!subscriptionEnabled}
+                      >
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {subscriptionEnabled ? 'Select a plan to upgrade' : 'Plan upgrades will be available soon.'}
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+            </CardContent>
+          </Card>
+          {!subscriptionEnabled && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Available Plans (Coming Soon)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {PLAN_OPTIONS.map((planOption) => (
+                    <div key={planOption.value} className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                      <div className="text-lg font-semibold text-gray-700">{planOption.label.split(' (')[0]}</div>
+                      <div className="text-2xl font-bold text-blue-600 mt-2">{planOption.price} KES</div>
+                      <div className="text-sm text-gray-500 mt-2">
+                        {planOption.value === 'premium_weekly' && 'Weekly premium features'}
+                        {planOption.value === 'premium_monthly' && 'Monthly premium features'}
+                        {planOption.value === 'premium_yearly' && 'Yearly premium features'}
+                        {planOption.value === 'pro' && 'Executive features & reduced commissions'}
+                      </div>
+                      <div className="mt-3">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Coming Soon
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-yellow-800">
+                    <span className="text-lg">💡</span>
+                    <span className="font-medium">Premium Benefits</span>
+                  </div>
+                  <ul className="text-sm text-yellow-700 mt-2 space-y-1">
+                    <li>• Reduced commission rates (5% vs 15% for free plan)</li>
+                    <li>• Priority customer support</li>
+                    <li>• Advanced analytics and insights</li>
+                    <li>• Marketing promotions and customer notifications</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Methods</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {paymentMethods.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No payment methods added yet.
+                  <div className="mt-4">
+                    <Button variant="outline" onClick={() => setCardModalOpen(true)}>
+                      <Plus className="w-4 h-4 mr-2" /> Add Payment Method
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {paymentMethods.map((card) => (
+                    <div key={card.id} className="flex items-center justify-between border rounded p-3">
+                      <div className="flex items-center gap-3">
+                        <CreditCardIcon className="w-5 h-5 text-blue-600" />
+                        <div>
+                          <div className="font-medium">**** **** **** {card.card_number.slice(-4)}</div>
+                          <div className="text-xs text-gray-500">Exp: {card.expiry} | {card.name}</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={() => handleEditCard(card)}>
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => handleDeactivateCard(card.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="mt-4">
+                    <Button variant="outline" onClick={() => setCardModalOpen(true)}>
+                      <Plus className="w-4 h-4 mr-2" /> Add Another Card
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {/* Card Modal */}
+              {cardModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                  <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                    <h3 className="text-lg font-bold mb-4">{cardForm.id ? 'Edit Card' : 'Add Card'}</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="card_number">Card Number</Label>
+                        <Input
+                          id="card_number"
+                          value={cardForm.card_number}
+                          onChange={e => setCardForm(f => ({ ...f, card_number: e.target.value }))}
+                          placeholder="1234 5678 9012 3456"
+                          maxLength={19}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <Label htmlFor="expiry">Expiry</Label>
+                          <Input
+                            id="expiry"
+                            value={cardForm.expiry}
+                            onChange={e => setCardForm(f => ({ ...f, expiry: e.target.value }))}
+                            placeholder="MM/YY"
+                            maxLength={5}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Label htmlFor="cvc">CVC</Label>
+                          <Input
+                            id="cvc"
+                            value={cardForm.cvc}
+                            onChange={e => setCardForm(f => ({ ...f, cvc: e.target.value }))}
+                            placeholder="123"
+                            maxLength={4}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="name">Name on Card</Label>
+                        <Input
+                          id="name"
+                          value={cardForm.name}
+                          onChange={e => setCardForm(f => ({ ...f, name: e.target.value }))}
+                          placeholder="Cardholder Name"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 mt-6">
+                      <Button variant="outline" onClick={() => { setCardModalOpen(false); setCardForm({ card_number: '', expiry: '', cvc: '', name: '', id: '' }); }}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleAddOrUpdateCard}>
+                        {cardForm.id ? 'Update Card' : 'Add Card'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          {/* Upgrade Modal */}
+          {showUpgrade && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                <h3 className="text-lg font-bold mb-4">Upgrade Your Plan</h3>
+                {upgradeSuccess ? (
+                  <div className="text-center text-green-600 font-semibold py-8">Plan upgraded successfully!</div>
+                ) : (
+                  <>
+                    <div className="mb-4">
+                      <label className="block font-medium mb-2">Select Plan</label>
+                      <select className="border rounded px-3 py-2 w-full mb-4" value={selectedPlan} onChange={e => setSelectedPlan(e.target.value)}>
+                        {PLAN_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                      <label className="block font-medium mb-2">Select Payment Method</label>
+                      <select className="border rounded px-3 py-2 w-full mb-4" value={selectedPaymentMethod} onChange={e => setSelectedPaymentMethod(e.target.value)}>
+                        <option value="card">Card</option>
+                        <option value="mpesa">MPESA</option>
+                        <option value="airtel">Airtel Money</option>
+                      </select>
+                      {/* Payment details fields */}
+                      {selectedPaymentMethod === 'card' && (
+                        <div className="space-y-2 mb-2">
+                          <input className="border rounded px-3 py-2 w-full" placeholder="Card Number" value={cardDetails.card_number} onChange={e => setCardDetails(d => ({ ...d, card_number: e.target.value }))} />
+                          <div className="flex gap-2">
+                            <input className="border rounded px-3 py-2 w-full" placeholder="MM/YY" value={cardDetails.expiry} onChange={e => setCardDetails(d => ({ ...d, expiry: e.target.value }))} />
+                            <input className="border rounded px-3 py-2 w-full" placeholder="CVC" value={cardDetails.cvc} onChange={e => setCardDetails(d => ({ ...d, cvc: e.target.value }))} />
+                          </div>
+                          <input className="border rounded px-3 py-2 w-full" placeholder="Name on Card" value={cardDetails.name} onChange={e => setCardDetails(d => ({ ...d, name: e.target.value }))} />
+                        </div>
+                      )}
+                      {selectedPaymentMethod === 'mpesa' && (
+                        <div className="mb-2">
+                          <input className="border rounded px-3 py-2 w-full" placeholder="MPESA Number" value={mpesaNumber} onChange={e => setMpesaNumber(e.target.value)} />
+                        </div>
+                      )}
+                      {selectedPaymentMethod === 'airtel' && (
+                        <div className="mb-2">
+                          <input className="border rounded px-3 py-2 w-full" placeholder="Airtel Money Number" value={airtelNumber} onChange={e => setAirtelNumber(e.target.value)} />
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded shadow w-full mb-2 disabled:opacity-60"
+                      onClick={handleUpgradePayment}
+                      disabled={true}
+                    >
+                      Coming Soon
+                    </button>
+                    <button
+                      className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded shadow w-full"
+                      onClick={() => { setShowUpgrade(false); setUpgradeSuccess(false); onCloseUpgradeModal && onCloseUpgradeModal(); }}
+                      disabled={upgradeLoading}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -232,23 +232,24 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
   const currentModule = modules[currentModuleIndex];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 p-4 sm:p-6">
       {/* Header */}
       <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+        <CardHeader className="pb-4 sm:pb-6">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-2">
-              <BookOpen className="w-6 h-6 text-blue-600" />
-              <span className="text-blue-800">Vendor Training Program</span>
+              <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+              <span className="text-blue-800 text-lg sm:text-xl font-semibold">Vendor Training Program</span>
             </div>
             <Dialog open={showSupportDialog} onOpenChange={setShowSupportDialog}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-50">
+                <Button variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-50 w-full sm:w-auto text-sm">
                   <HelpCircle className="w-4 h-4 mr-2" />
-                  Having trouble? Request a call
+                  <span className="hidden sm:inline">Having trouble? Request a call</span>
+                  <span className="sm:hidden">Need help? Call us</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Request Support Call</DialogTitle>
                 </DialogHeader>
@@ -279,11 +280,11 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
                       rows={3}
                     />
                   </div>
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={() => setShowSupportDialog(false)}>
+                  <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
+                    <Button variant="outline" onClick={() => setShowSupportDialog(false)} className="w-full sm:w-auto">
                       Cancel
                     </Button>
-                    <Button onClick={submitSupportRequest}>
+                    <Button onClick={submitSupportRequest} className="w-full sm:w-auto">
                       Submit Request
                     </Button>
                   </div>
@@ -292,9 +293,9 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
             </Dialog>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between text-sm text-blue-700">
+        <CardContent className="pt-0">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-blue-700 space-y-1 sm:space-y-0">
               <span>Progress: {completedCount} of {modules.length} modules completed</span>
               <span>{Math.round(progressPercentage)}% Complete</span>
             </div>
@@ -309,18 +310,18 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
       {/* Module Content */}
       {currentModule && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+          <CardHeader className="pb-4 sm:pb-6">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
               <div className="flex items-center space-x-2">
-                <Play className="w-5 h-5 text-green-600" />
-                <span>Module {currentModule.module_order}: {currentModule.title}</span>
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                <span className="text-base sm:text-lg">Module {currentModule.module_order}: {currentModule.title}</span>
               </div>
-              <Badge variant={isModuleCompleted(currentModule.id) ? "default" : "secondary"}>
+              <Badge variant={isModuleCompleted(currentModule.id) ? "default" : "secondary"} className="w-fit">
                 {isModuleCompleted(currentModule.id) ? "Completed" : "In Progress"}
               </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6">
             {currentModule.image_url && (
               <div className="w-full">
                 <img 
@@ -331,30 +332,31 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
               </div>
             )}
             
-            <div className="space-y-4">
-              <p className="text-gray-600">{currentModule.description}</p>
+            <div className="space-y-3 sm:space-y-4">
+              <p className="text-gray-600 text-sm sm:text-base">{currentModule.description}</p>
               {currentModule.content && (
-                <div className="prose max-w-none">
+                <div className="prose max-w-none text-sm sm:text-base">
                   <div dangerouslySetInnerHTML={{ __html: currentModule.content }} />
                 </div>
               )}
             </div>
 
-            <div className="flex justify-between items-center pt-4">
+            <div className="flex flex-col sm:flex-row justify-between items-center pt-4 space-y-3 sm:space-y-0">
               <Button
                 variant="outline"
                 onClick={() => setCurrentModuleIndex(prev => Math.max(0, prev - 1))}
                 disabled={currentModuleIndex === 0}
+                className="w-full sm:w-auto"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Previous
               </Button>
 
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
                 {!isModuleCompleted(currentModule.id) && (
                   <Button
                     onClick={() => markModuleComplete(currentModule.id)}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Mark Complete
@@ -365,6 +367,7 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
                   <Button
                     onClick={() => setCurrentModuleIndex(prev => prev + 1)}
                     disabled={!isModuleCompleted(currentModule.id)}
+                    className="w-full sm:w-auto"
                   >
                     Next
                     <ArrowRight className="w-4 h-4 ml-2" />
@@ -378,11 +381,11 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
 
       {/* Module List */}
       <Card>
-        <CardHeader>
-          <CardTitle>All Training Modules</CardTitle>
+        <CardHeader className="pb-4 sm:pb-6">
+          <CardTitle className="text-lg sm:text-xl">All Training Modules</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {modules.map((module, index) => (
               <Card 
                 key={module.id} 
@@ -391,15 +394,15 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
                 }`}
                 onClick={() => setCurrentModuleIndex(index)}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Module {module.module_order}</span>
+                    <span className="text-xs sm:text-sm font-medium">Module {module.module_order}</span>
                     {isModuleCompleted(module.id) && (
-                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                     )}
                   </div>
-                  <h4 className="font-medium text-sm mb-1">{module.title}</h4>
-                  <p className="text-xs text-gray-600 line-clamp-2">{module.description}</p>
+                  <h4 className="font-medium text-sm sm:text-base mb-1">{module.title}</h4>
+                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">{module.description}</p>
                 </CardContent>
               </Card>
             ))}
