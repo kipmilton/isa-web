@@ -30,6 +30,7 @@ import { ProductService } from "@/services/productService";
 import { ImageUploadService } from "@/services/imageUploadService";
 import { CommissionService, CommissionInfo } from "@/services/commissionService";
 import { useToast } from "@/hooks/use-toast";
+import { useConfetti } from "@/contexts/ConfettiContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import ImageUpload from "./ImageUpload";
@@ -309,6 +310,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const { toast } = useToast();
+  const { triggerConfetti } = useConfetti();
   const { user: authUser } = useAuth();
   const navigate = useNavigate();
   const [banReasonDialogOpen, setBanReasonDialogOpen] = useState(false);
@@ -482,6 +484,13 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
           throw new Error(result.error.message);
         }
         productId = result.data[0].id;
+        // Trigger confetti celebration for product creation
+        triggerConfetti({
+          duration: 3500,
+          particleCount: 120,
+          colors: ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#06B6D4']
+        });
+
         toast({
           title: "Success",
           description: "Product created successfully"

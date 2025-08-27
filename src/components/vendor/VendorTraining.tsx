@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useConfetti } from "@/contexts/ConfettiContext";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   BookOpen, 
@@ -54,6 +55,7 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
     message: ''
   });
   const { toast } = useToast();
+  const { triggerConfetti } = useConfetti();
 
   useEffect(() => {
     loadTrainingData();
@@ -152,6 +154,13 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
             is_completed: true,
             completed_at: new Date().toISOString()
           });
+
+        // Trigger confetti celebration for training completion
+        triggerConfetti({
+          duration: 5000,
+          particleCount: 200,
+          colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8']
+        });
 
         toast({
           title: "Training Completed!",

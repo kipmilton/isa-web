@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
+import { useConfetti } from "@/contexts/ConfettiContext";
 import { supabase } from "@/integrations/supabase/client";
 import LocationSelect from "@/components/auth/LocationSelect";
 import { 
@@ -32,6 +33,7 @@ interface VendorApplicationFormProps {
 
 const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorApplicationFormProps) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const { triggerConfetti } = useConfetti();
   const [formData, setFormData] = useState({
     accountType: '',
     heardAboutUs: '',
@@ -295,6 +297,13 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
           // Don't throw error for support request - it's optional
         }
       }
+
+      // Trigger confetti celebration
+      triggerConfetti({
+        duration: 4000,
+        particleCount: 150,
+        colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F']
+      });
 
       // Show success message with any upload warnings
       if (uploadWarnings.length > 0) {

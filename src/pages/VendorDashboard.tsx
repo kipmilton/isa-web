@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useConfetti } from "@/contexts/ConfettiContext";
 import VendorDashboardComponent from "@/components/vendor/VendorDashboard";
 import { Loader2 } from "lucide-react";
 
 const VendorDashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [hasShownWelcome, setHasShownWelcome] = useState(false);
   const navigate = useNavigate();
+  const { triggerConfetti } = useConfetti();
 
   useEffect(() => {
     checkUser();
@@ -47,6 +50,34 @@ const VendorDashboard = () => {
         email: session.user.email,
         name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email
       });
+
+      // Check if this is the first time logging in after approval
+      if (profile.status === 'approved' && !hasShownWelcome) {
+        // Check if they've logged in before by looking at last_login
+        const { data: loginData } = await supabase
+          .from('profiles')
+          .select('last_login')
+          .eq('id', session.user.id)
+          .single();
+
+        if (!loginData?.last_login) {
+          // First time login after approval - trigger celebration
+          setTimeout(() => {
+            triggerConfetti({
+              duration: 6000,
+              particleCount: 250,
+              colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F']
+            });
+          }, 1000); // Small delay to ensure dashboard is loaded
+          setHasShownWelcome(true);
+        }
+
+        // Update last_login
+        await supabase
+          .from('profiles')
+          .update({ last_login: new Date().toISOString() })
+          .eq('id', session.user.id);
+      }
     } catch (error) {
       console.error('Error checking user:', error);
       navigate('/');

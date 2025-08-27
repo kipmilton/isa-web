@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useConfetti } from "@/contexts/ConfettiContext";
 import { supabase } from "@/integrations/supabase/client";
 import LocationSelect from "./auth/LocationSelect";
 
@@ -17,6 +18,7 @@ interface AccountSetupModalProps {
 const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps) => {
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState({ county: "", constituency: "" });
+  const { triggerConfetti } = useConfetti();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -97,6 +99,13 @@ const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps)
         console.error('Error updating profile:', error);
         toast.error('Failed to update profile');
       } else {
+        // Trigger confetti celebration for account setup completion
+        triggerConfetti({
+          duration: 3000,
+          particleCount: 100,
+          colors: ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#06B6D4', '#84CC16', '#EC4899']
+        });
+
         toast.success('Profile setup completed! You\'ll now get better personalized recommendations.');
         onOpenChange(false);
       }
