@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, Menu, X, Bell } from "lucide-react";
+import { AlertTriangle, Menu, X, Bell, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams } from "react-router-dom";
 import VendorSidebar from "./VendorSidebar";
@@ -33,6 +33,9 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [helpData, setHelpData] = useState({ phone: '', message: '' });
+  const [submittingHelp, setSubmittingHelp] = useState(false);
 
   const PLAN_LIMITS: Record<string, number> = {
     free: Infinity,
@@ -105,6 +108,37 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
     setActiveSection('settings');
     setUpgradeFromBanner(true);
     setMobileMenuOpen(false);
+  };
+
+  const submitHelpRequest = async () => {
+    if (!helpData.phone || !helpData.message) {
+      alert('Please provide both phone number and message.');
+      return;
+    }
+
+    setSubmittingHelp(true);
+    try {
+      // Insert support request directly into the table
+      const { error } = await supabase
+        .from('support_requests' as any)
+        .insert({
+          user_id: user.id,
+          phone_number: helpData.phone,
+          message: helpData.message,
+          request_type: 'technical_support'
+        });
+
+      if (error) throw error;
+
+      alert('Help request submitted successfully! We\'ll get back to you shortly.');
+      setShowHelpModal(false);
+      setHelpData({ phone: '', message: '' });
+    } catch (error) {
+      console.error('Error submitting help request:', error);
+      alert('Failed to submit help request. Please try again.');
+    } finally {
+      setSubmittingHelp(false);
+    }
   };
 
   const handleSectionChange = (section: string) => {
@@ -361,6 +395,86 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
                 >
                   Close
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Floating Help Button */}
+          <div className="fixed bottom-6 right-6 z-50">
+            <button
+              onClick={() => setShowHelpModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-14 h-14 shadow-lg flex items-center justify-center transition-colors"
+            >
+              <MessageCircle className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Help Modal */}
+          {showHelpModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Request Help</h3>
+                  <button
+                    onClick={() => setShowHelpModal(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="helpPhone" className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone Number *
+                    </label>
+                    <input
+                      id="helpPhone"
+                      type="text"
+                      value={helpData.phone}
+                      onChange={(e) => setHelpData(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="Enter your phone number"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="helpMessage" className="block text-sm font-medium text-gray-700 mb-1">
+                      Message *
+                    </label>
+                    <textarea
+                      id="helpMessage"
+                      value={helpData.message}
+                      onChange={(e) => setHelpData(prev => ({ ...prev, message: e.target.value }))}
+                      placeholder="Describe what you need help with..."
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    />
+                  </div>
+
+                  <div className="flex space-x-3 pt-4">
+                    <button
+                      onClick={() => setShowHelpModal(false)}
+                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={submitHelpRequest}
+                      disabled={submittingHelp || !helpData.phone || !helpData.message}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {submittingHelp ? (
+                        <div className="flex items-center justify-center">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          Submitting...
+                        </div>
+                      ) : (
+                        'Submit Request'
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
