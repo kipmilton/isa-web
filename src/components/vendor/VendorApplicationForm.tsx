@@ -19,7 +19,8 @@ import {
   CheckCircle,
   ArrowRight,
   ChevronRight,
-  AlertCircle
+  AlertCircle,
+  MessageCircle
 } from "lucide-react";
 import imageCompression from 'browser-image-compression';
 
@@ -51,6 +52,10 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
       bankName: '',
       accountNumber: '',
       accountHolderName: ''
+    },
+    supportRequest: {
+      phone: '',
+      message: ''
     }
   });
   const [loading, setLoading] = useState(false);
@@ -146,6 +151,11 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
     if (formData.documents.bankName) completedFields++;
     if (formData.documents.accountNumber) completedFields++;
     if (formData.documents.accountHolderName) completedFields++;
+
+    // Step 5: Support Request (optional - 2 fields)
+    totalFields += 2;
+    if (formData.supportRequest.phone) completedFields++;
+    if (formData.supportRequest.message) completedFields++;
 
     const progress = Math.round((completedFields / totalFields) * 100);
     onProgressChange?.(progress);
@@ -264,6 +274,28 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
         throw stepError;
       }
 
+      // Submit support request if provided
+      if (formData.supportRequest.phone && formData.supportRequest.message) {
+        try {
+          const { error: supportError } = await supabase
+            .from('support_requests')
+            .insert({
+              user_id: userId,
+              phone_number: formData.supportRequest.phone,
+              message: formData.supportRequest.message,
+              request_type: 'onboarding_help'
+            });
+
+          if (supportError) {
+            console.error('Support request error:', supportError);
+            // Don't throw error for support request - it's optional
+          }
+        } catch (error) {
+          console.error('Error submitting support request:', error);
+          // Don't throw error for support request - it's optional
+        }
+      }
+
       // Show success message with any upload warnings
       if (uploadWarnings.length > 0) {
         toast({
@@ -324,6 +356,9 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
           if (formData.documents.idCard && fileErrors.idCard) return false;
         }
         return formData.documents.bankName && formData.documents.accountNumber && formData.documents.accountHolderName;
+      case 5:
+        // Support request is optional - always allow proceeding
+        return true;
       default:
         return false;
     }
@@ -683,6 +718,66 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
           </div>
         );
 
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start space-x-3">
+                <MessageCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-blue-800 mb-1">Need Help?</h4>
+                  <p className="text-sm text-blue-700">
+                    If you need assistance with the onboarding process, please provide your contact details and message below. Our team will get back to you shortly.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="supportPhone" className="text-base font-semibold text-gray-900">Phone Number</Label>
+                <Input
+                  id="supportPhone"
+                  value={formData.supportRequest.phone}
+                  onChange={(e) => handleInputChange('supportRequest', {
+                    ...formData.supportRequest,
+                    phone: e.target.value
+                  })}
+                  placeholder="Enter your phone number for contact"
+                  className="mt-2 h-12 text-base"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="supportMessage" className="text-base font-semibold text-gray-900">Message</Label>
+                <Textarea
+                  id="supportMessage"
+                  value={formData.supportRequest.message}
+                  onChange={(e) => handleInputChange('supportRequest', {
+                    ...formData.supportRequest,
+                    message: e.target.value
+                  })}
+                  placeholder="Describe what you need help with..."
+                  className="mt-2 min-h-[120px] text-base resize-none"
+                  rows={5}
+                />
+              </div>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-gray-800 mb-1">Optional Step</h4>
+                  <p className="text-sm text-gray-700">
+                    This step is completely optional. You can skip it if you don't need assistance. Your application will be processed normally.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -692,7 +787,8 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
     { number: 1, title: "Account Type", icon: User, description: "Choose your account type" },
     { number: 2, title: "Contact Details", icon: Phone, description: "Provide contact information" },
     { number: 3, title: "Business Info", icon: Building, description: "Describe your business" },
-    { number: 4, title: "Documents", icon: FileText, description: "Upload required documents" }
+    { number: 4, title: "Documents", icon: FileText, description: "Upload required documents" },
+    { number: 5, title: "Support Request", icon: MessageCircle, description: "Request help if needed" }
   ];
 
   return (

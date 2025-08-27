@@ -57,22 +57,31 @@ const AdminCustomerSupport = () => {
     try {
       setLoading(true);
       
-      // Fetch support requests with user information
-      const { data, error } = await supabase
+      // Fetch support requests
+      const { data: requestsData, error: requestsError } = await supabase
         .from('support_requests')
-        .select(`
-          *,
-          user:profiles!support_requests_user_id_fkey(
-            first_name,
-            last_name,
-            email
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (requestsError) throw requestsError;
 
-      setSupportRequests(data || []);
+      // Fetch user profiles for all requests
+      const userIds = [...new Set(requestsData?.map(req => req.user_id) || [])];
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, email')
+        .in('id', userIds);
+
+      if (profilesError) throw profilesError;
+
+      // Combine the data
+      const profilesMap = new Map(profilesData?.map(profile => [profile.id, profile]) || []);
+      const combinedData = requestsData?.map(request => ({
+        ...request,
+        user: profilesMap.get(request.user_id)
+      })) || [];
+
+      setSupportRequests(combinedData);
     } catch (error) {
       console.error('Error loading support requests:', error);
       toast({
