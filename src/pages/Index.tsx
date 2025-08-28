@@ -12,6 +12,7 @@ import AuthDialog from "@/components/auth/AuthDialog";
 import DeliverySignupDialog from "@/components/auth/DeliverySignupDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { TrendingPostsService, TrendingPost } from "@/services/trendingPostsService";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -24,6 +25,8 @@ const Index = () => {
   const [showTerms, setShowTerms] = useState(false);
   const [authDefaultVendor, setAuthDefaultVendor] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [trendingPosts, setTrendingPosts] = useState<TrendingPost[]>([]);
+  const [trendingPostsLoading, setTrendingPostsLoading] = useState(true);
   const navigate = useNavigate();
 
   // Check for rejected vendors and delivery users on page load
@@ -77,11 +80,24 @@ const Index = () => {
     };
 
     checkUserStatus();
+    loadTrendingPosts();
   }, [navigate]);
 
   const handleThemeToggle = () => {
     setIsDarkTheme(!isDarkTheme);
     document.documentElement.classList.toggle("dark");
+  };
+
+  const loadTrendingPosts = async () => {
+    try {
+      const { data, error } = await TrendingPostsService.getActivePosts();
+      if (error) throw error;
+      setTrendingPosts(data || []);
+    } catch (error) {
+      console.error('Error loading trending posts:', error);
+    } finally {
+      setTrendingPostsLoading(false);
+    }
   };
 
   const handleTryFree = () => {
@@ -425,62 +441,63 @@ const Index = () => {
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
             What's Trending
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg overflow-hidden hover:shadow-lg transition-shadow hover-scale">
-              <div className="h-48 bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center">
-                <img 
-                  src="/isa-uploads/9d50b380-2e89-46c9-a242-8f5c708309df.png" 
-                  alt="ISA mobile app launch"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">ISA Goes Mobile!</h3>
-                <p className="text-gray-600 mb-4">ISA is set to go live on Play Store and App Store on December 12th, 2025. Get ready for the ultimate mobile shopping experience!</p>
-                <Link to="/chat">
-                  <Button variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-50">
-                    Be the First to Know
-                  </Button>
-                </Link>
-              </div>
+          {trendingPostsLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-lg">Loading trending posts...</div>
             </div>
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg overflow-hidden hover:shadow-lg transition-shadow hover-scale">
-              <div className="h-48 bg-gradient-to-br from-green-200 to-green-300 flex items-center justify-center">
-                <img 
-                  src="/isa-uploads/ce883482-92de-4adf-a3c6-a0c82b907ebe.png" 
-                  alt="NVIDIA investing in Africa"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">NVIDIA Invests in Africa</h3>
-                <p className="text-gray-600 mb-4">NVIDIA is now investing heavily in Africa to ensure they're not left behind in the AI revolution. This means more tech opportunities for African businesses!</p>
-                <Link to="/chat">
-                  <Button variant="outline" className="border-green-500 text-green-600 hover:bg-green-50">
-                    Learn More
-                  </Button>
-                </Link>
-              </div>
+          ) : trendingPosts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {trendingPosts.map((post, index) => {
+                const gradientColors = [
+                  'from-blue-50 to-blue-100',
+                  'from-green-50 to-green-100', 
+                  'from-orange-50 to-orange-100'
+                ];
+                const buttonColors = [
+                  'border-blue-500 text-blue-600 hover:bg-blue-50',
+                  'border-green-500 text-green-600 hover:bg-green-50',
+                  'border-orange-500 text-orange-600 hover:bg-orange-50'
+                ];
+                const bgGradients = [
+                  'from-blue-200 to-blue-300',
+                  'from-green-200 to-green-300',
+                  'from-orange-200 to-orange-300'
+                ];
+                
+                const colorIndex = index % 3;
+                const imageUrl = post.image_url || post.image_file_path || '/placeholder.svg';
+                
+                return (
+                  <div key={post.id} className={`bg-gradient-to-br ${gradientColors[colorIndex]} rounded-lg overflow-hidden hover:shadow-lg transition-shadow hover-scale`}>
+                    <div className={`h-48 bg-gradient-to-br ${bgGradients[colorIndex]} flex items-center justify-center`}>
+                      <img 
+                        src={imageUrl}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder.svg';
+                        }}
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold text-gray-800 mb-2">{post.title}</h3>
+                      <p className="text-gray-600 mb-4">{post.description}</p>
+                      <Link to={post.link_url}>
+                        <Button variant="outline" className={buttonColors[colorIndex]}>
+                          {post.button_text}
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg overflow-hidden hover:shadow-lg transition-shadow hover-scale">
-              <div className="h-48 bg-gradient-to-br from-orange-200 to-orange-300 flex items-center justify-center">
-                <img 
-                  src="/isa-uploads/94a65745-ea22-43d2-a47c-5a99be9bfa56.png" 
-                  alt="Jumia partnership"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Shop Jumia via ISA</h3>
-                <p className="text-gray-600 mb-4">Exciting news! Buyers will now be able to order from Jumia directly through ISA. More choices, better deals, one platform!</p>
-                <Link to="/chat">
-                  <Button variant="outline" className="border-orange-500 text-orange-600 hover:bg-orange-50">
-                    Start Shopping
-                  </Button>
-                </Link>
-              </div>
+          ) : (
+            <div className="text-center text-gray-500">
+              <p>No trending posts available at the moment.</p>
             </div>
-          </div>
+          )}
         </div>
       </section>
 

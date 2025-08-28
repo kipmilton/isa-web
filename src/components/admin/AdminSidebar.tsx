@@ -13,7 +13,8 @@ import {
   LogOut,
   Star,
   Bell,
-  MessageCircle
+  MessageCircle,
+  TrendingUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,7 @@ const AdminSidebar = ({ activeSection, onSectionChange, onLogout, userName }: Ad
     { id: 'training', label: 'Training Modules', icon: Users },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'customer-support', label: 'Customer Support', icon: MessageCircle },
+    { id: 'trending-posts', label: 'Trending Posts', icon: TrendingUp },
   ];
 
   return (
