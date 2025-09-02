@@ -127,6 +127,30 @@ const Index = () => {
     if (user) {
       navigate('/shop');
     } else {
+      // Store the intended destination
+      sessionStorage.setItem('intendedPath', '/shop');
+      setAuthType('customer');
+      setShowAuth(true);
+    }
+  };
+
+  const handleTryISA = () => {
+    if (user) {
+      navigate('/chat');
+    } else {
+      // Store the intended destination
+      sessionStorage.setItem('intendedPath', '/chat');
+      setAuthType('customer');
+      setShowAuth(true);
+    }
+  };
+
+  const handleGiftSomeone = () => {
+    if (user) {
+      navigate('/gift');
+    } else {
+      // Store the intended destination
+      sessionStorage.setItem('intendedPath', '/gift');
       setAuthType('customer');
       setShowAuth(true);
     }
@@ -188,18 +212,26 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img src="/isa-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-10 w-10" />
+              <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-10 w-10" />
               <span className="text-2xl font-bold text-gray-800">ISA</span>
             </div>
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center space-x-6">
-              <Link to="/chat" className="text-gray-600 hover:text-orange-600 transition-colors">Ask ISA</Link>
+              <button 
+                onClick={handleTryISA}
+                className="text-gray-600 hover:text-orange-600 transition-colors bg-transparent border-none p-0 m-0 cursor-pointer"
+              >
+                Ask ISA
+              </button>
               <a href="#how-it-works" className="text-gray-600 hover:text-orange-600 transition-colors">How it Works</a>
               <a href="#trending" className="text-gray-600 hover:text-orange-600 transition-colors">Trending</a>
-              <Link to="/gift" className="flex items-center text-gray-600 hover:text-orange-600 transition-colors">
+              <button 
+                onClick={handleGiftSomeone}
+                className="flex items-center text-gray-600 hover:text-orange-600 transition-colors bg-transparent border-none p-0 m-0 cursor-pointer"
+              >
                 <Gift className="h-4 w-4 mr-1" />
                 Gift Someone
-              </Link>
+              </button>
               <Button 
                 onClick={scrollToVendors} 
                 variant="outline" 
@@ -231,13 +263,12 @@ const Index = () => {
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg border-b z-50 animate-fade-in">
             <div className="flex flex-col space-y-2 px-6 py-4">
-              <Link
-                to="/chat"
-                className="py-2 text-gray-700 hover:text-orange-600 border-b border-gray-100"
-                onClick={() => setMobileMenuOpen(false)}
+              <button
+                onClick={() => { setMobileMenuOpen(false); handleTryISA(); }}
+                className="py-2 text-left text-gray-700 hover:text-orange-600 border-b border-gray-100 bg-transparent border-none w-full cursor-pointer"
               >
                 Ask ISA
-              </Link>
+              </button>
               <a
                 href="#how-it-works"
                 className="py-2 text-gray-700 hover:text-orange-600 border-b border-gray-100"
@@ -252,13 +283,12 @@ const Index = () => {
               >
                 Trending
               </a>
-              <Link
-                to="/gift"
-                className="py-2 flex items-center text-gray-700 hover:text-orange-600 border-b border-gray-100"
-                onClick={() => setMobileMenuOpen(false)}
+              <button
+                onClick={() => { setMobileMenuOpen(false); handleGiftSomeone(); }}
+                className="py-2 text-left flex items-center text-gray-700 hover:text-orange-600 border-b border-gray-100 bg-transparent border-none w-full cursor-pointer"
               >
                 <Gift className="h-4 w-4 mr-1" /> Gift Someone
-              </Link>
+              </button>
               <button
                 onClick={() => { setMobileMenuOpen(false); scrollToVendors(); }}
                 className="py-2 text-left text-green-600 border-b border-gray-100 hover:bg-green-50 rounded"
@@ -280,7 +310,7 @@ const Index = () => {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <div className="flex justify-center mb-6 animate-fade-in">
-            <img src="/isa-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-20 w-20" />
+            <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-20 w-20" />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-fade-in">
             Shop Smarter, Buy Better
@@ -289,11 +319,13 @@ const Index = () => {
             Discover fashion, lifestyle & essentials curated just for you — powered by AI.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
-            <Link to="/chat">
-              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 hover-scale">
-                Try ISA Free
-              </Button>
-            </Link>
+            <Button 
+              size="lg" 
+              className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 hover-scale"
+              onClick={handleTryISA}
+            >
+              Try ISA Free
+            </Button>
             <Button 
               size="lg" 
               variant="outline" 
