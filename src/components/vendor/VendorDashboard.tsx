@@ -12,6 +12,7 @@ import VendorPayments from "./sections/VendorPayments";
 import VendorWallet from "./sections/VendorWallet";
 import VendorSubscription from "./VendorSubscription";
 import VendorSettings from "./sections/VendorSettings";
+import { HCaptchaComponent } from "@/components/ui/hcaptcha";
 import { Button } from "@/components/ui/button";
 import { ProductService } from "@/services/productService";
 
@@ -36,6 +37,7 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [helpData, setHelpData] = useState({ phone: '', message: '' });
   const [submittingHelp, setSubmittingHelp] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const PLAN_LIMITS: Record<string, number> = {
     free: Infinity,
@@ -116,6 +118,12 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
       return;
     }
 
+    const hcaptchaEnabled = import.meta.env.VITE_ENABLE_HCAPTCHA === 'true';
+    if (hcaptchaEnabled && !captchaToken) {
+      alert('Please complete the captcha verification.');
+      return;
+    }
+
     setSubmittingHelp(true);
     try {
       // Insert support request directly into the table
@@ -125,7 +133,8 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
           user_id: user.id,
           phone_number: helpData.phone,
           message: helpData.message,
-          request_type: 'technical_support'
+          request_type: 'technical_support',
+          captcha_token: hcaptchaEnabled ? captchaToken : null
         });
 
       if (error) throw error;
@@ -133,6 +142,7 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
       alert('Help request submitted successfully! We\'ll get back to you shortly.');
       setShowHelpModal(false);
       setHelpData({ phone: '', message: '' });
+      setCaptchaToken(null);
     } catch (error) {
       console.error('Error submitting help request:', error);
       alert('Failed to submit help request. Please try again.');
@@ -451,6 +461,8 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                     />
                   </div>
+
+                  <HCaptchaComponent onVerify={(t) => setCaptchaToken(t)} onError={() => setCaptchaToken(null)} />
 
                   <div className="flex space-x-3 pt-4">
                     <button

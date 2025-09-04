@@ -45,7 +45,7 @@ const ShopDashboard = () => {
   const [productReviews, setProductReviews] = useState<any[]>([]);
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
-  const [showAskIsaDialog, setShowAskIsaDialog] = useState(true);
+  const [showAskIsaDialog, setShowAskIsaDialog] = useState(false);
   const [showAccountSetup, setShowAccountSetup] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -61,6 +61,19 @@ const ShopDashboard = () => {
       setLoading(false);
     };
     getSession();
+  }, []);
+
+  // Show Ask ISA dialog only once per user/browser
+  useEffect(() => {
+    try {
+      const hasSeen = localStorage.getItem('isa_seen_ask_isa') === 'true';
+      if (!hasSeen) {
+        setShowAskIsaDialog(true);
+        localStorage.setItem('isa_seen_ask_isa', 'true');
+      }
+    } catch (e) {
+      // ignore storage errors
+    }
   }, []);
 
   useEffect(() => {
@@ -338,7 +351,7 @@ const ShopDashboard = () => {
             {/* Logo and Title */}
             <Link to="/" className="flex items-center space-x-2 sm:space-x-4 hover:scale-105 transition-transform">
               <img 
-                src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" 
+                src="/isa-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" 
                 alt="ISA Logo" 
                 className="w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-md"
               />

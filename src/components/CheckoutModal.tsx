@@ -4,12 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { X, CreditCard, Check, MapPin, Download, Lock, Truck, Home } from 'lucide-react';
+import { X, Check, Download, Truck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrderService } from '@/services/orderService';
-import { MpesaService } from '@/services/mpesaService';
+import IsaPayModal from '@/components/payments/IsaPayModal';
 // import { AirtelMoneyService } from '@/services/airtelMoneyService'; // Uncomment if you have this service
 import { CartItemWithProduct, Address, PaymentMethod, DeliveryDetails } from '@/types/order';
 import { Product } from '@/types/product';
@@ -32,7 +31,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
-  const [currentStep, setCurrentStep] = useState<'delivery' | 'payment' | 'pay' | 'complete'>('delivery');
+  const [currentStep, setCurrentStep] = useState<'delivery' | 'pay' | 'complete'>('delivery');
 
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [contactInfo, setContactInfo] = useState({
@@ -40,8 +39,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     phone: '',
     whatsapp: ''
   });
-  const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'airtel_money'>('mpesa');
-  const [mobileNumber, setMobileNumber] = useState('');
+  const [showIsaPay, setShowIsaPay] = useState(false);
   const [notes, setNotes] = useState('');
   const { toast } = useToast();
 
@@ -69,26 +67,16 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
         toast({ title: 'Missing Information', description: 'Please enter your delivery address.', variant: 'destructive' });
         return;
       }
-      setCurrentStep('payment');
-    } else if (currentStep === 'payment') {
       setCurrentStep('pay');
     }
   };
 
   const handleBackStep = () => {
-    if (currentStep === 'payment') setCurrentStep('delivery');
-    else if (currentStep === 'pay') setCurrentStep('payment');
+    if (currentStep === 'pay') setCurrentStep('delivery');
   };
 
-  const handlePayment = async () => {
-    if (!mobileNumber) {
-      toast({ title: 'Missing Information', description: 'Please enter your mobile number.', variant: 'destructive' });
-      return;
-    }
-    setIsProcessing(true);
-    try {
-      // Create order first
-      const order = await OrderService.createOrder(user.id, {
+  const createOrder = async () => {
+    return OrderService.createOrder(user.id, {
         items: cartItems.map(item => ({ product_id: item.product_id, quantity: item.quantity })),
         shipping_address: {
           street: deliveryAddress,
@@ -107,42 +95,27 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
         customer_email: contactInfo.email,
         customer_phone: contactInfo.phone,
         notes: `ISA Delivery - WhatsApp: ${contactInfo.whatsapp}\nDelivery Address: ${deliveryAddress}\n${notes}`,
-        payment_method: paymentMethod,
+        payment_method: 'isa_pay',
         delivery_type: 'delivery',
         delivery_location_lat: null,
         delivery_location_lng: null,
         delivery_location_address: deliveryAddress,
         delivery_fee: deliveryFee
       });
-      let paymentResponse;
-      if (paymentMethod === 'mpesa') {
-        paymentResponse = await MpesaService.initiatePayment({
-          phoneNumber: mobileNumber,
-          amount: totalAmount,
-          orderId: order.id,
-          description: `ISA Order #${order.order_number}`
-        });
-      } else if (paymentMethod === 'airtel_money') {
-        // paymentResponse = await AirtelMoneyService.initiatePayment({ ... });
-        paymentResponse = { success: true, message: 'Airtel Money payment simulated.' };
-      }
-      if (paymentResponse.success) {
-        setOrderNumber(order.order_number);
-        setCurrentStep('complete');
-        onOrderComplete();
-        toast({ title: 'Payment Request Sent!', description: paymentResponse.message });
-      } else {
-        throw new Error(paymentResponse.message);
-      }
+  };
+
+  const handlePayWithIsa = async () => {
+    try {
+      const order = await createOrder();
+      setOrderNumber(order.order_number);
+      setShowIsaPay(true);
     } catch (error: any) {
-      toast({ title: 'Payment Failed', description: error instanceof Error ? error.message : 'Payment failed. Please try again.', variant: 'destructive' });
-    } finally {
-      setIsProcessing(false);
+      toast({ title: 'Order Failed', description: error?.message ?? 'Unable to create order', variant: 'destructive' });
     }
   };
 
   const downloadReceipt = () => {
-    const receiptContent = `Order Receipt\nOrder #: ${orderNumber}\nDate: ${new Date().toLocaleDateString()}\nCustomer: ${contactInfo.email}\nPhone: ${contactInfo.phone}\nWhatsApp: ${contactInfo.whatsapp}\n\nItems:\n${cartItems.map(item => `${item.product.name} x${item.quantity} - ${formatPrice(item.product.price * item.quantity)}`).join('\n')}\n\nSubtotal: ${formatPrice(subtotal)}\nDelivery Fee: ${formatPrice(deliveryFee)}\nTotal: ${formatPrice(totalAmount)}\n\nDelivery Address: ${deliveryAddress}\nDelivery Method: ISA Delivery\nPayment Method: ${paymentMethod === 'mpesa' ? 'M-Pesa' : 'Airtel Money'}\n    `;
+    const receiptContent = `Order Receipt\nOrder #: ${orderNumber}\nDate: ${new Date().toLocaleDateString()}\nCustomer: ${contactInfo.email}\nPhone: ${contactInfo.phone}\nWhatsApp: ${contactInfo.whatsapp}\n\nItems:\n${cartItems.map(item => `${item.product.name} x${item.quantity} - ${formatPrice(item.product.price * item.quantity)}`).join('\n')}\n\nSubtotal: ${formatPrice(subtotal)}\nDelivery Fee: ${formatPrice(deliveryFee)}\nTotal: ${formatPrice(totalAmount)}\n\nDelivery Address: ${deliveryAddress}\nDelivery Method: ISA Delivery\nPayment Method: ISA Pay\n    `;
     const blob = new Blob([receiptContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -195,10 +168,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
           <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Checkout</CardTitle>
           <div className="flex items-center space-x-2 mt-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'delivery' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>1</div>
-            <div className={`flex-1 h-1 ${currentStep === 'payment' || currentStep === 'pay' ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'payment' || currentStep === 'pay' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>2</div>
             <div className={`flex-1 h-1 ${currentStep === 'pay' ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'pay' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>3</div>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'pay' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>2</div>
           </div>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
@@ -277,24 +248,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </div>
             </>
           )}
-          {currentStep === 'payment' && (
+          
+          {currentStep === 'pay' && (
             <>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Payment Method
-                </h3>
-                <Select value={paymentMethod} onValueChange={value => setPaymentMethod(value as 'mpesa' | 'airtel_money')}>
-                  <SelectTrigger className="bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600">
-                    <SelectValue placeholder="Select payment method" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mpesa">M-Pesa</SelectItem>
-                    <SelectItem value="airtel_money">Airtel Money</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Separator />
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Order Summary</h3>
                 <div className="space-y-2 bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
@@ -319,34 +275,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <span className="text-gray-900 dark:text-white">{formatPrice(totalAmount)}</span>
                   </div>
                 </div>
-              </div>
-              <Separator />
-              <div>
-                <Label htmlFor="notes">Order Notes (Optional)</Label>
-                <Textarea id="notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Special instructions or notes..." className="bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600" rows={3} />
-              </div>
-            </>
-          )}
-          {currentStep === 'pay' && (
-            <>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                  <Lock className="w-5 h-5 mr-2" />
-                  {paymentMethod === 'mpesa' ? 'M-Pesa Payment' : 'Airtel Money Payment'}
-                </h3>
-                <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg mb-4">
-                  <p className="text-sm text-green-800 dark:text-green-200">
-                    You will receive a {paymentMethod === 'mpesa' ? 'M-Pesa' : 'Airtel Money'} prompt on your phone to complete the payment of {formatPrice(totalAmount)}.
-                  </p>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="mobile_number">{paymentMethod === 'mpesa' ? 'M-Pesa' : 'Airtel Money'} Phone Number</Label>
-                    <Input id="mobile_number" type="tel" value={mobileNumber} onChange={e => setMobileNumber(e.target.value)} placeholder="254700000000" className="bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600" />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Enter your {paymentMethod === 'mpesa' ? 'M-Pesa' : 'Airtel Money'} registered phone number. You will receive a payment prompt on your phone.
-                    </p>
-                  </div>
+                <div className="mt-4">
+                  <Label htmlFor="notes">Order Notes (Optional)</Label>
+                  <Textarea id="notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Special instructions or notes..." className="bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600" rows={3} />
                 </div>
               </div>
             </>
@@ -358,20 +289,32 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <div className="flex gap-2 ml-auto">
               <Button onClick={onClose} variant="outline">Cancel</Button>
               {currentStep === 'delivery' && (
-                <Button onClick={handleNextStep}>Continue to Payment</Button>
-              )}
-              {currentStep === 'payment' && (
-                <Button onClick={handleNextStep}>Continue to {paymentMethod === 'mpesa' ? 'M-Pesa' : 'Airtel Money'}</Button>
+                <Button onClick={handleNextStep}>Review & Pay</Button>
               )}
               {currentStep === 'pay' && (
-                <Button onClick={handlePayment} disabled={isProcessing} className="bg-green-600 hover:bg-green-700">
-                  {isProcessing ? 'Processing...' : `Pay ${formatPrice(totalAmount)}`}
+                <Button onClick={handlePayWithIsa} disabled={isProcessing} className="bg-green-600 hover:bg-green-700">
+                  {isProcessing ? 'Processing...' : `Pay with ISA Pay (${formatPrice(totalAmount)})`}
                 </Button>
               )}
             </div>
           </div>
         </CardContent>
       </Card>
+      {showIsaPay && (
+        <IsaPayModal
+          open={showIsaPay}
+          onOpenChange={setShowIsaPay}
+          userId={user.id}
+          amount={totalAmount}
+          currency={'KES'}
+          orderId={orderNumber}
+          description={`ISA Order #${orderNumber}`}
+          onSuccess={() => {
+            setCurrentStep('complete');
+            onOrderComplete();
+          }}
+        />
+      )}
     </div>
   );
 };

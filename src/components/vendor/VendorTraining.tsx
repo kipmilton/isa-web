@@ -20,6 +20,7 @@ import {
   ArrowLeft,
   HelpCircle
 } from "lucide-react";
+import { HCaptchaComponent } from "@/components/ui/hcaptcha";
 
 interface TrainingModule {
   id: string;
@@ -56,6 +57,7 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
   });
   const { toast } = useToast();
   const { triggerConfetti } = useConfetti();
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   useEffect(() => {
     loadTrainingData();
@@ -145,6 +147,11 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
       );
 
       if (allCompleted) {
+        const hcaptchaEnabled = import.meta.env.VITE_ENABLE_HCAPTCHA === 'true';
+        if (hcaptchaEnabled && !captchaToken) {
+          toast({ title: "Verification required", description: "Please complete the captcha before finishing training.", variant: "destructive" });
+          return;
+        }
         // Save training completion step
         await supabase
           .from('vendor_application_steps')
@@ -180,12 +187,17 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
   };
 
   const submitSupportRequest = async () => {
+    const hcaptchaEnabled = import.meta.env.VITE_ENABLE_HCAPTCHA === 'true';
     if (!supportData.phone || !supportData.message) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
         variant: "destructive"
       });
+      return;
+    }
+    if (hcaptchaEnabled && !captchaToken) {
+      toast({ title: "Verification required", description: "Please complete the captcha verification.", variant: "destructive" });
       return;
     }
 
@@ -196,7 +208,8 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
           user_id: userId,
           phone_number: supportData.phone,
           message: supportData.message,
-          request_type: 'training_help'
+          request_type: 'training_help',
+          captcha_token: hcaptchaEnabled ? captchaToken : null
         });
 
       if (error) throw error;
@@ -208,6 +221,7 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
 
       setShowSupportDialog(false);
       setSupportData({ phone: '', message: '' });
+      setCaptchaToken(null);
     } catch (error) {
       console.error('Error submitting support request:', error);
       toast({
@@ -290,6 +304,7 @@ const VendorTraining = ({ userId, onComplete, onProgressChange }: VendorTraining
                     />
                   </div>
                   <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
+                    <HCaptchaComponent onVerify={(t) => setCaptchaToken(t)} onError={() => setCaptchaToken(null)} />
                     <Button variant="outline" onClick={() => setShowSupportDialog(false)} className="w-full sm:w-auto">
                       Cancel
                     </Button>

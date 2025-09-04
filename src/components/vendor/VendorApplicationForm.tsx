@@ -24,6 +24,7 @@ import {
   MessageCircle
 } from "lucide-react";
 import imageCompression from 'browser-image-compression';
+import { HCaptchaComponent } from "@/components/ui/hcaptcha";
 
 interface VendorApplicationFormProps {
   userId: string;
@@ -61,6 +62,7 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
     }
   });
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const { toast } = useToast();
 
   const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
@@ -201,6 +203,12 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      const hcaptchaEnabled = import.meta.env.VITE_ENABLE_HCAPTCHA === 'true';
+      if (hcaptchaEnabled && !captchaToken) {
+        toast({ title: "Verification required", description: "Please complete the captcha verification.", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
       // Upload documents (optional - continue even if uploads fail)
       const documentUrls: Record<string, string> = {};
       let uploadWarnings: string[] = [];
@@ -260,6 +268,7 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
           step_name: 'application_form',
           step_data: {
             ...formData,
+            captcha_token: hcaptchaEnabled ? captchaToken : null,
             documents: {
               ...documentUrls,
               bankName: formData.documents.bankName,
