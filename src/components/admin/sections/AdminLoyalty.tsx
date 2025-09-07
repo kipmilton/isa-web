@@ -49,10 +49,10 @@ const AdminLoyalty = () => {
 
               if (!configError && configData) {
          setPointsConfig(configData);
-         // These fields may not exist in the database yet, so default to false
-         setRedemptionEnabled(false);
-         setVendorSubscriptionEnabled(false);
-         setCustomerPremiumEnabled(false);
+         // Use the new fields from the database
+         setRedemptionEnabled(configData.redemption_enabled || false);
+         setVendorSubscriptionEnabled(configData.vendor_subscription_enabled || false);
+         setCustomerPremiumEnabled(configData.customer_premium_enabled || false);
        }
 
       // Load commission rates with enhanced structure
@@ -119,6 +119,7 @@ const AdminLoyalty = () => {
       const { error } = await supabase
         .from('points_config')
         .insert({
+          redemption_enabled: newStatus,
           point_value_kes: pointsConfig?.point_value_kes || 0.1,
           spending_points_per_100_kes: pointsConfig?.spending_points_per_100_kes || 10,
           first_purchase_points: pointsConfig?.first_purchase_points || 100,
@@ -183,6 +184,7 @@ const AdminLoyalty = () => {
       const { error } = await supabase
         .from('points_config')
         .insert({
+          vendor_subscription_enabled: newStatus,
           point_value_kes: pointsConfig?.point_value_kes || 0.1,
           spending_points_per_100_kes: pointsConfig?.spending_points_per_100_kes || 10,
           first_purchase_points: pointsConfig?.first_purchase_points || 100,
@@ -273,6 +275,7 @@ const AdminLoyalty = () => {
         const { error } = await supabase
           .from('points_config')
           .insert({
+            customer_premium_enabled: newStatus,
             point_value_kes: pointsConfig?.point_value_kes || 0.1,
             spending_points_per_100_kes: pointsConfig?.spending_points_per_100_kes || 10,
             first_purchase_points: pointsConfig?.first_purchase_points || 100,

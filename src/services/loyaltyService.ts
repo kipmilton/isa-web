@@ -76,9 +76,26 @@ export class LoyaltyService {
     }
   }
 
-  // Award points for spending
+  // Check if loyalty program is enabled
+  static async isLoyaltyProgramEnabled() {
+    try {
+      const config = await this.getPointsConfig();
+      return config?.redemption_enabled || false;
+    } catch (error) {
+      console.error('Error checking loyalty program status:', error);
+      return false;
+    }
+  }
+
+  // Award points for spending (only if loyalty program enabled)
   static async awardSpendingPoints(userId: string, amountSpent: number) {
     try {
+      const isEnabled = await this.isLoyaltyProgramEnabled();
+      if (!isEnabled) {
+        console.log('Loyalty program disabled, points earning paused');
+        return 0;
+      }
+
       const { data, error } = await supabase.rpc('award_spending_points', {
         user_id_param: userId,
         amount_spent: amountSpent
@@ -92,9 +109,15 @@ export class LoyaltyService {
     }
   }
 
-  // Award points for quiz completion
+  // Award points for quiz completion (only if loyalty program enabled)
   static async awardQuizPoints(userId: string) {
     try {
+      const isEnabled = await this.isLoyaltyProgramEnabled();
+      if (!isEnabled) {
+        console.log('Loyalty program disabled, points earning paused');
+        return 0;
+      }
+
       const config = await this.getPointsConfig();
       const pointsToAward = config?.quiz_completion_points || 20;
 
@@ -146,9 +169,15 @@ export class LoyaltyService {
     }
   }
 
-  // Award points for first purchase
+  // Award points for first purchase (only if loyalty program enabled)
   static async awardFirstPurchasePoints(userId: string) {
     try {
+      const isEnabled = await this.isLoyaltyProgramEnabled();
+      if (!isEnabled) {
+        console.log('Loyalty program disabled, points earning paused');
+        return 0;
+      }
+
       const config = await this.getPointsConfig();
       const pointsToAward = config?.first_purchase_points || 100;
 
@@ -200,9 +229,14 @@ export class LoyaltyService {
     }
   }
 
-  // Redeem points
+  // Redeem points (only if loyalty program enabled)
   static async redeemPoints(userId: string, pointsToRedeem: number, orderId?: string) {
     try {
+      const isEnabled = await this.isLoyaltyProgramEnabled();
+      if (!isEnabled) {
+        throw new Error('Points redemption is currently disabled by the administrator');
+      }
+
       const { data, error } = await supabase.rpc('redeem_points', {
         user_id_param: userId,
         points_to_redeem: pointsToRedeem,
@@ -214,6 +248,18 @@ export class LoyaltyService {
     } catch (error) {
       console.error('Error redeeming points:', error);
       throw error;
+    }
+  }
+
+  // Calculate points discount for gift checkout
+  static async calculatePointsDiscount(userId: string, pointsToRedeem: number) {
+    try {
+      const config = await this.getPointsConfig();
+      const pointValue = config?.point_value_kes || 0.1;
+      return pointsToRedeem * pointValue;
+    } catch (error) {
+      console.error('Error calculating points discount:', error);
+      return 0;
     }
   }
 
@@ -231,18 +277,9 @@ export class LoyaltyService {
 
       for (const milestone of milestones) {
         if (currentPoints >= milestone.points) {
-          // Check if we've already notified for this milestone
-          const { data: existingNotification } = await supabase
-            .from('user_notifications')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('title', `🏆 Milestone Achieved: ${milestone.name}!`)
-            .limit(1);
-
-          if (!existingNotification || existingNotification.length === 0) {
-            // Send milestone notification
-            await NotificationService.notifyMilestone(userId, milestone.name, currentPoints);
-          }
+          // For now, just log milestone achievements
+          // In the future, this can integrate with the notification system
+          console.log(`User ${userId} achieved milestone: ${milestone.name}`);
         }
       }
     } catch (error) {
@@ -251,28 +288,15 @@ export class LoyaltyService {
     }
   }
 
-  // Create referral
-  static async createReferral(referrerId: string, referredId: string, referralCode: string) {
-    try {
-      const { error } = await supabase
-        .from('user_referrals')
-        .insert({
-          referrer_id: referrerId,
-          referred_id: referredId,
-          referral_code: referralCode
-        });
-
-      if (error) throw error;
-      return true;
-    } catch (error) {
-      console.error('Error creating referral:', error);
-      throw error;
-    }
-  }
-
-  // Award referral signup points
+  // Award referral signup points (only if loyalty program enabled)
   static async awardReferralSignupPoints(referrerId: string) {
     try {
+      const isEnabled = await this.isLoyaltyProgramEnabled();
+      if (!isEnabled) {
+        console.log('Loyalty program disabled, points earning paused');
+        return 0;
+      }
+
       const config = await this.getPointsConfig();
       const pointsToAward = config?.referral_signup_points || 200;
 
@@ -309,9 +333,15 @@ export class LoyaltyService {
     }
   }
 
-  // Award referral purchase points
+  // Award referral purchase points (only if loyalty program enabled)
   static async awardReferralPurchasePoints(referrerId: string) {
     try {
+      const isEnabled = await this.isLoyaltyProgramEnabled();
+      if (!isEnabled) {
+        console.log('Loyalty program disabled, points earning paused');
+        return 0;
+      }
+
       const config = await this.getPointsConfig();
       const pointsToAward = config?.referral_purchase_points || 200;
 
@@ -344,6 +374,25 @@ export class LoyaltyService {
       return pointsToAward;
     } catch (error) {
       console.error('Error awarding referral purchase points:', error);
+      throw error;
+    }
+  }
+
+  // Create referral
+  static async createReferral(referrerId: string, referredId: string, referralCode: string) {
+    try {
+      const { error } = await supabase
+        .from('user_referrals')
+        .insert({
+          referrer_id: referrerId,
+          referred_id: referredId,
+          referral_code: referralCode
+        });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error creating referral:', error);
       throw error;
     }
   }
@@ -482,4 +531,4 @@ export class LoyaltyService {
       throw error;
     }
   }
-} 
+}
