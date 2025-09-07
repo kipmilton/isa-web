@@ -78,6 +78,7 @@ const AdminCustomerSupport = () => {
       const profilesMap = new Map(profilesData?.map(profile => [profile.id, profile]) || []);
       const combinedData = requestsData?.map(request => ({
         ...request,
+        status: request.status as 'pending' | 'in_progress' | 'resolved',
         user: profilesMap.get(request.user_id)
       })) || [];
 

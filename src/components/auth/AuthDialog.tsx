@@ -240,7 +240,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             id: authData.user.id,
             email: signUpData.email,
             user_type: userType,
-            account_setup_completed: hasCompleteCustomerData,
+            account_setup_completed: hasCompleteCustomerData ? true : false,
             first_name: '',
             last_name: '',
             phone_number: '',
@@ -248,7 +248,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             age: null,
             gender: '',
             location: '',
-            status: 'pending'
+            status: userType === 'customer' ? 'approved' : 'pending'
           };
 
           // Add customer-specific data if user is customer

@@ -47,11 +47,12 @@ const AdminLoyalty = () => {
         .limit(1)
         .single();
 
-             if (!configError && configData) {
+              if (!configError && configData) {
          setPointsConfig(configData);
-         setRedemptionEnabled(configData.redemption_enabled || false);
-         setVendorSubscriptionEnabled(configData.vendor_subscription_enabled || false);
-         setCustomerPremiumEnabled(configData.customer_premium_enabled || false);
+         // These fields may not exist in the database yet, so default to false
+         setRedemptionEnabled(false);
+         setVendorSubscriptionEnabled(false);
+         setCustomerPremiumEnabled(false);
        }
 
       // Load commission rates with enhanced structure
@@ -118,7 +119,13 @@ const AdminLoyalty = () => {
       const { error } = await supabase
         .from('points_config')
         .insert({
-          redemption_enabled: newStatus
+          point_value_kes: pointsConfig?.point_value_kes || 0.1,
+          spending_points_per_100_kes: pointsConfig?.spending_points_per_100_kes || 10,
+          first_purchase_points: pointsConfig?.first_purchase_points || 100,
+          referral_signup_points: pointsConfig?.referral_signup_points || 200,
+          referral_purchase_points: pointsConfig?.referral_purchase_points || 200,
+          quiz_completion_points: pointsConfig?.quiz_completion_points || 20,
+          points_expiry_months: pointsConfig?.points_expiry_months || 12
         });
 
       if (error) throw error;
@@ -176,7 +183,13 @@ const AdminLoyalty = () => {
       const { error } = await supabase
         .from('points_config')
         .insert({
-          vendor_subscription_enabled: newStatus
+          point_value_kes: pointsConfig?.point_value_kes || 0.1,
+          spending_points_per_100_kes: pointsConfig?.spending_points_per_100_kes || 10,
+          first_purchase_points: pointsConfig?.first_purchase_points || 100,
+          referral_signup_points: pointsConfig?.referral_signup_points || 200,
+          referral_purchase_points: pointsConfig?.referral_purchase_points || 200,
+          quiz_completion_points: pointsConfig?.quiz_completion_points || 20,
+          points_expiry_months: pointsConfig?.points_expiry_months || 12
         });
 
       if (error) throw error;
@@ -256,12 +269,18 @@ const AdminLoyalty = () => {
      try {
        const newStatus = !customerPremiumEnabled;
        
-       // Update the customer premium status in the database
-       const { error } = await supabase
-         .from('points_config')
-         .insert({
-           customer_premium_enabled: newStatus
-         });
+        // Update the customer premium status in the database
+        const { error } = await supabase
+          .from('points_config')
+          .insert({
+            point_value_kes: pointsConfig?.point_value_kes || 0.1,
+            spending_points_per_100_kes: pointsConfig?.spending_points_per_100_kes || 10,
+            first_purchase_points: pointsConfig?.first_purchase_points || 100,
+            referral_signup_points: pointsConfig?.referral_signup_points || 200,
+            referral_purchase_points: pointsConfig?.referral_purchase_points || 200,
+            quiz_completion_points: pointsConfig?.quiz_completion_points || 20,
+            points_expiry_months: pointsConfig?.points_expiry_months || 12
+          });
 
        if (error) throw error;
 
