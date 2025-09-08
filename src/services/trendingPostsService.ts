@@ -151,11 +151,16 @@ export class TrendingPostsService {
         sort_order: index + 1
       }));
 
-      const { error } = await supabase
-        .from('trending_posts')
-        .upsert(updates, { onConflict: 'id' });
+      for (const post of updates) {
+        const { error } = await supabase
+          .from('trending_posts')
+          .update({ sort_order: post.sort_order })
+          .eq('id', post.id);
+        
+        if (error) throw error;
+      }
 
-      return { error };
+      return { error: null };
     } catch (error) {
       console.error('Error reordering trending posts:', error);
       return { error };

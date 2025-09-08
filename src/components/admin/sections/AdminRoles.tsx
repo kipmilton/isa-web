@@ -23,13 +23,15 @@ import {
 } from "lucide-react";
 
 interface AdminRole {
-  id: string;
   user_id: string;
   role: string;
   is_active: boolean;
-  assigned_at: string;
-  assigned_by?: string;
-  profiles?: any;
+  created_at: string;
+  profiles?: {
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
 }
 
 interface SupportRequest {
@@ -181,12 +183,12 @@ const AdminRoles = () => {
     }
   };
 
-  const handleToggleRole = async (roleId: string, currentStatus: boolean) => {
+  const handleToggleRole = async (userId: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
         .from('admin_roles')
         .update({ is_active: !currentStatus })
-        .eq('id', roleId);
+        .eq('user_id', userId);
 
       if (error) throw error;
 
@@ -206,12 +208,12 @@ const AdminRoles = () => {
     }
   };
 
-  const handleDeleteRole = async (roleId: string) => {
+  const handleDeleteRole = async (userId: string) => {
     try {
       const { error } = await supabase
         .from('admin_roles')
         .delete()
-        .eq('id', roleId);
+        .eq('user_id', userId);
 
       if (error) throw error;
 
@@ -362,7 +364,7 @@ const AdminRoles = () => {
                     </TableRow>
                   ) : (
                     adminRoles.map((role) => (
-                      <TableRow key={role.id}>
+                      <TableRow key={role.user_id}>
                         <TableCell>
                           {role.profiles?.first_name || role.profiles?.last_name 
                             ? `${role.profiles.first_name || ''} ${role.profiles.last_name || ''}`.trim()
@@ -381,24 +383,24 @@ const AdminRoles = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center space-x-1 text-sm text-gray-600">
-                          <Calendar className="w-4 h-4" />
-                          <span>{new Date(role.assigned_at).toLocaleDateString()}</span>
-                        </div>
+                         <div className="flex items-center space-x-1 text-sm text-gray-600">
+                           <Calendar className="w-4 h-4" />
+                           <span>{new Date(role.created_at).toLocaleDateString()}</span>
+                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Button
                             size="sm"
                             variant={role.is_active ? "outline" : "default"}
-                            onClick={() => handleToggleRole(role.id, role.is_active)}
+                            onClick={() => handleToggleRole(role.user_id, role.is_active)}
                           >
                             {role.is_active ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
                           </Button>
                           <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => handleDeleteRole(role.id)}
+                            onClick={() => handleDeleteRole(role.user_id)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

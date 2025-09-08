@@ -53,14 +53,8 @@ const VendorDashboard = () => {
 
       // Check if this is the first time logging in after approval
       if (profile.status === 'approved' && !hasShownWelcome) {
-        // Check if they've logged in before by looking at last_login
-        const { data: loginData } = await supabase
-          .from('profiles')
-          .select('last_login')
-          .eq('id', session.user.id)
-          .single();
-
-        if (!loginData?.last_login) {
+        // Check first time login using created_at as proxy
+        if (profile.created_at === profile.updated_at) {
           // First time login after approval - trigger celebration
           setTimeout(() => {
             triggerConfetti({
@@ -72,11 +66,11 @@ const VendorDashboard = () => {
           setHasShownWelcome(true);
         }
 
-        // Update last_login
-        await supabase
-          .from('profiles')
-          .update({ last_login: new Date().toISOString() })
-          .eq('id', session.user.id);
+        // Skip updating last_login as column doesn't exist
+        // await supabase
+        //   .from('profiles')
+        //   .update({ last_login: new Date().toISOString() })
+        //   .eq('id', session.user.id);
       }
     } catch (error) {
       console.error('Error checking user:', error);

@@ -30,7 +30,7 @@ export class NotificationService {
         return [];
       }
 
-      return data || [];
+      return (data || []) as UserNotification[];
     } catch (error) {
       console.error('Error fetching user notifications:', error);
       return [];
@@ -91,8 +91,7 @@ export class NotificationService {
           read_at: new Date().toISOString() 
         })
         .eq('user_id', userId)
-        .eq('is_read', false)
-        .select('*', { count: 'exact' });
+        .eq('is_read', false);
 
       if (error) {
         console.error('Error marking all notifications as read:', error);

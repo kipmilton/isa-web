@@ -85,7 +85,7 @@ const ProductDetail = () => {
     try {
       const productResult = await ProductService.getProduct(productId!);
       if (productResult.error) throw new Error("Product not found");
-      setProduct(productResult.data);
+      setProduct(productResult.data as Product);
 
              const imagesResult = await ProductService.getProductImages(productId!);
        setProductImages(imagesResult as unknown as ProductImage[]);

@@ -68,7 +68,7 @@ export class CommissionService {
 
       return {
         rate,
-        plan,
+        plan: plan === 'pro' || plan === 'premium_weekly' || plan === 'premium_monthly' || plan === 'premium_yearly' ? 'premium' : 'freemium',
         category_path: categoryPath,
         estimated_earnings: isa_commission, // Keep for backward compatibility
         vendor_earnings,
@@ -107,7 +107,7 @@ export class CommissionService {
 
       return data?.map(rate => ({
         ...rate,
-        current_rate: plan === 'premium' ? rate.premium_commission_rate : rate.freemium_commission_rate,
+        current_rate: (plan === 'pro' || plan === 'premium_weekly' || plan === 'premium_monthly' || plan === 'premium_yearly') ? rate.premium_commission_rate : rate.freemium_commission_rate,
         plan
       })) || [];
     } catch (error) {

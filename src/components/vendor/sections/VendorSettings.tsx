@@ -302,9 +302,11 @@ const VendorSettings = ({ vendorId, defaultTab = 'account', showUpgradeModal = f
         return;
       }
       
-      // Use the first row if multiple rows exist
-      const firstRow = Array.isArray(data) && data.length > 0 ? data[0] : data;
-      setSubscriptionEnabled(firstRow?.vendor_subscription_enabled || false);
+      const configRow = Array.isArray(data) ? data[0] : data;
+      const subscriptionEnabled = configRow && typeof configRow === 'object' && 'vendor_subscription_enabled' in configRow
+        ? Boolean(configRow.vendor_subscription_enabled)
+        : false;
+      setSubscriptionEnabled(subscriptionEnabled);
     } catch (error) {
       console.error('Error checking subscription status:', error);
       setSubscriptionEnabled(false);

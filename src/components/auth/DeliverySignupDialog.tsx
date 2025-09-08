@@ -180,19 +180,19 @@ const DeliverySignupDialog = ({ open, onOpenChange }: DeliverySignupDialogProps)
           return;
         }
 
-        // Create delivery application
+        // Create delivery personnel profile
         const { error: applicationError } = await supabase
-          .from('delivery_applications')
+          .from('delivery_personnel')
           .insert({
             user_id: authData.user.id,
-            id_number: formData.idNumber,
-            vehicle_type: formData.vehicleType,
-            vehicle_registration: formData.vehicleRegistration,
-            license_number: formData.licenseNumber,
-            experience: formData.experience,
-            availability: formData.availability,
-            service_areas: formData.areas,
-            status: 'pending'
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            phone_number: formData.phoneNumber,
+            email: formData.email,
+            constituency: 'Unknown', // Placeholder value
+            county: 'Unknown', // Placeholder value
+            drivers_license_url: formData.documents.license ? 'uploaded' : '',
+            id_card_url: formData.documents.idCard ? 'uploaded' : ''
           });
 
         if (applicationError) {

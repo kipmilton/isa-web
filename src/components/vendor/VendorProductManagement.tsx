@@ -385,7 +385,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
           variant: "destructive"
         });
       } else {
-        setProducts(result.data || []);
+        setProducts((result.data || []) as Product[]);
       }
     } catch (error) {
       toast({
