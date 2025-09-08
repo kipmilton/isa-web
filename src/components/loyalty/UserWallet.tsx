@@ -74,11 +74,12 @@ const UserWallet = ({ user }: UserWalletProps) => {
         }
       }
 
-      // Load transactions
+      // Load transactions (excluding deprecated daily login bonuses)
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('points_transactions')
         .select('*')
         .eq('user_id', user.id)
+        .not('reason', 'ilike', '%daily login%')
         .order('created_at', { ascending: false })
         .limit(10);
 
