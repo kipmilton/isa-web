@@ -25,8 +25,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import ProductImageFallback from "@/components/ProductImageFallback";
+import { useUISound } from "@/contexts/SoundContext";
 
 const ProductDetail = () => {
+  const playAddToCart = useUISound("add_to_cart");
+  const playLike = useUISound("like_toggle");
+  const playSubmitReview = useUISound("submit_review");
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -168,6 +172,7 @@ const ProductDetail = () => {
       });
       setIsInCart(true);
       toast({ title: "Success", description: "Product added to cart" });
+      try { playAddToCart(); } catch {}
     } catch (error) {
       toast({
         title: "Error",
@@ -202,6 +207,7 @@ const ProductDetail = () => {
         setIsLiked(true);
         toast({ title: "Added to wishlist" });
       }
+      try { playLike(); } catch {}
     } catch (error) {
       toast({
         title: "Error",
@@ -230,6 +236,7 @@ const ProductDetail = () => {
         });
         toast({ title: "Review submitted successfully" });
       }
+      try { playSubmitReview(); } catch {}
 
       setShowReviewDialog(false);
       setReviewText("");

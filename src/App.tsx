@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { VendorProvider } from "@/contexts/VendorContext";
 import { ConfettiProvider } from "@/contexts/ConfettiContext";
 import AuthGuard from "./components/auth/AuthGuard";
+import { SoundProvider } from "@/contexts/SoundContext";
 import Index from "./pages/Index";
 import Vendors from "./pages/Vendors";
 import Chat from "./pages/Chat";
@@ -35,6 +36,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <VendorProvider>
       <ConfettiProvider>
+        <SoundProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -116,6 +118,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
         </TooltipProvider>
+        </SoundProvider>
       </ConfettiProvider>
     </VendorProvider>
     <Analytics />

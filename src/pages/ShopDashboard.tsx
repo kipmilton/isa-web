@@ -23,10 +23,15 @@ import SubscriptionManager from "@/components/subscription/SubscriptionManager";
 import NotificationBell from "@/components/ui/notification-bell";
 import { useNavigate, Link } from "react-router-dom";
 import ProductImageFallback from "@/components/ProductImageFallback";
+import { useUISound } from "@/contexts/SoundContext";
 
 const categories = ["All", "Electronics", "Fashion", "Home", "Beauty", "Sports", "Books"];
 
 const ShopDashboard = () => {
+  const playAddToCart = useUISound("add_to_cart");
+  const playLike = useUISound("like_toggle");
+  const playOpenReviews = useUISound("open_reviews");
+  const playSubmitReview = useUISound("submit_review");
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showCart, setShowCart] = useState(false);
@@ -262,6 +267,7 @@ const ShopDashboard = () => {
         title: "Review submitted!",
         description: "Thank you for your feedback."
       });
+      try { playSubmitReview(); } catch {}
 
       setReviewText("");
       setReviewRating(5);
@@ -297,6 +303,7 @@ const ShopDashboard = () => {
       });
       await loadCart();
       toast({ title: "Added to cart!", description: "Item has been added to your shopping cart." });
+      try { playAddToCart(); } catch {}
     } catch (e: any) {
       toast({ title: "Failed to add to cart", description: e.message || "Please try again." });
     }
@@ -316,6 +323,7 @@ const ShopDashboard = () => {
         });
       }
       await loadWishlist();
+      try { playLike(); } catch {}
     } catch (e: any) {
       toast({ title: "Failed to update wishlist", description: e.message || "Please try again." });
     }
@@ -890,6 +898,7 @@ const ShopDashboard = () => {
                         onClick={() => {
                           setShowProductReviews(product.id);
                           loadProductReviews(product.id);
+                          try { playOpenReviews(); } catch {}
                         }}
                         className="absolute top-3 left-3 w-8 h-8 rounded-full shadow-md bg-white/80 text-gray-600 hover:bg-white"
                       >

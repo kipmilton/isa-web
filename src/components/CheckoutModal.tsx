@@ -12,6 +12,7 @@ import IsaPayModal from '@/components/payments/IsaPayModal';
 // import { AirtelMoneyService } from '@/services/airtelMoneyService'; // Uncomment if you have this service
 import { CartItemWithProduct, Address, PaymentMethod, DeliveryDetails } from '@/types/order';
 import { Product } from '@/types/product';
+import { useUISound } from '@/contexts/SoundContext';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -42,6 +43,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [showIsaPay, setShowIsaPay] = useState(false);
   const [notes, setNotes] = useState('');
   const { toast } = useToast();
+  const playCheckoutSuccess = useUISound('checkout_success');
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const deliveryFee = 500; // Fixed delivery fee
@@ -312,6 +314,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
           onSuccess={() => {
             setCurrentStep('complete');
             onOrderComplete();
+            try { playCheckoutSuccess(); } catch {}
           }}
         />
       )}

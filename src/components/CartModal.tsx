@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { OrderService } from "@/services/orderService";
 import { CartItemWithProduct } from "@/types/order";
 import CheckoutModal from "./CheckoutModal";
+import { useUISound } from "@/contexts/SoundContext";
 
 interface CartModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ const CartModal = ({ isOpen, onClose, user, onRemoveFromCart, onUpdateQuantity }
   const [isLoading, setIsLoading] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const { toast } = useToast();
+  const playCheckoutOpen = useUISound("checkout_open");
 
   useEffect(() => {
     if (isOpen && user) {
@@ -82,6 +84,7 @@ const CartModal = ({ isOpen, onClose, user, onRemoveFromCart, onUpdateQuantity }
 
   const handleCheckout = () => {
     setShowCheckout(true);
+    try { playCheckoutOpen(); } catch {}
   };
 
   const handleOrderComplete = () => {

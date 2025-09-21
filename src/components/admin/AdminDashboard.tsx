@@ -15,6 +15,7 @@ import AdminTraining from "./sections/AdminTraining";
 import AdminNotifications from "./sections/AdminNotifications";
 import AdminCustomerSupport from "./sections/AdminCustomerSupport";
 import AdminTrendingPosts from "./sections/AdminTrendingPosts";
+import AdminSounds from "./sections/AdminSounds";
 
 interface AdminDashboardProps {
   user: any;
@@ -56,6 +57,8 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
         return <AdminCustomerSupport />;
       case "trending-posts":
         return <AdminTrendingPosts />;
+      case "manage-sounds":
+        return <AdminSounds />;
       default:
         return <AdminHome />;
     }
