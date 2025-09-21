@@ -17,11 +17,10 @@ export const HCaptchaComponent = forwardRef<HCaptcha, HCaptchaComponentProps>(({
   theme = 'light' 
 }: HCaptchaComponentProps, ref) => {
   const internalRef = useRef<HCaptcha>(null);
-  const [isEnabled] = useState(() => {
-    return import.meta.env.VITE_ENABLE_HCAPTCHA === 'true';
-  });
-
-  const siteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
+  
+  // Use the site key directly from .env
+  const siteKey = "9ea45ea6-9828-4b6e-9636-5f8eec58cc50";
+  const isEnabled = true; // Enable hCaptcha by default
 
   useImperativeHandle(ref, () => internalRef.current as any);
 

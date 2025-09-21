@@ -75,7 +75,7 @@ export default function AdminSounds() {
     try {
       // Upsert into app_sounds table
       const upserts = rows.map(r => ({ event_key: r.key, enabled: r.enabled, url: r.url, volume: r.volume }));
-      const { error } = await supabase.from('app_sounds').upsert(upserts, { onConflict: 'event_key' });
+      const { error } = await (supabase as any).from('app_sounds').upsert(upserts, { onConflict: 'event_key' });
       if (error) throw error;
       await refresh();
       toast({ title: "Saved", description: "Sound settings updated" });

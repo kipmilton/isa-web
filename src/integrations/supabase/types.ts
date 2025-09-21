@@ -35,6 +35,36 @@ export type Database = {
         }
         Relationships: []
       }
+      app_sounds: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          event_key: string
+          id: string
+          updated_at: string
+          url: string
+          volume: number
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          event_key: string
+          id?: string
+          updated_at?: string
+          url: string
+          volume?: number
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          event_key?: string
+          id?: string
+          updated_at?: string
+          url?: string
+          volume?: number
+        }
+        Relationships: []
+      }
       chat_history: {
         Row: {
           id: string

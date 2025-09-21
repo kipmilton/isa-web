@@ -65,7 +65,7 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
   const loadSettings = useCallback(async () => {
     try {
       // Try load from DB; fall back to localStorage; final fallback to defaults
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("app_sounds")
         .select("event_key, enabled, url, volume")
         .order("updated_at", { ascending: false });
