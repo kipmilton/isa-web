@@ -1036,6 +1036,7 @@ export type Database = {
           banned: boolean
           banned_reason: string | null
           brand: string | null
+          brand_level: string | null
           category: string
           commission_percentage: number | null
           created_at: string | null
@@ -1077,6 +1078,7 @@ export type Database = {
           banned?: boolean
           banned_reason?: string | null
           brand?: string | null
+          brand_level?: string | null
           category: string
           commission_percentage?: number | null
           created_at?: string | null
@@ -1118,6 +1120,7 @@ export type Database = {
           banned?: boolean
           banned_reason?: string | null
           brand?: string | null
+          brand_level?: string | null
           category?: string
           commission_percentage?: number | null
           created_at?: string | null
@@ -1473,6 +1476,51 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          priority: string
+          responded_at: string | null
+          responded_by: string | null
+          response: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          id?: string
+          priority?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          priority?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       training_modules: {
         Row: {
           content: string | null
@@ -1619,27 +1667,33 @@ export type Database = {
       user_likes: {
         Row: {
           created_at: string | null
+          custom_note: string | null
           id: string
           product_category: string | null
           product_id: string
           product_name: string | null
           user_id: string | null
+          wishlist_group_id: string | null
         }
         Insert: {
           created_at?: string | null
+          custom_note?: string | null
           id?: string
           product_category?: string | null
           product_id: string
           product_name?: string | null
           user_id?: string | null
+          wishlist_group_id?: string | null
         }
         Update: {
           created_at?: string | null
+          custom_note?: string | null
           id?: string
           product_category?: string | null
           product_id?: string
           product_name?: string | null
           user_id?: string | null
+          wishlist_group_id?: string | null
         }
         Relationships: [
           {
@@ -1668,6 +1722,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_likes_wishlist_group_id_fkey"
+            columns: ["wishlist_group_id"]
+            isOneToOne: false
+            referencedRelation: "wishlist_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -2279,6 +2340,36 @@ export type Database = {
           status?: string
           updated_at?: string
           vendor_id?: string
+        }
+        Relationships: []
+      }
+      wishlist_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          hashtag: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          hashtag?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          hashtag?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

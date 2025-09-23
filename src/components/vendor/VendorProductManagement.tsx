@@ -49,6 +49,7 @@ interface ProductFormData {
   category: string;
   subcategory?: string;
   brand?: string;
+  brand_level?: "entry" | "medium" | "high";
   stock_quantity: number;
   sku?: string;
   tags: string[];
@@ -325,6 +326,7 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
     category: "",
     subcategory: "",
     brand: "",
+    brand_level: "entry",
     stock_quantity: 0,
     sku: "",
     tags: [],
@@ -947,6 +949,20 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                       placeholder="Enter brand name"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="brand_level">Brand Level</Label>
+                  <Select value={formData.brand_level || "entry"} onValueChange={(value: "entry" | "medium" | "high") => setFormData(prev => ({ ...prev, brand_level: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select brand level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="entry">Entry Level - Budget-friendly products</SelectItem>
+                      <SelectItem value="medium">Medium Level - Mid-range quality</SelectItem>
+                      <SelectItem value="high">High Level - Premium/Luxury products</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>

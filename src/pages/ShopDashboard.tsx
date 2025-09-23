@@ -24,6 +24,9 @@ import NotificationBell from "@/components/ui/notification-bell";
 import { useNavigate, Link } from "react-router-dom";
 import ProductImageFallback from "@/components/ProductImageFallback";
 import { useUISound } from "@/contexts/SoundContext";
+import ShareButton from "@/components/shop/ShareButton";
+import SupportTicketDialog from "@/components/support/SupportTicketDialog";
+import EnhancedWishlistModal from "@/components/wishlist/EnhancedWishlistModal";
 
 const categories = ["All", "Electronics", "Fashion", "Home", "Beauty", "Sports", "Books"];
 
@@ -418,6 +421,8 @@ const ShopDashboard = () => {
                   <span className="text-sm font-medium">Ask ISA</span>
                 </Button>
               </Link>
+              
+              <ShareButton className="px-3 py-2" />
               
               <Link to="/gift">
                 <Button variant="ghost" className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-lg px-3 py-2">
