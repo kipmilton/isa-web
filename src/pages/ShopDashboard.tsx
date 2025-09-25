@@ -1053,119 +1053,13 @@ const ShopDashboard = () => {
         onUpdateQuantity={() => {}}
       />
 
-      {/* Wishlist Modal */}
-      {showLikedItems && (
-        <Dialog open={showLikedItems} onOpenChange={setShowLikedItems}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center space-x-2">
-                <Heart className="w-5 h-5 text-red-500" />
-                <span>Your Favorites</span>
-                <Badge className="bg-red-500 text-white">{likedItems.length}</Badge>
-              </DialogTitle>
-              <DialogDescription className="sr-only">
-                View and manage your favorite products.
-              </DialogDescription>
-            </DialogHeader>
-            {likedItems.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-12 h-12 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">No favorites yet</h3>
-                <p className="text-gray-600 mb-4">Start liking products to see them here!</p>
-                <Button onClick={() => setShowLikedItems(false)} className="bg-orange-500 hover:bg-orange-600">
-                  Continue Shopping
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {likedItems.map((item: any) => (
-                  <Card key={item.id} className="group hover:shadow-lg transition-all duration-200">
-                    <div className="flex gap-4 p-4">
-                      {/* Product Image */}
-                      <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg">
-                        {item.product?.main_image ? (
-                          <img
-                            src={item.product.main_image}
-                            alt={item.product.name || 'Product'}
-                            className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
-                            onError={(e) => {
-                              e.currentTarget.src = '/placeholder.svg';
-                            }}
-                          />
-                        ) : (
-                          <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                            <img src="/placeholder.svg" alt="No image" className="w-8 h-8 text-gray-400" />
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Product Details */}
-                      <div className="flex-1 min-w-0">
-                        <div className="space-y-2">
-                          <div>
-                            <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-orange-600 transition-colors cursor-pointer"
-                                onClick={() => {
-                                  setShowLikedItems(false);
-                                  navigate(`/product/${item.product_id}`);
-                                }}>
-                              {item.product?.name || item.product_name || 'Product'}
-                            </h3>
-                            <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600 mt-1">
-                              {item.product?.category || item.product_category || 'Category'}
-                            </Badge>
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                              <div className="text-lg font-bold text-gray-900">
-                                {item.product?.price ? formatPrice(getConvertedPrice(item.product.price), selectedCurrency) : 'Price N/A'}
-                              </div>
-                              {item.product?.original_price && item.product.original_price > item.product.price && (
-                                <div className="text-sm text-gray-500 line-through">
-                                  {formatPrice(getConvertedPrice(item.product.original_price), selectedCurrency)}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Action Buttons */}
-                      <div className="flex flex-col gap-2">
-                        <Button 
-                          size="sm" 
-                          className="bg-orange-500 hover:bg-orange-600 text-white"
-                          onClick={async () => {
-                            const product = products.find((p: any) => p.id === item.product_id) || item.product;
-                            if (product) {
-                              await handleAddToCart(product);
-                            }
-                          }}
-                        >
-                          <ShoppingCart className="w-4 h-4 mr-1" /> Add to Cart
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                          onClick={async () => {
-                            await OrderService.removeFromWishlist(user.id, item.product_id);
-                            await loadWishlist();
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* Enhanced Wishlist Modal */}
+      <EnhancedWishlistModal
+        open={showLikedItems}
+        onOpenChange={setShowLikedItems}
+        userId={user.id}
+        onAddToCart={handleAddToCart}
+      />
 
       {/* Ask ISA Welcome Dialog */}
       <Dialog open={showAskIsaDialog} onOpenChange={setShowAskIsaDialog}>
