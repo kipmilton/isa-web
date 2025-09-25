@@ -23,6 +23,8 @@ const EVENTS: EventRow[] = [
   { key: "checkout_success", label: "Checkout Success", hint: "Plays after payment success" },
   { key: "submit_review", label: "Submit Review", hint: "Plays after review submit" },
   { key: "open_reviews", label: "Open Reviews", hint: "Plays when opening reviews modal" },
+  { key: "ticket_created", label: "Ticket Created", hint: "Plays when support ticket is created" },
+  { key: "ticket_responded", label: "Ticket Responded", hint: "Plays when admin responds to ticket" },
 ];
 
 const BUCKET = "app-sounds"; // Create this bucket in Supabase Storage
