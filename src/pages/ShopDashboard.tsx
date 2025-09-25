@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X, Truck, Settings, Wallet, CreditCard, Crown, Globe } from "lucide-react";
+import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X, Truck, Settings, Wallet, CreditCard, Crown, Globe, MessageSquare } from "lucide-react";
 import { ProductService } from "@/services/productService";
 import { OrderService } from "@/services/orderService";
 import { SubscriptionService } from "@/services/subscriptionService";
@@ -422,7 +422,7 @@ const ShopDashboard = () => {
                 </Button>
               </Link>
               
-              <ShareButton className="px-3 py-2" />
+              
               
               <Link to="/gift">
                 <Button variant="ghost" className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-lg px-3 py-2">
@@ -1106,6 +1106,28 @@ const ShopDashboard = () => {
           }}
         />
       )}
+
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
+        {/* Share Button - positioned above ticket button */}
+        <div className="relative group">
+          <ShareButton className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0" />
+        </div>
+        
+        {/* Support Ticket Button */}
+        {user && (
+          <div className="relative group">
+            <SupportTicketDialog userId={user.id}>
+              <Button 
+                className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 bg-gradient-to-r from-orange-500 to-red-600 text-white border-0"
+                size="icon"
+              >
+                <MessageSquare className="w-6 h-6" />
+              </Button>
+            </SupportTicketDialog>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
