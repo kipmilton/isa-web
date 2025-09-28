@@ -16,6 +16,7 @@ import Admin from "./pages/Admin";
 import VendorDashboard from "./pages/VendorDashboard";
 import VendorStatus from "./components/vendor/VendorStatus";
 import VendorRejection from "./pages/VendorRejection";
+import MyOrders from "./pages/MyOrders";
 import NotFound from "./pages/NotFound";
 import ShopDashboard from "./pages/ShopDashboard";
 import ProductDetail from "./pages/ProductDetail";
@@ -80,6 +81,11 @@ const App = () => (
             <Route path="/product/:productId" element={
               <AuthGuard requireAuth={true} allowedUserTypes={['customer']}>
                 <ProductDetail />
+              </AuthGuard>
+            } />
+            <Route path="/my-orders" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['customer']}>
+                <MyOrders />
               </AuthGuard>
             } />
             <Route path="/auth/callback" element={<AuthCallback />} />

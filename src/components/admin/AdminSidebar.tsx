@@ -1,22 +1,6 @@
 import { useState } from "react";
 import { 
-  Home, 
-  Users, 
-  Store, 
-  ShoppingCart, 
-  Package, 
-  CreditCard, 
-  Wallet,
-  Truck,
-  Shield,
-  ChevronRight,
-  LogOut,
-  Star,
-  Bell,
-  MessageCircle,
-  TrendingUp,
-  Volume2,
-  Ticket
+import { Home, Users, Package, CreditCard, Star, Truck, Settings, Bell, Wallet, UserCheck, MessageSquare, TrendingUp, RotateCcw } from "lucide-react";
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -41,6 +25,7 @@ const AdminSidebar = ({ activeSection, onSectionChange, onLogout, userName }: Ad
     { id: 'loyalty', label: 'Loyalty Program', icon: Wallet },
     { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },
     { id: 'style-quiz', label: 'Style Quiz', icon: Star },
+    { id: 'returns', label: 'Item Returns', icon: RotateCcw },
     { id: 'delivery', label: 'Manage Delivery', icon: Truck },
     { id: 'roles', label: 'Admin Roles', icon: Shield },
     { id: 'training', label: 'Training Modules', icon: Users },

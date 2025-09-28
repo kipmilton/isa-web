@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X, Truck, Settings, Wallet, CreditCard, Crown, Globe, MessageSquare } from "lucide-react";
+import { Heart, ShoppingCart, Search, LogOut, Star, MessageCircle, User, Gift, Filter, TrendingUp, Plus, Minus, Eye, UserCheck, Menu, X, Truck, Settings, Wallet, CreditCard, Crown, Globe, MessageSquare, Package } from "lucide-react";
 import { ProductService } from "@/services/productService";
 import { OrderService } from "@/services/orderService";
 import { SubscriptionService } from "@/services/subscriptionService";
@@ -496,6 +496,10 @@ const ShopDashboard = () => {
                   <DropdownMenuItem onClick={() => navigate('/profile?tab=wallet')}>
                     <Wallet className="w-4 h-4 mr-2" />
                     My Wallet
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/my-orders')}>
+                    <Package className="w-4 h-4 mr-2" />
+                    My Orders
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/profile?tab=quiz')}>
                     <Star className="w-4 h-4 mr-2" />

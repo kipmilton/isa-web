@@ -9,6 +9,7 @@ import AdminPayments from "./sections/AdminPayments";
 import AdminLoyalty from "./sections/AdminLoyalty";
 import AdminSubscriptions from "./sections/AdminSubscriptions";
 import AdminStyleQuiz from "./sections/AdminStyleQuiz";
+import AdminReturns from "./sections/AdminReturns";
 import AdminDelivery from "./sections/AdminDelivery";
 import AdminRoles from "./sections/AdminRoles";
 import AdminTraining from "./sections/AdminTraining";
@@ -46,6 +47,8 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
         return <AdminSubscriptions />;
       case "style-quiz":
         return <AdminStyleQuiz />;
+      case "returns":
+        return <AdminReturns />;
       case "delivery":
         return <AdminDelivery />;
       case "roles":

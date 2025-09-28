@@ -605,6 +605,8 @@ export type Database = {
           delivery_location_address: string | null
           delivery_location_lat: number | null
           delivery_location_lng: number | null
+          delivery_rating: number | null
+          delivery_review_comment: string | null
           delivery_type: string | null
           discount_amount: number | null
           estimated_delivery_date: string | null
@@ -617,6 +619,9 @@ export type Database = {
           payment_status: string | null
           pickup_location: string | null
           pickup_phone: string | null
+          product_rating: number | null
+          product_review_comment: string | null
+          rated_at: string | null
           shipping_address: Json | null
           shipping_amount: number | null
           status: string
@@ -637,6 +642,8 @@ export type Database = {
           delivery_location_address?: string | null
           delivery_location_lat?: number | null
           delivery_location_lng?: number | null
+          delivery_rating?: number | null
+          delivery_review_comment?: string | null
           delivery_type?: string | null
           discount_amount?: number | null
           estimated_delivery_date?: string | null
@@ -649,6 +656,9 @@ export type Database = {
           payment_status?: string | null
           pickup_location?: string | null
           pickup_phone?: string | null
+          product_rating?: number | null
+          product_review_comment?: string | null
+          rated_at?: string | null
           shipping_address?: Json | null
           shipping_amount?: number | null
           status?: string
@@ -669,6 +679,8 @@ export type Database = {
           delivery_location_address?: string | null
           delivery_location_lat?: number | null
           delivery_location_lng?: number | null
+          delivery_rating?: number | null
+          delivery_review_comment?: string | null
           delivery_type?: string | null
           discount_amount?: number | null
           estimated_delivery_date?: string | null
@@ -681,6 +693,9 @@ export type Database = {
           payment_status?: string | null
           pickup_location?: string | null
           pickup_phone?: string | null
+          product_rating?: number | null
+          product_review_comment?: string | null
+          rated_at?: string | null
           shipping_address?: Json | null
           shipping_amount?: number | null
           status?: string
@@ -1062,6 +1077,9 @@ export type Database = {
           ram: string | null
           rating: number | null
           rejection_reason: string | null
+          return_eligible: boolean | null
+          return_policy_guidelines: string | null
+          return_policy_reason: string | null
           review_count: number | null
           sku: string | null
           specifications: Json | null
@@ -1104,6 +1122,9 @@ export type Database = {
           ram?: string | null
           rating?: number | null
           rejection_reason?: string | null
+          return_eligible?: boolean | null
+          return_policy_guidelines?: string | null
+          return_policy_reason?: string | null
           review_count?: number | null
           sku?: string | null
           specifications?: Json | null
@@ -1146,6 +1167,9 @@ export type Database = {
           ram?: string | null
           rating?: number | null
           rejection_reason?: string | null
+          return_eligible?: boolean | null
+          return_policy_guidelines?: string | null
+          return_policy_reason?: string | null
           review_count?: number | null
           sku?: string | null
           specifications?: Json | null

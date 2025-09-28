@@ -41,29 +41,32 @@ interface VendorProductManagementProps {
   user: any;
 }
 
-interface ProductFormData {
-  name: string;
-  description: string;
-  price: number;
-  original_price?: number;
-  category: string;
-  subcategory?: string;
-  brand?: string;
-  brand_level?: "entry" | "medium" | "high";
-  stock_quantity: number;
-  sku?: string;
-  tags: string[];
-  specifications: Record<string, any>;
-  is_featured: boolean;
-  is_active: boolean;
-  main_image?: string;
-  images?: string[];
-  commission_percentage?: number;
-  pickup_location?: string;
-  pickup_phone_number?: string;
-  status?: "pending" | "approved" | "rejected";
-  rejection_reason?: string | null;
-}
+  interface ProductFormData {
+    name: string;
+    description: string;
+    price: number;
+    original_price?: number;
+    category: string;
+    subcategory?: string;
+    brand?: string;
+    brand_level?: "entry" | "medium" | "high";
+    stock_quantity: number;
+    sku?: string;
+    tags: string[];
+    specifications: Record<string, any>;
+    is_featured: boolean;
+    is_active: boolean;
+    main_image?: string;
+    images?: string[];
+    commission_percentage?: number;
+    pickup_location?: string;
+    pickup_phone_number?: string;
+    status?: "pending" | "approved" | "rejected";
+    rejection_reason?: string | null;
+    return_eligible?: boolean;
+    return_policy_guidelines?: string;
+    return_policy_reason?: string;
+  }
 
 // 1. Add the full category tree and types at the top
 export interface CategoryNode {
@@ -337,7 +340,10 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
     images: [],
     commission_percentage: undefined,
     pickup_location: "",
-    pickup_phone_number: ""
+    pickup_phone_number: "",
+    return_eligible: true,
+    return_policy_guidelines: "",
+    return_policy_reason: ""
   });
 
   const [productAttributes, setProductAttributes] = useState<Omit<ProductAttribute, 'id' | 'product_id' | 'created_at' | 'updated_at'>[]>([]);
@@ -1294,6 +1300,49 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                     checked={formData.is_active}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
                   />
+                </div>
+
+                {/* Return Policy Section */}
+                <div className="space-y-4 border-t pt-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Return Policy</h3>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="return_eligible">Eligible for Return</Label>
+                      <p className="text-sm text-gray-600">Can customers return this item after purchase?</p>
+                    </div>
+                    <Switch
+                      id="return_eligible"
+                      checked={formData.return_eligible || false}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, return_eligible: checked }))}
+                    />
+                  </div>
+
+                  {formData.return_eligible ? (
+                    <div>
+                      <Label htmlFor="return_policy_guidelines">Return Guidelines</Label>
+                      <p className="text-sm text-gray-600 mb-2">Specify the conditions under which the product can be returned</p>
+                      <Textarea
+                        id="return_policy_guidelines"
+                        value={formData.return_policy_guidelines || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, return_policy_guidelines: e.target.value }))}
+                        placeholder="e.g., Product must be undamaged, in original packaging, with all accessories included. No signs of wear or use."
+                        rows={3}
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <Label htmlFor="return_policy_reason">Reason for No Returns</Label>
+                      <p className="text-sm text-gray-600 mb-2">Explain why this product cannot be returned</p>
+                      <Textarea
+                        id="return_policy_reason"
+                        value={formData.return_policy_reason || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, return_policy_reason: e.target.value }))}
+                        placeholder="e.g., Highly consumable item like perfumes that cannot be resold for hygiene reasons"
+                        rows={3}
+                      />
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
