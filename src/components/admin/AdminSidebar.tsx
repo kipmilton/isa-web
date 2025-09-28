@@ -1,6 +1,26 @@
 import { useState } from "react";
 import { 
-import { Home, Users, Package, CreditCard, Star, Truck, Settings, Bell, Wallet, UserCheck, MessageSquare, TrendingUp, RotateCcw } from "lucide-react";
+  Home, 
+  Users, 
+  Package, 
+  CreditCard, 
+  Star, 
+  Truck, 
+  Settings, 
+  Bell, 
+  Wallet, 
+  UserCheck, 
+  MessageSquare, 
+  TrendingUp, 
+  RotateCcw,
+  Store,
+  ShoppingCart,
+  Shield,
+  ChevronRight,
+  Volume2,
+  Ticket,
+  MessageCircle,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

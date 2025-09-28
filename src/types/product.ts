@@ -42,6 +42,9 @@ export interface Product {
   banned_reason?: string | null;
   status?: 'pending' | 'approved' | 'rejected';
   rejection_reason?: string | null;
+  return_eligible?: boolean;
+  return_policy_guidelines?: string;
+  return_policy_reason?: string;
 }
 
 export interface ProductAttribute {
