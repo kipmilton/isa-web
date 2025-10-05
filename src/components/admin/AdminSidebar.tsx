@@ -16,11 +16,11 @@ import {
   Store,
   ShoppingCart,
   Shield,
-  ChevronRight,
   Volume2,
   Ticket,
-  MessageCircle,
-  LogOut
+  LogOut,
+  ChevronRight,
+  MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
