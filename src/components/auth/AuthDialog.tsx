@@ -13,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import { HCaptchaComponent } from "@/components/ui/hcaptcha";
 import { useRef } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import PrivacyPolicy from "./PrivacyPolicy";
 
 interface AuthDialogProps {
   open: boolean;
@@ -25,7 +27,9 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const [location, setLocation] = useState({ county: "", constituency: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
+  const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
   const [userType, setUserType] = useState<'customer' | 'vendor' | null>(null); // New state for user type
   const { setIsVendor, setVendorStatus } = useVendor();
   const navigate = useNavigate();
@@ -151,9 +155,9 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
     try {
       if (isSignUp) {
-        // Check if terms are accepted for signup
-        if (!acceptedTerms) {
-          toast.error("Please accept the terms and conditions to continue");
+        // Check if terms and privacy are accepted for signup
+        if (!acceptedTerms || !acceptedPrivacy) {
+          toast.error("Please accept both Terms & Conditions and Privacy Policy to continue");
           setIsLoading(false);
           return;
         }
@@ -407,7 +411,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
     try {
       if (isSignUp) {
         // Re-run a minimal subset of validations from above
-        if (!acceptedTerms || (signUpData.password !== signUpData.confirmPassword)) {
+        if (!acceptedTerms || !acceptedPrivacy || (signUpData.password !== signUpData.confirmPassword)) {
           setIsLoading(false);
           return;
         }
@@ -496,7 +500,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden">
+      <DialogContent className="max-w-4xl p-0 max-h-[90vh]">
         <DialogHeader className="sr-only">
           <DialogTitle>
             {userType === 'customer' ? 'Customer' : 'Vendor'} {isSignUp ? 'Sign Up' : 'Sign In'}
@@ -508,7 +512,8 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             }
           </DialogDescription>
         </DialogHeader>
-        <div className="flex min-h-[600px]">
+        <ScrollArea className="max-h-[85vh]">
+          <div className="flex min-h-[600px]">
           {/* Left Side - Form */}
           <div className="flex-1 p-8">
             <div className="max-w-md mx-auto">
@@ -681,7 +686,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                 </TabsContent>
                 
                 <TabsContent value="signup">
-                  <form onSubmit={handleSubmit} className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                  <form onSubmit={handleSubmit} className="space-y-4 pr-2">
                     
                     {isSignUp && (
                       <>
@@ -876,7 +881,28 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                             onClick={() => setShowTermsDialog(true)}
                             className="text-blue-600 hover:underline"
                           >
-                            Terms and Conditions
+                            Terms & Conditions
+                          </button>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Privacy Policy */}
+                    <div className="flex items-start space-x-2">
+                      <Checkbox 
+                        id="privacy" 
+                        checked={acceptedPrivacy} 
+                        onCheckedChange={(checked) => setAcceptedPrivacy(checked as boolean)}
+                      />
+                      <div className="text-sm">
+                        <label htmlFor="privacy" className="text-gray-700">
+                          I agree to the{" "}
+                          <button 
+                            type="button"
+                            onClick={() => setShowPrivacyDialog(true)}
+                            className="text-blue-600 hover:underline"
+                          >
+                            Privacy Policy
                           </button>
                         </label>
                       </div>
@@ -895,7 +921,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                     <Button 
                       type="submit" 
                       className="w-full bg-orange-500 hover:bg-orange-600" 
-                      disabled={isLoading || !acceptedTerms}
+                      disabled={isLoading || !acceptedTerms || !acceptedPrivacy}
                     >
                       {isLoading ? 'Creating Account...' : 'Create Account'}
                     </Button>
@@ -963,7 +989,8 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
               </div>
             </div>
           </div>
-        </div>
+          </div>
+        </ScrollArea>
       </DialogContent>
 
       {/* Terms and Conditions Dialog */}
@@ -1223,6 +1250,26 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           <div className="mt-6 flex justify-end">
             <Button onClick={() => setShowTermsDialog(false)}>Close</Button>
           </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* Privacy Policy Dialog */}
+    <Dialog open={showPrivacyDialog} onOpenChange={setShowPrivacyDialog}>
+      <DialogContent className="max-w-4xl max-h-[80vh]">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold mb-4">
+            {userType === 'customer' ? 'Customer Privacy Policy' : 'Vendor Privacy Policy'}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Privacy policy for {userType === 'customer' ? 'customers' : 'vendors'} using the ISA AI Shopping Assistant platform.
+          </DialogDescription>
+        </DialogHeader>
+        <ScrollArea className="max-h-[60vh] p-6">
+          <PrivacyPolicy userType={userType || 'customer'} />
+        </ScrollArea>
+        <div className="p-6 pt-0">
+          <Button onClick={() => setShowPrivacyDialog(false)} className="w-full">Close</Button>
         </div>
       </DialogContent>
     </Dialog>
