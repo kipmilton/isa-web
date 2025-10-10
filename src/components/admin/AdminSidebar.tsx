@@ -20,7 +20,9 @@ import {
   Ticket,
   LogOut,
   ChevronRight,
-  MessageCircle
+  MessageCircle,
+  UserCog,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -30,9 +32,11 @@ interface AdminSidebarProps {
   onSectionChange: (section: string) => void;
   onLogout: () => void;
   userName: string;
+  userRole?: string;
+  canAccessSection?: (section: string) => boolean;
 }
 
-const AdminSidebar = ({ activeSection, onSectionChange, onLogout, userName }: AdminSidebarProps) => {
+export function AdminSidebar({ activeSection, onSectionChange, onLogout, userName, userRole, canAccessSection }: AdminSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menuItems = [
@@ -54,7 +58,15 @@ const AdminSidebar = ({ activeSection, onSectionChange, onLogout, userName }: Ad
     { id: 'tickets', label: 'Support Tickets', icon: Ticket },
     { id: 'customer-support', label: 'Customer Support', icon: MessageCircle },
     { id: 'trending-posts', label: 'Trending Posts', icon: TrendingUp },
+    { id: 'admin_management', label: 'Admin Management', icon: UserCog },
+    { id: 'vendor_guidelines', label: 'Vendor Guidelines', icon: FileText },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
+
+  // Filter menu items based on role permissions
+  const filteredMenuItems = menuItems.filter(item => 
+    !canAccessSection || canAccessSection(item.id)
+  );
 
   return (
     <div className={cn(
@@ -68,9 +80,14 @@ const AdminSidebar = ({ activeSection, onSectionChange, onLogout, userName }: Ad
             <div>
               <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <Shield className="h-5 w-5 text-blue-600" />
-                Admin Portal
+                Earth Portal
               </h2>
               <p className="text-sm text-gray-600 truncate">{userName}</p>
+              {userRole && (
+                <p className="text-xs text-gray-500 capitalize">
+                  {userRole.replace('_', ' ')}
+                </p>
+              )}
             </div>
           )}
           <Button
@@ -88,8 +105,8 @@ const AdminSidebar = ({ activeSection, onSectionChange, onLogout, userName }: Ad
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
-        {menuItems.map((item) => {
+      <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+        {filteredMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
           
@@ -128,6 +145,6 @@ const AdminSidebar = ({ activeSection, onSectionChange, onLogout, userName }: Ad
       </div>
     </div>
   );
-};
+}
 
 export default AdminSidebar;

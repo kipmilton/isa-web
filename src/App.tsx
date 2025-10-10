@@ -13,6 +13,7 @@ import Vendors from "./pages/Vendors";
 import Chat from "./pages/Chat";
 import Gift from "./pages/Gift";
 import Admin from "./pages/Admin";
+import Earth from "./pages/Earth";
 import VendorDashboard from "./pages/VendorDashboard";
 import VendorStatus from "./components/vendor/VendorStatus";
 import VendorRejection from "./pages/VendorRejection";
@@ -47,7 +48,8 @@ const App = () => (
             <Route path="/vendors" element={<Vendors />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/gift" element={<Gift />} />
-            <Route path="/admin" element={<Admin />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/earth/*" element={<Earth />} />
             <Route path="/vendor-dashboard" element={
               <AuthGuard requireAuth={true} allowedUserTypes={['vendor']} allowedVendorStatuses={['approved']}>
                 <VendorDashboard />

@@ -17,20 +17,44 @@ export type Database = {
       admin_roles: {
         Row: {
           created_at: string | null
+          created_by: string | null
           is_active: boolean | null
+          is_suspended: boolean | null
+          last_login: string | null
+          must_reset_password: boolean | null
+          password_hash: string | null
           role: string
+          suspended_at: string | null
+          suspended_by: string | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          created_by?: string | null
           is_active?: boolean | null
+          is_suspended?: boolean | null
+          last_login?: string | null
+          must_reset_password?: boolean | null
+          password_hash?: string | null
           role: string
+          suspended_at?: string | null
+          suspended_by?: string | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
+          created_by?: string | null
           is_active?: boolean | null
+          is_suspended?: boolean | null
+          last_login?: string | null
+          must_reset_password?: boolean | null
+          password_hash?: string | null
           role?: string
+          suspended_at?: string | null
+          suspended_by?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -2249,6 +2273,48 @@ export type Database = {
           },
         ]
       }
+      vendor_guidelines: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          is_active: boolean | null
+          title: string
+          updated_at: string | null
+          uploaded_by: string | null
+          version: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          is_active?: boolean | null
+          title: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+          version?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+          version?: string | null
+        }
+        Relationships: []
+      }
       vendor_payment_preferences: {
         Row: {
           airtel_number: string | null
@@ -2547,6 +2613,10 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      check_admin_access: {
+        Args: { _required_role?: string; _user_id: string }
+        Returns: boolean
+      }
       check_rate_limit: {
         Args: {
           p_action: string
@@ -2563,6 +2633,10 @@ export type Database = {
       cleanup_old_security_records: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      create_admin_user: {
+        Args: { _created_by: string; _email: string; _role: string }
+        Returns: Json
       }
       debug_admin_roles: {
         Args: { user_uuid: string }
@@ -2672,6 +2746,18 @@ export type Database = {
       }
       reject_vendor_application: {
         Args: { admin_notes?: string; application_id: string }
+        Returns: boolean
+      }
+      reset_admin_password: {
+        Args: {
+          _current_password: string
+          _new_password: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      toggle_admin_suspension: {
+        Args: { _suspend: boolean; _suspended_by: string; _user_id: string }
         Returns: boolean
       }
     }
