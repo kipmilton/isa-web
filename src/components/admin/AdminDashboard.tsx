@@ -21,6 +21,7 @@ import AdminTickets from "./sections/AdminTickets";
 import AdminWallet from "./sections/AdminWallet";
 import AdminManagement from "./sections/AdminManagement";
 import VendorGuidelines from "./sections/VendorGuidelines";
+import AdminSKUSearch from "./sections/AdminSKUSearch";
 import PasswordResetDialog from "./PasswordResetDialog";
 
 interface AdminDashboardProps {
@@ -39,9 +40,9 @@ const AdminDashboard = ({ user, onLogout, mustResetPassword, adminRole }: AdminD
     if (adminRole?.role === 'main_admin') return true;
     
     const rolePermissions: Record<string, string[]> = {
-      'vendor_admin': ['home', 'vendors', 'products', 'tickets', 'vendor_guidelines'],
+      'vendor_admin': ['home', 'vendors', 'products', 'tickets', 'vendor_guidelines', 'sku_search'],
       'customer_service_admin': ['home', 'vendors', 'tickets', 'customer_support', 'returns'],
-      'order_admin': ['home', 'orders', 'products', 'returns']
+      'order_admin': ['home', 'orders', 'products', 'returns', 'sku_search']
     };
     
     return rolePermissions[adminRole?.role]?.includes(section) || false;
@@ -59,6 +60,8 @@ const AdminDashboard = ({ user, onLogout, mustResetPassword, adminRole }: AdminD
         return <AdminOrders />;
       case "products":
         return <AdminProducts />;
+      case "sku_search":
+        return <AdminSKUSearch />;
       case "payments":
         return <AdminPayments />;
       case "loyalty":

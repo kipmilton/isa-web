@@ -21,6 +21,7 @@ export interface Product {
   vendor?: {
     first_name?: string;
     last_name?: string;
+    vendor_serial_number?: string;
   };
   pickup_location?: string;
   pickup_phone_number?: string;
@@ -45,6 +46,32 @@ export interface Product {
   return_eligible?: boolean;
   return_policy_guidelines?: string;
   return_policy_reason?: string;
+  // New fields
+  weight_kg?: number;
+  length_cm?: number;
+  width_cm?: number;
+  height_cm?: number;
+  warranty_period?: number;
+  warranty_unit?: 'months' | 'years';
+  materials?: string[];
+  // Extended electronics fields
+  display_resolution?: string;
+  display_size_inch?: number;
+  hdd_size?: string;
+  memory_capacity_gb?: number;
+  modem_type?: string;
+  mount_type?: string;
+  plug_type?: string;
+  system_memory?: string;
+  voltage?: string;
+  battery_capacity_mah?: number;
+  connection_gender?: string;
+  cpu_manufacturer?: string;
+  graphics_memory_gb?: number;
+  memory_technology?: string;
+  panel_type?: string;
+  processor_type?: string;
+  storage_capacity_gb?: number;
 }
 
 export interface ProductAttribute {

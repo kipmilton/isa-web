@@ -22,7 +22,8 @@ import {
   ChevronRight,
   MessageCircle,
   UserCog,
-  FileText
+  FileText,
+  Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,7 @@ export function AdminSidebar({ activeSection, onSectionChange, onLogout, userNam
     { id: 'vendors', label: 'Vendors', icon: Store },
     { id: 'orders', label: 'Orders', icon: ShoppingCart },
     { id: 'products', label: 'Products', icon: Package },
+    { id: 'sku_search', label: 'SKU Search', icon: Search },
     { id: 'payments', label: 'Payments', icon: CreditCard },
     { id: 'loyalty', label: 'Loyalty Program', icon: Wallet },
     { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },

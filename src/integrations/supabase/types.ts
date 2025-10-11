@@ -1074,30 +1074,47 @@ export type Database = {
         Row: {
           banned: boolean
           banned_reason: string | null
+          battery_capacity_mah: number | null
           brand: string | null
           brand_level: string | null
           category: string
           commission_percentage: number | null
+          connection_gender: string | null
+          cpu_manufacturer: string | null
           created_at: string | null
           currency: string | null
           description: string | null
+          display_resolution: string | null
           display_size: string | null
+          display_size_inch: number | null
+          graphics_memory_gb: number | null
+          hdd_size: string | null
+          height_cm: number | null
           id: string
           images: string[] | null
           is_active: boolean | null
           is_featured: boolean | null
+          length_cm: number | null
           location_address: string | null
           location_lat: number | null
           location_lng: number | null
           main_category: string | null
           main_image: string | null
+          materials: string[] | null
+          memory_capacity_gb: number | null
+          memory_technology: string | null
+          modem_type: string | null
+          mount_type: string | null
           name: string
           original_price: number | null
+          panel_type: string | null
           pickup_location: string | null
           pickup_phone: string | null
           pickup_phone_number: string | null
+          plug_type: string | null
           price: number
           processor: string | null
+          processor_type: string | null
           ram: string | null
           rating: number | null
           rejection_reason: string | null
@@ -1110,39 +1127,63 @@ export type Database = {
           status: string
           stock_quantity: number | null
           storage: string | null
+          storage_capacity_gb: number | null
           sub_subcategory: string | null
           subcategory: string | null
+          system_memory: string | null
           tags: string[] | null
           updated_at: string | null
           vendor_id: string | null
+          voltage: string | null
+          warranty_period: number | null
+          warranty_unit: string | null
+          weight_kg: number | null
+          width_cm: number | null
         }
         Insert: {
           banned?: boolean
           banned_reason?: string | null
+          battery_capacity_mah?: number | null
           brand?: string | null
           brand_level?: string | null
           category: string
           commission_percentage?: number | null
+          connection_gender?: string | null
+          cpu_manufacturer?: string | null
           created_at?: string | null
           currency?: string | null
           description?: string | null
+          display_resolution?: string | null
           display_size?: string | null
+          display_size_inch?: number | null
+          graphics_memory_gb?: number | null
+          hdd_size?: string | null
+          height_cm?: number | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          length_cm?: number | null
           location_address?: string | null
           location_lat?: number | null
           location_lng?: number | null
           main_category?: string | null
           main_image?: string | null
+          materials?: string[] | null
+          memory_capacity_gb?: number | null
+          memory_technology?: string | null
+          modem_type?: string | null
+          mount_type?: string | null
           name: string
           original_price?: number | null
+          panel_type?: string | null
           pickup_location?: string | null
           pickup_phone?: string | null
           pickup_phone_number?: string | null
+          plug_type?: string | null
           price: number
           processor?: string | null
+          processor_type?: string | null
           ram?: string | null
           rating?: number | null
           rejection_reason?: string | null
@@ -1155,39 +1196,63 @@ export type Database = {
           status?: string
           stock_quantity?: number | null
           storage?: string | null
+          storage_capacity_gb?: number | null
           sub_subcategory?: string | null
           subcategory?: string | null
+          system_memory?: string | null
           tags?: string[] | null
           updated_at?: string | null
           vendor_id?: string | null
+          voltage?: string | null
+          warranty_period?: number | null
+          warranty_unit?: string | null
+          weight_kg?: number | null
+          width_cm?: number | null
         }
         Update: {
           banned?: boolean
           banned_reason?: string | null
+          battery_capacity_mah?: number | null
           brand?: string | null
           brand_level?: string | null
           category?: string
           commission_percentage?: number | null
+          connection_gender?: string | null
+          cpu_manufacturer?: string | null
           created_at?: string | null
           currency?: string | null
           description?: string | null
+          display_resolution?: string | null
           display_size?: string | null
+          display_size_inch?: number | null
+          graphics_memory_gb?: number | null
+          hdd_size?: string | null
+          height_cm?: number | null
           id?: string
           images?: string[] | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          length_cm?: number | null
           location_address?: string | null
           location_lat?: number | null
           location_lng?: number | null
           main_category?: string | null
           main_image?: string | null
+          materials?: string[] | null
+          memory_capacity_gb?: number | null
+          memory_technology?: string | null
+          modem_type?: string | null
+          mount_type?: string | null
           name?: string
           original_price?: number | null
+          panel_type?: string | null
           pickup_location?: string | null
           pickup_phone?: string | null
           pickup_phone_number?: string | null
+          plug_type?: string | null
           price?: number
           processor?: string | null
+          processor_type?: string | null
           ram?: string | null
           rating?: number | null
           rejection_reason?: string | null
@@ -1200,11 +1265,18 @@ export type Database = {
           status?: string
           stock_quantity?: number | null
           storage?: string | null
+          storage_capacity_gb?: number | null
           sub_subcategory?: string | null
           subcategory?: string | null
+          system_memory?: string | null
           tags?: string[] | null
           updated_at?: string | null
           vendor_id?: string | null
+          voltage?: string | null
+          warranty_period?: number | null
+          warranty_unit?: string | null
+          weight_kg?: number | null
+          width_cm?: number | null
         }
         Relationships: [
           {
@@ -1249,6 +1321,7 @@ export type Database = {
           tax_id: string | null
           updated_at: string | null
           user_type: string | null
+          vendor_serial_number: string | null
           website_url: string | null
         }
         Insert: {
@@ -1283,6 +1356,7 @@ export type Database = {
           tax_id?: string | null
           updated_at?: string | null
           user_type?: string | null
+          vendor_serial_number?: string | null
           website_url?: string | null
         }
         Update: {
@@ -1317,6 +1391,7 @@ export type Database = {
           tax_id?: string | null
           updated_at?: string | null
           user_type?: string | null
+          vendor_serial_number?: string | null
           website_url?: string | null
         }
         Relationships: []
@@ -2657,6 +2732,19 @@ export type Database = {
         Returns: undefined
       }
       generate_order_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_product_sku: {
+        Args: {
+          p_brand: string
+          p_category: string
+          p_main_image: string
+          p_vendor_id: string
+        }
+        Returns: string
+      }
+      generate_vendor_serial: {
         Args: Record<PropertyKey, never>
         Returns: string
       }

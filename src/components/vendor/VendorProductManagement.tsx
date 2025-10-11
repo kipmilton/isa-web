@@ -66,6 +66,32 @@ interface VendorProductManagementProps {
     return_eligible?: boolean;
     return_policy_guidelines?: string;
     return_policy_reason?: string;
+    // New fields
+    weight_kg?: number;
+    length_cm?: number;
+    width_cm?: number;
+    height_cm?: number;
+    warranty_period?: number;
+    warranty_unit?: 'months' | 'years';
+    materials?: string[];
+    // Extended electronics fields
+    display_resolution?: string;
+    display_size_inch?: number;
+    hdd_size?: string;
+    memory_capacity_gb?: number;
+    modem_type?: string;
+    mount_type?: string;
+    plug_type?: string;
+    system_memory?: string;
+    voltage?: string;
+    battery_capacity_mah?: number;
+    connection_gender?: string;
+    cpu_manufacturer?: string;
+    graphics_memory_gb?: number;
+    memory_technology?: string;
+    panel_type?: string;
+    processor_type?: string;
+    storage_capacity_gb?: number;
   }
 
 // 1. Add the full category tree and types at the top
@@ -343,7 +369,14 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
     pickup_phone_number: "",
     return_eligible: true,
     return_policy_guidelines: "",
-    return_policy_reason: ""
+    return_policy_reason: "",
+    weight_kg: undefined,
+    length_cm: undefined,
+    width_cm: undefined,
+    height_cm: undefined,
+    warranty_period: undefined,
+    warranty_unit: undefined,
+    materials: []
   });
 
   const [productAttributes, setProductAttributes] = useState<Omit<ProductAttribute, 'id' | 'product_id' | 'created_at' | 'updated_at'>[]>([]);
@@ -1040,18 +1073,222 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                 )}
 
                 {mainCategory === 'Electronics' && getExtraFields(mainCategory).length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {getExtraFields(mainCategory).map(field => (
-                      <div key={field}>
-                        <Label>{field}</Label>
-                        <Input
-                          type="text"
-                          value={extraFields[field] || ''}
-                          onChange={e => setExtraFields(prev => ({ ...prev, [field]: e.target.value }))}
-                          placeholder={`Enter ${field}`}
-                        />
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Basic Electronics Specifications</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {getExtraFields(mainCategory).map(field => (
+                        <div key={field}>
+                          <Label>{field}</Label>
+                          <Input
+                            type="text"
+                            value={extraFields[field] || ''}
+                            onChange={e => setExtraFields(prev => ({ ...prev, [field]: e.target.value }))}
+                            placeholder={`Enter ${field}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Extended Electronics Specifications */}
+                    <div className="space-y-3">
+                      <Label className="text-base font-semibold">Advanced Electronics Specifications</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <Label htmlFor="display_resolution" className="text-xs">Display Resolution</Label>
+                          <Input
+                            id="display_resolution"
+                            value={formData.display_resolution || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, display_resolution: e.target.value }))}
+                            placeholder="e.g., 1080p, 4K"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="display_size_inch" className="text-xs">Display Size (inches)</Label>
+                          <Input
+                            id="display_size_inch"
+                            type="number"
+                            step="0.1"
+                            value={formData.display_size_inch || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, display_size_inch: parseFloat(e.target.value) || undefined }))}
+                            placeholder="e.g., 55"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="hdd_size" className="text-xs">HDD Size</Label>
+                          <Input
+                            id="hdd_size"
+                            value={formData.hdd_size || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, hdd_size: e.target.value }))}
+                            placeholder="e.g., 1 TB"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="memory_capacity_gb" className="text-xs">Memory Capacity (GB)</Label>
+                          <Input
+                            id="memory_capacity_gb"
+                            type="number"
+                            value={formData.memory_capacity_gb || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, memory_capacity_gb: parseInt(e.target.value) || undefined }))}
+                            placeholder="e.g., 16"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="system_memory" className="text-xs">System Memory</Label>
+                          <Input
+                            id="system_memory"
+                            value={formData.system_memory || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, system_memory: e.target.value }))}
+                            placeholder="e.g., 8 GB"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="storage_capacity_gb" className="text-xs">Storage Capacity (GB)</Label>
+                          <Input
+                            id="storage_capacity_gb"
+                            type="number"
+                            value={formData.storage_capacity_gb || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, storage_capacity_gb: parseInt(e.target.value) || undefined }))}
+                            placeholder="e.g., 256"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="battery_capacity_mah" className="text-xs">Battery Capacity (mAh)</Label>
+                          <Input
+                            id="battery_capacity_mah"
+                            type="number"
+                            value={formData.battery_capacity_mah || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, battery_capacity_mah: parseInt(e.target.value) || undefined }))}
+                            placeholder="e.g., 5000"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="cpu_manufacturer" className="text-xs">CPU Manufacturer</Label>
+                          <Input
+                            id="cpu_manufacturer"
+                            value={formData.cpu_manufacturer || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, cpu_manufacturer: e.target.value }))}
+                            placeholder="e.g., Intel, AMD"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="processor_type" className="text-xs">Processor Type</Label>
+                          <Input
+                            id="processor_type"
+                            value={formData.processor_type || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, processor_type: e.target.value }))}
+                            placeholder="e.g., Core i7"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="graphics_memory_gb" className="text-xs">Graphics Memory (GB)</Label>
+                          <Input
+                            id="graphics_memory_gb"
+                            type="number"
+                            value={formData.graphics_memory_gb || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, graphics_memory_gb: parseInt(e.target.value) || undefined }))}
+                            placeholder="e.g., 8"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="memory_technology" className="text-xs">Memory Technology</Label>
+                          <Select 
+                            value={formData.memory_technology || ""} 
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, memory_technology: value }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="DDR3">DDR3</SelectItem>
+                              <SelectItem value="DDR4">DDR4</SelectItem>
+                              <SelectItem value="DDR5">DDR5</SelectItem>
+                              <SelectItem value="LPDDR4">LPDDR4</SelectItem>
+                              <SelectItem value="LPDDR5">LPDDR5</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="panel_type" className="text-xs">Panel Type</Label>
+                          <Select 
+                            value={formData.panel_type || ""} 
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, panel_type: value }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select panel type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="IPS">IPS</SelectItem>
+                              <SelectItem value="VA">VA</SelectItem>
+                              <SelectItem value="TN">TN</SelectItem>
+                              <SelectItem value="OLED">OLED</SelectItem>
+                              <SelectItem value="AMOLED">AMOLED</SelectItem>
+                              <SelectItem value="LCD">LCD</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="plug_type" className="text-xs">Plug Type</Label>
+                          <Select 
+                            value={formData.plug_type || ""} 
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, plug_type: value }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Type-C">Type-C</SelectItem>
+                              <SelectItem value="USB-A">USB-A</SelectItem>
+                              <SelectItem value="Lightning">Lightning</SelectItem>
+                              <SelectItem value="Micro-USB">Micro-USB</SelectItem>
+                              <SelectItem value="Mini-USB">Mini-USB</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="voltage" className="text-xs">Voltage</Label>
+                          <Input
+                            id="voltage"
+                            value={formData.voltage || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, voltage: e.target.value }))}
+                            placeholder="e.g., 110V, 220V"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="modem_type" className="text-xs">Modem Type</Label>
+                          <Input
+                            id="modem_type"
+                            value={formData.modem_type || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, modem_type: e.target.value }))}
+                            placeholder="e.g., 4G LTE, 5G"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="mount_type" className="text-xs">Mount Type</Label>
+                          <Input
+                            id="mount_type"
+                            value={formData.mount_type || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, mount_type: e.target.value }))}
+                            placeholder="e.g., VESA, Wall"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="connection_gender" className="text-xs">Connection Gender</Label>
+                          <Select 
+                            value={formData.connection_gender || ""} 
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, connection_gender: value }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Male">Male</SelectItem>
+                              <SelectItem value="Female">Female</SelectItem>
+                              <SelectItem value="Unisex">Unisex</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                    ))}
+                    </div>
                   </div>
                 )}
 
@@ -1067,13 +1304,15 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="sku">SKU</Label>
+                    <Label htmlFor="sku">SKU (Auto-generated)</Label>
                     <Input
                       id="sku"
-                      value={formData.sku}
-                      onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}
-                      placeholder="Enter SKU Code"
+                      value={formData.sku || "Will be auto-generated"}
+                      disabled
+                      placeholder="Auto-generated on save"
+                      className="bg-muted"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">SKU is automatically generated when you save the product</p>
                   </div>
                   <div>
                     <Label htmlFor="stock_quantity">Stock Quantity *</Label>
@@ -1087,6 +1326,123 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
                     />
                   </div>
                 </div>
+
+                {/* Product Dimensions and Weight */}
+                <div className="space-y-2">
+                  <Label className="text-base font-semibold">Product Dimensions & Weight</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div>
+                      <Label htmlFor="length_cm" className="text-xs">Length (cm)</Label>
+                      <Input
+                        id="length_cm"
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        value={formData.length_cm || ""}
+                        onChange={e => setFormData(prev => ({ ...prev, length_cm: parseFloat(e.target.value) || undefined }))}
+                        placeholder="L"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="width_cm" className="text-xs">Width (cm)</Label>
+                      <Input
+                        id="width_cm"
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        value={formData.width_cm || ""}
+                        onChange={e => setFormData(prev => ({ ...prev, width_cm: parseFloat(e.target.value) || undefined }))}
+                        placeholder="W"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="height_cm" className="text-xs">Height (cm)</Label>
+                      <Input
+                        id="height_cm"
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        value={formData.height_cm || ""}
+                        onChange={e => setFormData(prev => ({ ...prev, height_cm: parseFloat(e.target.value) || undefined }))}
+                        placeholder="H"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="weight_kg" className="text-xs">Weight (kg)</Label>
+                      <Input
+                        id="weight_kg"
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        value={formData.weight_kg || ""}
+                        onChange={e => setFormData(prev => ({ ...prev, weight_kg: parseFloat(e.target.value) || undefined }))}
+                        placeholder="Weight"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Warranty */}
+                <div className="space-y-2">
+                  <Label className="text-base font-semibold">Warranty Period</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="warranty_period" className="text-xs">Duration</Label>
+                      <Input
+                        id="warranty_period"
+                        type="number"
+                        min={0}
+                        value={formData.warranty_period || ""}
+                        onChange={e => setFormData(prev => ({ ...prev, warranty_period: parseInt(e.target.value) || undefined }))}
+                        placeholder="Enter number"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="warranty_unit" className="text-xs">Unit</Label>
+                      <Select 
+                        value={formData.warranty_unit || ""} 
+                        onValueChange={(value: 'months' | 'years') => setFormData(prev => ({ ...prev, warranty_unit: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select unit" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="months">Months</SelectItem>
+                          <SelectItem value="years">Years</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Materials (for Household items) */}
+                {(mainCategory === 'Home & Lifestyle' || mainCategory === 'Furniture') && (
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold">Materials</Label>
+                    <p className="text-xs text-muted-foreground">Select all materials used in this product</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {['Wood', 'Metal', 'Steel', 'Plastic', 'Glass', 'Fabric', 'Leather', 'Ceramic', 'Stone', 'Other'].map(material => (
+                        <div key={material} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`material-${material}`}
+                            checked={formData.materials?.includes(material) || false}
+                            onChange={(e) => {
+                              const materials = formData.materials || [];
+                              if (e.target.checked) {
+                                setFormData(prev => ({ ...prev, materials: [...materials, material] }));
+                              } else {
+                                setFormData(prev => ({ ...prev, materials: materials.filter(m => m !== material) }));
+                              }
+                            }}
+                            className="rounded"
+                          />
+                          <Label htmlFor={`material-${material}`} className="text-sm cursor-pointer">{material}</Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-4">
                   <div>
