@@ -39,6 +39,7 @@ import ProductAttributes from "./ProductAttributes";
 
 interface VendorProductManagementProps {
   user: any;
+  isFullPage?: boolean;
 }
 
   interface ProductFormData {
@@ -331,7 +332,7 @@ export const CATEGORY_TREE: CategoryNode[] = [
   ] }
 ];
 
-const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
+const VendorProductManagement = ({ user, isFullPage = false }: VendorProductManagementProps) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -343,6 +344,15 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
   const { triggerConfetti } = useConfetti();
   const { user: authUser } = useAuth();
   const navigate = useNavigate();
+
+  const handleAddProduct = () => {
+    if (isFullPage) {
+      setShowAddDialog(true);
+    } else {
+      // Navigate to store section
+      window.location.href = '/vendor-dashboard?section=store';
+    }
+  };
   const [banReasonDialogOpen, setBanReasonDialogOpen] = useState(false);
   const [banReasonText, setBanReasonText] = useState("");
   const [statusFilter, setStatusFilter] = useState('All');
@@ -471,6 +481,16 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate minimum 3 images
+    if (productImages.length < 3) {
+      toast({
+        title: "Validation Error",
+        description: "Please upload at least 3 product images",
         variant: "destructive"
       });
       return;
@@ -725,18 +745,19 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-3 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Product Management</h1>
-              <p className="text-gray-600 text-sm sm:text-base">Manage your product catalog</p>
+        {/* Header - Only show when not in full page mode */}
+        {!isFullPage && (
+          <div className="mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Product Management</h1>
+                <p className="text-gray-600 text-sm sm:text-base">Manage your product catalog</p>
+              </div>
+              <Button onClick={handleAddProduct} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Product
+              </Button>
             </div>
-            <Button onClick={() => setShowAddDialog(true)} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Product
-            </Button>
-          </div>
 
           {/* Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
@@ -823,9 +844,21 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
             </Select>
           </div>
         </div>
+        )}
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Show form directly when in full page mode */}
+        {isFullPage && !showAddDialog && (
+          <div className="mb-6">
+            <Button onClick={() => setShowAddDialog(true)} className="bg-blue-600 hover:bg-blue-700 w-full">
+              <Plus className="w-4 h-4 mr-2" />
+              Start Adding Product
+            </Button>
+          </div>
+        )}
+
+        {/* Products Grid - Only show when NOT in full page mode */}
+        {!isFullPage && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {loading ? (
             <div className="col-span-full flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -924,9 +957,10 @@ const VendorProductManagement = ({ user }: VendorProductManagementProps) => {
               </CardContent>
             </Card>
           ))}
-        </div>
+           </div>
+        )}
 
-        {filteredProducts.length === 0 && !loading && (
+        {filteredProducts.length === 0 && !loading && !isFullPage && (
           <div className="text-center py-12">
             <Package className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No products found</h3>

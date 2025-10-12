@@ -15,7 +15,8 @@ import {
   LogOut,
   X,
   Crown,
-  Building
+  Building,
+  MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ const VendorSidebar = ({ activeSection, onSectionChange, onLogout, userName, isM
     { id: 'products', label: 'Products', icon: Package },
     { id: 'orders', label: 'Orders', icon: ShoppingCart },
     { id: 'store', label: 'My Store', icon: Store },
+    { id: 'support', label: 'Customer Support', icon: MessageCircle },
     { id: 'payments', label: 'Payments', icon: CreditCard },
     { id: 'reviews', label: 'Customer Reviews', icon: Star },
     { id: 'wallet', label: 'Wallet', icon: Wallet },

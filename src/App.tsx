@@ -31,6 +31,7 @@ import CustomerPremium from "./components/customer/CustomerPremium";
 import VendorSubscription from "./components/vendor/VendorSubscription";
 import { Analytics } from "@vercel/analytics/react";
 import VendorOnboarding from "./pages/VendorOnboarding";
+import VendorOrderDetailPage from "./pages/VendorOrderDetail";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,11 @@ const App = () => (
             <Route path="/vendor-dashboard" element={
               <AuthGuard requireAuth={true} allowedUserTypes={['vendor']} allowedVendorStatuses={['approved']}>
                 <VendorDashboard />
+              </AuthGuard>
+            } />
+            <Route path="/vendor-order/:orderId" element={
+              <AuthGuard requireAuth={true} allowedUserTypes={['vendor']} allowedVendorStatuses={['approved']}>
+                <VendorOrderDetailPage />
               </AuthGuard>
             } />
             <Route path="/vendor-status" element={

@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { OrderService } from "@/services/orderService";
 import { OrderWithDetails } from "@/types/order";
 import { format } from "date-fns";
-import { Package, Truck } from "lucide-react";
+import { Package, Truck, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface VendorOrdersProps {
   vendorId: string;
@@ -18,6 +19,7 @@ const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
   const [orders, setOrders] = useState<OrderWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchOrders();
@@ -159,34 +161,45 @@ const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
                         {order.created_at ? format(new Date(order.created_at), 'MMM dd, yyyy') : 'N/A'}
                       </TableCell>
                       <TableCell>
-                        {order.status === 'pending' && (
-                          <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                            <Button
-                              size="sm"
-                              className="text-xs"
-                              onClick={() => updateOrderStatus(order.id, 'processing')}
-                            >
-                              Accept
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-xs"
-                              onClick={() => updateOrderStatus(order.id, 'cancelled')}
-                            >
-                              Decline
-                            </Button>
-                          </div>
-                        )}
-                        {order.status === 'processing' && (
+                        <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                           <Button
                             size="sm"
+                            variant="outline"
                             className="text-xs"
-                            onClick={() => updateOrderStatus(order.id, 'shipped')}
+                            onClick={() => navigate(`/vendor-order/${order.id}`)}
                           >
-                            Mark Shipped
+                            <Eye className="w-3 h-3 mr-1" />
+                            View Details
                           </Button>
-                        )}
+                          {order.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                className="text-xs"
+                                onClick={() => updateOrderStatus(order.id, 'processing')}
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs"
+                                onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                              >
+                                Decline
+                              </Button>
+                            </>
+                          )}
+                          {order.status === 'processing' && (
+                            <Button
+                              size="sm"
+                              className="text-xs"
+                              onClick={() => updateOrderStatus(order.id, 'shipped')}
+                            >
+                              Mark Shipped
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

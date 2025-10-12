@@ -12,6 +12,7 @@ import VendorPayments from "./sections/VendorPayments";
 import VendorWallet from "./sections/VendorWallet";
 import VendorSubscription from "./VendorSubscription";
 import VendorSettings from "./sections/VendorSettings";
+import VendorSupport from "./sections/VendorSupport";
 import { HCaptchaComponent } from "@/components/ui/hcaptcha";
 import { Button } from "@/components/ui/button";
 import { ProductService } from "@/services/productService";
@@ -216,9 +217,16 @@ const VendorDashboard = ({ user, onLogout }: VendorDashboardProps) => {
       case "store":
         return (
           <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Add Product</h1>
+            <VendorProductManagement user={user} isFullPage={true} />
+          </div>
+        );
+      case "support":
+        return (
+          <div>
             <UpgradeButton />
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">My Store</h1>
-            <VendorProductManagement user={user} />
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Customer Support</h1>
+            <VendorSupport vendorId={user.id} />
           </div>
         );
       case "payments":

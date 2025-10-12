@@ -260,6 +260,50 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_status_updates: {
+        Row: {
+          created_at: string | null
+          delivery_personnel_id: string | null
+          id: string
+          location_lat: number | null
+          location_lng: number | null
+          notes: string | null
+          order_id: string
+          photo_url: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          delivery_personnel_id?: string | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          order_id: string
+          photo_url?: string | null
+          status: string
+        }
+        Update: {
+          created_at?: string | null
+          delivery_personnel_id?: string | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          order_id?: string
+          photo_url?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_status_updates_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       delivery_tracking: {
         Row: {
           accuracy: number | null
@@ -528,6 +572,47 @@ export type Database = {
           },
         ]
       }
+      order_messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          image_url: string | null
+          is_read: boolean | null
+          message_text: string | null
+          order_id: string
+          sender_id: string
+          sender_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_read?: boolean | null
+          message_text?: string | null
+          order_id: string
+          sender_id: string
+          sender_type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_read?: boolean | null
+          message_text?: string | null
+          order_id?: string
+          sender_id?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_messages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_returns: {
         Row: {
           admin_notes: string | null
@@ -621,14 +706,17 @@ export type Database = {
         Row: {
           actual_delivery_date: string | null
           billing_address: Json
+          completion_code: string | null
           created_at: string | null
           currency: string | null
+          customer_additional_requests: string | null
           customer_email: string
           customer_phone: string | null
           delivery_fee: number | null
           delivery_location_address: string | null
           delivery_location_lat: number | null
           delivery_location_lng: number | null
+          delivery_photo_url: string | null
           delivery_rating: number | null
           delivery_review_comment: string | null
           delivery_type: string | null
@@ -639,6 +727,7 @@ export type Database = {
           mpesa_transaction_id: string | null
           notes: string | null
           order_number: string
+          packaging_guidelines: string | null
           payment_method: string | null
           payment_status: string | null
           pickup_location: string | null
@@ -658,14 +747,17 @@ export type Database = {
         Insert: {
           actual_delivery_date?: string | null
           billing_address?: Json
+          completion_code?: string | null
           created_at?: string | null
           currency?: string | null
+          customer_additional_requests?: string | null
           customer_email: string
           customer_phone?: string | null
           delivery_fee?: number | null
           delivery_location_address?: string | null
           delivery_location_lat?: number | null
           delivery_location_lng?: number | null
+          delivery_photo_url?: string | null
           delivery_rating?: number | null
           delivery_review_comment?: string | null
           delivery_type?: string | null
@@ -676,6 +768,7 @@ export type Database = {
           mpesa_transaction_id?: string | null
           notes?: string | null
           order_number: string
+          packaging_guidelines?: string | null
           payment_method?: string | null
           payment_status?: string | null
           pickup_location?: string | null
@@ -695,14 +788,17 @@ export type Database = {
         Update: {
           actual_delivery_date?: string | null
           billing_address?: Json
+          completion_code?: string | null
           created_at?: string | null
           currency?: string | null
+          customer_additional_requests?: string | null
           customer_email?: string
           customer_phone?: string | null
           delivery_fee?: number | null
           delivery_location_address?: string | null
           delivery_location_lat?: number | null
           delivery_location_lng?: number | null
+          delivery_photo_url?: string | null
           delivery_rating?: number | null
           delivery_review_comment?: string | null
           delivery_type?: string | null
@@ -713,6 +809,7 @@ export type Database = {
           mpesa_transaction_id?: string | null
           notes?: string | null
           order_number?: string
+          packaging_guidelines?: string | null
           payment_method?: string | null
           payment_status?: string | null
           pickup_location?: string | null
@@ -2730,6 +2827,10 @@ export type Database = {
       enable_customer_premium: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      generate_completion_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       generate_order_number: {
         Args: Record<PropertyKey, never>

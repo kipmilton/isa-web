@@ -35,6 +35,10 @@ export interface Order {
   notes?: string;
   estimated_delivery_date?: string;
   actual_delivery_date?: string;
+  packaging_guidelines?: string;
+  customer_additional_requests?: string;
+  completion_code?: string;
+  delivery_photo_url?: string;
   created_at?: string;
   updated_at?: string;
 }
