@@ -74,6 +74,8 @@ interface VendorProductManagementProps {
     height_cm?: number;
     warranty_period?: number;
     warranty_unit?: 'months' | 'years';
+    has_warranty?: boolean;
+    delivery_methods?: string[];
     materials?: string[];
     // Extended electronics fields
     display_resolution?: string;
@@ -386,6 +388,8 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
     height_cm: undefined,
     warranty_period: undefined,
     warranty_unit: undefined,
+    has_warranty: false,
+    delivery_methods: [],
     materials: []
   });
 
@@ -487,7 +491,7 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
     }
 
     // Validate minimum 3 images
-    if (productImages.length < 3) {
+    if (!formData.images || formData.images.length < 3) {
       toast({
         title: "Validation Error",
         description: "Please upload at least 3 product images",
@@ -1417,35 +1421,90 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
                 </div>
 
                 {/* Warranty */}
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="has_warranty"
+                      checked={formData.has_warranty || false}
+                      onChange={e => setFormData(prev => ({ ...prev, has_warranty: e.target.checked }))}
+                      className="w-4 h-4"
+                    />
+                    <Label htmlFor="has_warranty" className="text-base font-semibold cursor-pointer">
+                      This product has warranty
+                    </Label>
+                  </div>
+
+                  {formData.has_warranty && (
+                    <div className="grid grid-cols-2 gap-3 ml-6">
+                      <div>
+                        <Label htmlFor="warranty_period" className="text-xs">Duration</Label>
+                        <Input
+                          id="warranty_period"
+                          type="number"
+                          min={1}
+                          value={formData.warranty_period || ""}
+                          onChange={e => setFormData(prev => ({ ...prev, warranty_period: parseInt(e.target.value) || undefined }))}
+                          placeholder="Enter number"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="warranty_unit" className="text-xs">Unit</Label>
+                        <Select 
+                          value={formData.warranty_unit || ""} 
+                          onValueChange={(value: 'months' | 'years') => setFormData(prev => ({ ...prev, warranty_unit: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select unit" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="months">Months</SelectItem>
+                            <SelectItem value="years">Years</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Delivery Methods */}
                 <div className="space-y-2">
-                  <Label className="text-base font-semibold">Warranty Period</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label htmlFor="warranty_period" className="text-xs">Duration</Label>
-                      <Input
-                        id="warranty_period"
-                        type="number"
-                        min={0}
-                        value={formData.warranty_period || ""}
-                        onChange={e => setFormData(prev => ({ ...prev, warranty_period: parseInt(e.target.value) || undefined }))}
-                        placeholder="Enter number"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="warranty_unit" className="text-xs">Unit</Label>
-                      <Select 
-                        value={formData.warranty_unit || ""} 
-                        onValueChange={(value: 'months' | 'years') => setFormData(prev => ({ ...prev, warranty_unit: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select unit" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="months">Months</SelectItem>
-                          <SelectItem value="years">Years</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <Label className="text-base font-semibold">Preferred Delivery Methods</Label>
+                  <p className="text-xs text-muted-foreground">Select all applicable delivery methods</p>
+                  <div className="space-y-3">
+                    {[
+                      { value: 'bicycle', label: 'Bicycle Delivery', desc: 'Best for: Very light packages (documents, accessories, small electronics)' },
+                      { value: 'motorcycle', label: 'Motorcycle (Boda Boda)', desc: 'Best for: Small to medium parcels, food, fashion, electronics' },
+                      { value: 'car', label: 'Private Car / Taxi', desc: 'Best for: Fragile or medium-sized items (flowers, electronics, groceries)' },
+                      { value: 'pickup', label: 'Pickup Truck', desc: 'Best for: Bulkier or heavier goods like furniture, electronics' },
+                      { value: 'truck', label: 'Light Commercial Truck', desc: 'Best for: Heavy goods — building materials, fridges, beds' },
+                      { value: 'lorry', label: 'Lorry / Trailer', desc: 'Best for: Very heavy or bulk shipments — industrial items, pallets' },
+                      { value: 'matatu', label: 'Matatu / Bus Parcel Service', desc: 'Best for: Inter-county or rural deliveries' }
+                    ].map(method => (
+                      <div key={method.value} className="flex items-start space-x-2 border rounded p-3">
+                        <input
+                          type="checkbox"
+                          id={`delivery_${method.value}`}
+                          checked={formData.delivery_methods?.includes(method.value) || false}
+                          onChange={e => {
+                            const checked = e.target.checked;
+                            setFormData(prev => ({
+                              ...prev,
+                              delivery_methods: checked
+                                ? [...(prev.delivery_methods || []), method.value]
+                                : (prev.delivery_methods || []).filter(m => m !== method.value)
+                            }));
+                          }}
+                          className="w-4 h-4 mt-1"
+                        />
+                        <div>
+                          <Label htmlFor={`delivery_${method.value}`} className="font-medium cursor-pointer">
+                            {method.label}
+                          </Label>
+                          <p className="text-xs text-muted-foreground">{method.desc}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -1631,9 +1690,9 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
 
               <TabsContent value="media" className="space-y-4">
                 <div>
-                  <Label>Product Images</Label>
+                  <Label>Product Images (Minimum 3 required)</Label>
                   <p className="text-sm text-gray-600 mb-4">
-                    Upload product images. The first image will be used as the main product image.
+                    Upload at least 3 product images. The first image will be used as the main product image.
                   </p>
                   <ImageUpload
                     onImageUpload={handleImageUpload}
@@ -1642,6 +1701,11 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
                     multiple={true}
                     maxImages={5}
                   />
+                  {formData.images && formData.images.length < 3 && (
+                    <p className="text-sm text-red-600 mt-2">
+                      Please upload at least {3 - formData.images.length} more image(s)
+                    </p>
+                  )}
                 </div>
                 
                 <div>

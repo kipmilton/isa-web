@@ -18,47 +18,39 @@ const Admin = () => {
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
       
-      console.log('Admin check - Session:', session?.user?.email);
-      
       if (error || !session) {
-        console.log('Admin check - No session, redirecting to home');
         navigate('/');
         return;
       }
 
-      // Check if user is an admin - check both user_roles and profiles tables
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('user_type')
-        .eq('id', session.user.id)
+      // Check admin_roles table for admin access
+      const { data: adminRole, error: adminError } = await supabase
+        .from('admin_roles')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('is_active', true)
+        .eq('is_suspended', false)
         .single();
 
-      console.log('Admin check - Profile:', profile);
-      console.log('Admin check - Profile error:', profileError);
+      if (adminError || !adminRole) {
+        // Fallback: check user_roles and profiles
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', session.user.id)
+          .single();
 
-      if (profileError || profile?.user_type !== 'admin') {
-        console.log('Admin check - Not admin in profiles, checking user_roles');
-        // Also check user_roles table as fallback
-        const { data: roles, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id);
-
-        console.log('Admin check - Roles:', roles);
-        console.log('Admin check - Role error:', roleError);
-
-        if (roleError || !roles?.some(r => r.role === 'admin')) {
-          console.log('Admin check - Not admin in roles either, redirecting to home');
+        if (profile?.user_type !== 'admin') {
           navigate('/');
           return;
         }
       }
 
-      console.log('Admin check - Authentication successful');
       setUser({
         id: session.user.id,
         email: session.user.email,
-        name: session.user.email?.split('@')[0] || 'Admin'
+        name: session.user.email?.split('@')[0] || 'Admin',
+        adminRole: adminRole || { role: 'main_admin' }
       });
     } catch (error) {
       console.error('Error checking user:', error);
@@ -88,7 +80,14 @@ const Admin = () => {
     return null;
   }
 
-  return <AdminDashboard user={user} onLogout={handleLogout} />;
+  return (
+    <AdminDashboard 
+      user={user} 
+      onLogout={handleLogout}
+      adminRole={user.adminRole}
+      mustResetPassword={user.adminRole?.must_reset_password}
+    />
+  );
 };
 
 export default Admin;

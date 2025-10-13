@@ -159,8 +159,7 @@ const VendorOrderDetail = () => {
           <div>
             <h3 className="font-semibold mb-2">Customer Information</h3>
             <div className="text-sm space-y-1 text-gray-700">
-              <p>Email: {order.customer_email}</p>
-              <p>Phone: {order.customer_phone || 'Not provided'}</p>
+              <p>Customer Name: {order.customer_email?.split('@')[0] || 'Customer'}</p>
             </div>
           </div>
 

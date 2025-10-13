@@ -53,6 +53,8 @@ export interface Product {
   height_cm?: number;
   warranty_period?: number;
   warranty_unit?: 'months' | 'years';
+  has_warranty?: boolean;
+  delivery_methods?: string[];
   materials?: string[];
   // Extended electronics fields
   display_resolution?: string;
