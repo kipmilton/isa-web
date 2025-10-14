@@ -851,12 +851,827 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
         )}
 
         {/* Show form directly when in full page mode */}
-        {isFullPage && !showAddDialog && (
+        {isFullPage && (
           <div className="mb-6">
-            <Button onClick={() => setShowAddDialog(true)} className="bg-blue-600 hover:bg-blue-700 w-full">
-              <Plus className="w-4 h-4 mr-2" />
-              Start Adding Product
-            </Button>
+            <div className="max-w-4xl mx-auto bg-white rounded-lg shadow p-4 sm:p-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <Tabs defaultValue="basic" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                    <TabsTrigger value="pricing">Pricing</TabsTrigger>
+                    <TabsTrigger value="media">Media</TabsTrigger>
+                    <TabsTrigger value="advanced">Advanced</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="basic" className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="name">Product Name *</Label>
+                        <Input
+                          id="name"
+                          value={formData.name}
+                          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="Enter product name"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="brand">Brand</Label>
+                        <Input
+                          id="brand"
+                          value={formData.brand}
+                          onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
+                          placeholder="Enter brand name"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="brand_level">Brand Level</Label>
+                      <Select value={formData.brand_level || "entry"} onValueChange={(value: "entry" | "medium" | "high") => setFormData(prev => ({ ...prev, brand_level: value }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select brand level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="entry">Entry Level - Budget-friendly products</SelectItem>
+                          <SelectItem value="medium">Medium Level - Mid-range quality</SelectItem>
+                          <SelectItem value="high">High Level - Premium/Luxury products</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                        placeholder="Enter product description"
+                        rows={4}
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Main Category *</Label>
+                      <Select value={mainCategory} onValueChange={(value) => {
+                        setMainCategory(value);
+                        setSubCategory("");
+                        setSubSubCategory("");
+                        setFormData(prev => ({ ...prev, category: value }));
+                      }}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Main Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CATEGORY_TREE.map(cat => (
+                            <SelectItem key={cat.name} value={cat.name}>{cat.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {mainCategory && getSubcategories(mainCategory).length > 0 && (
+                      <div>
+                        <Label>Subcategory</Label>
+                        <Select value={subCategory} onValueChange={(value) => {
+                          setSubCategory(value);
+                          setSubSubCategory("");
+                          setFormData(prev => ({ ...prev, subcategory: value }));
+                        }}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Subcategory" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getSubcategories(mainCategory).map(sub => (
+                              <SelectItem key={sub.name} value={sub.name}>{sub.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {mainCategory && subCategory && getSubSubcategories(mainCategory, subCategory).length > 0 && (
+                      <div>
+                        <Label>Sub-Subcategory</Label>
+                        <Select value={subSubCategory} onValueChange={(value) => {
+                          setSubSubCategory(value);
+                        }}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Sub-Subcategory" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getSubSubcategories(mainCategory, subCategory).map(subsub => (
+                              <SelectItem key={subsub.name} value={subsub.name}>{subsub.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {mainCategory === 'Electronics' && getExtraFields(mainCategory).length > 0 && (
+                      <div className="space-y-4">
+                        <Label className="text-base font-semibold">Basic Electronics Specifications</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {getExtraFields(mainCategory).map(field => (
+                            <div key={field}>
+                              <Label>{field}</Label>
+                              <Input
+                                type="text"
+                                value={extraFields[field] || ''}
+                                onChange={e => setExtraFields(prev => ({ ...prev, [field]: e.target.value }))}
+                                placeholder={`Enter ${field}`}
+                              />
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Extended Electronics Specifications */}
+                        <div className="space-y-3">
+                          <Label className="text-base font-semibold">Advanced Electronics Specifications</Label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <Label htmlFor="display_resolution" className="text-xs">Display Resolution</Label>
+                              <Input
+                                id="display_resolution"
+                                value={formData.display_resolution || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, display_resolution: e.target.value }))}
+                                placeholder="e.g., 1080p, 4K"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="display_size_inch" className="text-xs">Display Size (inches)</Label>
+                              <Input
+                                id="display_size_inch"
+                                type="number"
+                                step="0.1"
+                                value={formData.display_size_inch || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, display_size_inch: parseFloat(e.target.value) || undefined }))}
+                                placeholder="e.g., 55"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="hdd_size" className="text-xs">HDD Size</Label>
+                              <Input
+                                id="hdd_size"
+                                value={formData.hdd_size || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, hdd_size: e.target.value }))}
+                                placeholder="e.g., 1 TB"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="memory_capacity_gb" className="text-xs">Memory Capacity (GB)</Label>
+                              <Input
+                                id="memory_capacity_gb"
+                                type="number"
+                                value={formData.memory_capacity_gb || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, memory_capacity_gb: parseInt(e.target.value) || undefined }))}
+                                placeholder="e.g., 16"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="system_memory" className="text-xs">System Memory</Label>
+                              <Input
+                                id="system_memory"
+                                value={formData.system_memory || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, system_memory: e.target.value }))}
+                                placeholder="e.g., 8 GB"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="storage_capacity_gb" className="text-xs">Storage Capacity (GB)</Label>
+                              <Input
+                                id="storage_capacity_gb"
+                                type="number"
+                                value={formData.storage_capacity_gb || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, storage_capacity_gb: parseInt(e.target.value) || undefined }))}
+                                placeholder="e.g., 256"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="battery_capacity_mah" className="text-xs">Battery Capacity (mAh)</Label>
+                              <Input
+                                id="battery_capacity_mah"
+                                type="number"
+                                value={formData.battery_capacity_mah || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, battery_capacity_mah: parseInt(e.target.value) || undefined }))}
+                                placeholder="e.g., 5000"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="cpu_manufacturer" className="text-xs">CPU Manufacturer</Label>
+                              <Input
+                                id="cpu_manufacturer"
+                                value={formData.cpu_manufacturer || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, cpu_manufacturer: e.target.value }))}
+                                placeholder="e.g., Intel, AMD"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="processor_type" className="text-xs">Processor Type</Label>
+                              <Input
+                                id="processor_type"
+                                value={formData.processor_type || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, processor_type: e.target.value }))}
+                                placeholder="e.g., Core i7"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="graphics_memory_gb" className="text-xs">Graphics Memory (GB)</Label>
+                              <Input
+                                id="graphics_memory_gb"
+                                type="number"
+                                value={formData.graphics_memory_gb || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, graphics_memory_gb: parseInt(e.target.value) || undefined }))}
+                                placeholder="e.g., 8"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="memory_technology" className="text-xs">Memory Technology</Label>
+                              <Select 
+                                value={formData.memory_technology || ""} 
+                                onValueChange={(value) => setFormData(prev => ({ ...prev, memory_technology: value }))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="DDR3">DDR3</SelectItem>
+                                  <SelectItem value="DDR4">DDR4</SelectItem>
+                                  <SelectItem value="DDR5">DDR5</SelectItem>
+                                  <SelectItem value="LPDDR4">LPDDR4</SelectItem>
+                                  <SelectItem value="LPDDR5">LPDDR5</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="panel_type" className="text-xs">Panel Type</Label>
+                              <Select 
+                                value={formData.panel_type || ""} 
+                                onValueChange={(value) => setFormData(prev => ({ ...prev, panel_type: value }))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select panel type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="IPS">IPS</SelectItem>
+                                  <SelectItem value="VA">VA</SelectItem>
+                                  <SelectItem value="TN">TN</SelectItem>
+                                  <SelectItem value="OLED">OLED</SelectItem>
+                                  <SelectItem value="AMOLED">AMOLED</SelectItem>
+                                  <SelectItem value="LCD">LCD</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="plug_type" className="text-xs">Plug Type</Label>
+                              <Select 
+                                value={formData.plug_type || ""} 
+                                onValueChange={(value) => setFormData(prev => ({ ...prev, plug_type: value }))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Type-C">Type-C</SelectItem>
+                                  <SelectItem value="USB-A">USB-A</SelectItem>
+                                  <SelectItem value="Lightning">Lightning</SelectItem>
+                                  <SelectItem value="Micro-USB">Micro-USB</SelectItem>
+                                  <SelectItem value="Mini-USB">Mini-USB</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="voltage" className="text-xs">Voltage</Label>
+                              <Input
+                                id="voltage"
+                                value={formData.voltage || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, voltage: e.target.value }))}
+                                placeholder="e.g., 110V, 220V"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="modem_type" className="text-xs">Modem Type</Label>
+                              <Input
+                                id="modem_type"
+                                value={formData.modem_type || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, modem_type: e.target.value }))}
+                                placeholder="e.g., 4G LTE, 5G"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="mount_type" className="text-xs">Mount Type</Label>
+                              <Input
+                                id="mount_type"
+                                value={formData.mount_type || ""}
+                                onChange={e => setFormData(prev => ({ ...prev, mount_type: e.target.value }))}
+                                placeholder="e.g., VESA, Wall"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="connection_gender" className="text-xs">Connection Gender</Label>
+                              <Select 
+                                value={formData.connection_gender || ""} 
+                                onValueChange={(value) => setFormData(prev => ({ ...prev, connection_gender: value }))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Male">Male</SelectItem>
+                                  <SelectItem value="Female">Female</SelectItem>
+                                  <SelectItem value="Unisex">Unisex</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Product Attributes for Fashion */}
+                    {mainCategory === 'Fashion' && (
+                      <ProductAttributes
+                        category={mainCategory}
+                        subcategory={subCategory}
+                        attributes={productAttributes as any}
+                        onAttributesChange={setProductAttributes}
+                      />
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="sku">SKU (Auto-generated)</Label>
+                        <Input
+                          id="sku"
+                          value={formData.sku || "Will be auto-generated"}
+                          disabled
+                          placeholder="Auto-generated on save"
+                          className="bg-muted"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">SKU is automatically generated when you save the product</p>
+                      </div>
+                      <div>
+                        <Label htmlFor="stock_quantity">Stock Quantity *</Label>
+                        <Input
+                          id="stock_quantity"
+                          type="number"
+                          min={0}
+                          value={formData.stock_quantity}
+                          onChange={e => setFormData(prev => ({ ...prev, stock_quantity: parseInt(e.target.value) || 0 }))}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Product Dimensions and Weight */}
+                    <div className="space-y-2">
+                      <Label className="text-base font-semibold">Product Dimensions & Weight</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div>
+                          <Label htmlFor="length_cm" className="text-xs">Length (cm)</Label>
+                          <Input
+                            id="length_cm"
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            value={formData.length_cm || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, length_cm: parseFloat(e.target.value) || undefined }))}
+                            placeholder="L"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="width_cm" className="text-xs">Width (cm)</Label>
+                          <Input
+                            id="width_cm"
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            value={formData.width_cm || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, width_cm: parseFloat(e.target.value) || undefined }))}
+                            placeholder="W"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="height_cm" className="text-xs">Height (cm)</Label>
+                          <Input
+                            id="height_cm"
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            value={formData.height_cm || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, height_cm: parseFloat(e.target.value) || undefined }))}
+                            placeholder="H"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="weight_kg" className="text-xs">Weight (kg)</Label>
+                          <Input
+                            id="weight_kg"
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            value={formData.weight_kg || ""}
+                            onChange={e => setFormData(prev => ({ ...prev, weight_kg: parseFloat(e.target.value) || undefined }))}
+                            placeholder="Weight"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Warranty */}
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="has_warranty"
+                          checked={formData.has_warranty || false}
+                          onChange={e => setFormData(prev => ({ ...prev, has_warranty: e.target.checked }))}
+                          className="w-4 h-4"
+                        />
+                        <Label htmlFor="has_warranty" className="text-base font-semibold cursor-pointer">
+                          This product has warranty
+                        </Label>
+                      </div>
+                      {formData.has_warranty && (
+                        <div className="grid grid-cols-2 gap-3 ml-6">
+                          <div>
+                            <Label htmlFor="warranty_period" className="text-xs">Duration</Label>
+                            <Input
+                              id="warranty_period"
+                              type="number"
+                              min={1}
+                              value={formData.warranty_period || ""}
+                              onChange={e => setFormData(prev => ({ ...prev, warranty_period: parseInt(e.target.value) || undefined }))}
+                              placeholder="Enter number"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="warranty_unit" className="text-xs">Unit</Label>
+                            <Select 
+                              value={formData.warranty_unit || ""} 
+                              onValueChange={(value: 'months' | 'years') => setFormData(prev => ({ ...prev, warranty_unit: value }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select unit" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="months">Months</SelectItem>
+                                <SelectItem value="years">Years</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Delivery Methods */}
+                    <div className="space-y-2">
+                      <Label className="text-base font-semibold">Preferred Delivery Methods</Label>
+                      <p className="text-xs text-muted-foreground">Select all applicable delivery methods</p>
+                      <div className="space-y-3">
+                        {[
+                          { value: 'bicycle', label: 'Bicycle Delivery', desc: 'Best for: Very light packages (documents, accessories, small electronics)' },
+                          { value: 'motorcycle', label: 'Motorcycle (Boda Boda)', desc: 'Best for: Small to medium parcels, food, fashion, electronics' },
+                          { value: 'car', label: 'Private Car / Taxi', desc: 'Best for: Fragile or medium-sized items (flowers, electronics, groceries)' },
+                          { value: 'pickup', label: 'Pickup Truck', desc: 'Best for: Bulkier or heavier goods like furniture, electronics' },
+                          { value: 'truck', label: 'Light Commercial Truck', desc: 'Best for: Heavy goods — building materials, fridges, beds' },
+                          { value: 'lorry', label: 'Lorry / Trailer', desc: 'Best for: Very heavy or bulk shipments — industrial items, pallets' },
+                          { value: 'matatu', label: 'Matatu / Bus Parcel Service', desc: 'Best for: Inter-county or rural deliveries' }
+                        ].map(method => (
+                          <div key={method.value} className="flex items-start space-x-2 border rounded p-3">
+                            <input
+                              type="checkbox"
+                              id={`delivery_${method.value}`}
+                              checked={formData.delivery_methods?.includes(method.value) || false}
+                              onChange={e => {
+                                const checked = e.target.checked;
+                                setFormData(prev => ({
+                                  ...prev,
+                                  delivery_methods: checked
+                                    ? [...(prev.delivery_methods || []), method.value]
+                                    : (prev.delivery_methods || []).filter(m => m !== method.value)
+                                }));
+                              }}
+                              className="w-4 h-4 mt-1"
+                            />
+                            <div>
+                              <Label htmlFor={`delivery_${method.value}`} className="font-medium cursor-pointer">
+                                {method.label}
+                              </Label>
+                              <p className="text-xs text-muted-foreground">{method.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Materials (for Household items) */}
+                    {(mainCategory === 'Home & Lifestyle' || mainCategory === 'Furniture') && (
+                      <div className="space-y-2">
+                        <Label className="text-base font-semibold">Materials</Label>
+                        <p className="text-xs text-muted-foreground">Select all materials used in this product</p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {['Wood', 'Metal', 'Steel', 'Plastic', 'Glass', 'Fabric', 'Leather', 'Ceramic', 'Stone', 'Other'].map(material => (
+                            <div key={material} className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                id={`material-${material}`}
+                                checked={formData.materials?.includes(material) || false}
+                                onChange={(e) => {
+                                  const materials = formData.materials || [];
+                                  if (e.target.checked) {
+                                    setFormData(prev => ({ ...prev, materials: [...materials, material] }));
+                                  } else {
+                                    setFormData(prev => ({ ...prev, materials: materials.filter(m => m !== material) }));
+                                  }
+                                }}
+                                className="rounded"
+                              />
+                              <Label htmlFor={`material-${material}`} className="text-sm cursor-pointer">{material}</Label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="pickup_location">Where do you want the item to be picked from? *</Label>
+                        <Textarea
+                          id="pickup_location"
+                          value={formData.pickup_location}
+                          onChange={(e) => setFormData(prev => ({ ...prev, pickup_location: e.target.value }))}
+                          placeholder="Please provide detailed pickup address (e.g., 3KM off Limuru Road, near Shell Petrol Station, blue gate house)"
+                          className="min-h-[100px]"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="pickup_phone_number">Pickup Phone Number *</Label>
+                        <Input
+                          id="pickup_phone_number"
+                          type="tel"
+                          value={formData.pickup_phone_number}
+                          onChange={(e) => setFormData(prev => ({ ...prev, pickup_phone_number: e.target.value }))}
+                          placeholder="e.g. +254700000000"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="pricing" className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="price">Now (Current Price) *</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold">Ksh</span>
+                          <Input
+                            id="price"
+                            type="number"
+                            min={0}
+                            value={formData.price}
+                            onChange={e => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                            required
+                            placeholder="e.g. 19500"
+                            className="pl-14 mb-1"
+                          />
+                          {formData.price > 0 && commissionInfo && (
+                            <div className="text-xs text-gray-600 mt-1">
+                              You will receive <span className="font-semibold">Ksh {commissionInfo.vendor_earnings.toFixed(2)}</span>, <span className="font-semibold">Ksh {commissionInfo.isa_commission.toFixed(2)}</span> goes to ISA commission
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="original_price">Was (Original Price)</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold">Ksh</span>
+                          <Input
+                            id="original_price"
+                            type="number"
+                            min={0}
+                            value={formData.original_price ?? ''}
+                            onChange={e => setFormData(prev => ({ ...prev, original_price: e.target.value ? parseFloat(e.target.value) : undefined }))}
+                            placeholder="e.g. 20000"
+                            className="pl-14 mb-4"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="commission_percentage">Commission Percentage (%)</Label>
+                      <Input
+                        id="commission_percentage"
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={0.01}
+                        value={formData.commission_percentage ?? ''}
+                        onChange={e => setFormData(prev => ({ ...prev, commission_percentage: e.target.value ? parseFloat(e.target.value) : undefined }))}
+                        placeholder="e.g. 10 for 10%"
+                        className="mb-4"
+                      />
+                    </div>
+
+                    {commissionInfo && mainCategory && (
+                      <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-semibold text-gray-800 flex items-center">
+                            <TrendingUp className="w-4 h-4 mr-2" />
+                            Earnings Breakdown
+                          </h4>
+                          <Badge variant={commissionInfo.plan === 'premium' ? 'default' : 'secondary'} className="flex items-center">
+                            <Crown className="w-3 h-3 mr-1" />
+                            {commissionInfo.plan === 'premium' ? 'Premium' : 'Freemium'}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-600">Product Price:</span>
+                            <span className="font-semibold ml-1 text-gray-800">Ksh {formData.price.toLocaleString()}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">ISA Commission ({commissionInfo.rate}%):</span>
+                            <span className="font-semibold ml-1 text-red-600">Ksh {commissionInfo.isa_commission.toFixed(2)}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-gray-600">Your Earnings:</span>
+                            <span className="font-semibold ml-1 text-green-600 text-lg">Ksh {commissionInfo.vendor_earnings.toFixed(2)}</span>
+                          </div>
+                        </div>
+                        <div className="mt-2 text-xs text-gray-500">
+                          Category: {commissionInfo.category_path}
+                        </div>
+                        {commissionInfo.plan === 'freemium' && (
+                          <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <h5 className="font-semibold text-blue-800 flex items-center mb-1">
+                                  <Crown className="w-4 h-4 mr-2 text-yellow-500" />
+                                  Upgrade to Premium
+                                </h5>
+                                <p className="text-xs text-blue-700 mb-2">
+                                  Reduce commission from {commissionInfo.rate}% down to around 5% and earn more!
+                                </p>
+                                <div className="text-xs text-blue-600">
+                                  <span className="font-semibold">Premium earnings:</span> Ksh {(formData.price * 0.95).toFixed(2)} 
+                                  <span className="text-green-600 ml-2">(+Ksh {(formData.price * 0.05).toFixed(2)} more)</span>
+                                </div>
+                              </div>
+                              <Button 
+                                size="sm" 
+                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs px-3 py-1"
+                                onClick={() => {
+                                  navigate('/vendor-dashboard?section=subscription');
+                                  toast({
+                                    title: "Premium Upgrade",
+                                    description: "Redirecting to subscription plans...",
+                                    variant: "default"
+                                  });
+                                }}
+                              >
+                                Upgrade Now
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="media" className="space-y-4">
+                    <div>
+                      <Label>Product Images (Minimum 3 required)</Label>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Upload at least 3 product images. The first image will be used as the main product image.
+                      </p>
+                      <ImageUpload
+                        onImageUpload={handleImageUpload}
+                        onImageRemove={handleImageRemove}
+                        existingImages={formData.images || []}
+                        multiple={true}
+                        maxImages={5}
+                      />
+                      {formData.images && formData.images.length < 3 && (
+                        <p className="text-sm text-red-600 mt-2">
+                          Please upload at least {3 - formData.images.length} more image(s)
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label>Tags</Label>
+                      <div className="flex gap-2 mb-2">
+                        <Input
+                          value={tagInput}
+                          onChange={(e) => setTagInput(e.target.value)}
+                          placeholder="Add a tag"
+                          onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                        />
+                        <Button type="button" onClick={addTag} variant="outline">
+                          Add
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.tags.map((tag, index) => (
+                          <Badge key={index} variant="secondary" className="cursor-pointer" onClick={() => removeTag(tag)}>
+                            {tag} ×
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="advanced" className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="featured">Featured Product</Label>
+                        <p className="text-sm text-gray-600">Show this product in featured sections</p>
+                      </div>
+                      <Switch
+                        id="featured"
+                        checked={formData.is_featured}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_featured: checked }))}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="active">Active Product</Label>
+                        <p className="text-sm text-gray-600">Make this product visible to customers</p>
+                      </div>
+                      <Switch
+                        id="active"
+                        checked={formData.is_active}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                      />
+                    </div>
+
+                    {/* Return Policy Section */}
+                    <div className="space-y-4 border-t pt-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Return Policy</h3>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label htmlFor="return_eligible">Eligible for Return</Label>
+                          <p className="text-sm text-gray-600">Can customers return this item after purchase?</p>
+                        </div>
+                        <Switch
+                          id="return_eligible"
+                          checked={formData.return_eligible || false}
+                          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, return_eligible: checked }))}
+                        />
+                      </div>
+
+                      {formData.return_eligible ? (
+                        <div>
+                          <Label htmlFor="return_policy_guidelines">Return Guidelines</Label>
+                          <p className="text-sm text-gray-600 mb-2">Specify the conditions under which the product can be returned</p>
+                          <Textarea
+                            id="return_policy_guidelines"
+                            value={formData.return_policy_guidelines || ''}
+                            onChange={(e) => setFormData(prev => ({ ...prev, return_policy_guidelines: e.target.value }))}
+                            placeholder="e.g., Product must be undamaged, in original packaging, with all accessories included. No signs of wear or use."
+                            rows={3}
+                          />
+                        </div>
+                      ) : (
+                        <div>
+                          <Label htmlFor="return_policy_reason">Reason for No Returns</Label>
+                          <p className="text-sm text-gray-600 mb-2">Explain why this product cannot be returned</p>
+                          <Textarea
+                            id="return_policy_reason"
+                            value={formData.return_policy_reason || ''}
+                            onChange={(e) => setFormData(prev => ({ ...prev, return_policy_reason: e.target.value }))}
+                            placeholder="e.g., Highly consumable item like perfumes that cannot be resold for hygiene reasons"
+                            rows={3}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                </Tabs>
+
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => {
+                    if (isFullPage) {
+                      resetForm();
+                    } else {
+                      setShowAddDialog(false);
+                      setEditingProduct(null);
+                      resetForm();
+                    }
+                  }}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    {editingProduct ? "Update Product" : "Create Product"}
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 
@@ -984,7 +1799,8 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
         )}
       </div>
 
-      {/* Add/Edit Product Dialog */}
+      {/* Add/Edit Product Dialog (used only in non-full-page mode) */}
+      {!isFullPage && (
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -1816,6 +2632,7 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
           </form>
         </DialogContent>
       </Dialog>
+      )}
       <Dialog open={banReasonDialogOpen} onOpenChange={setBanReasonDialogOpen}>
         <DialogContent>
           <DialogHeader>
