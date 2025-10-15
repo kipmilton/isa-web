@@ -10,7 +10,7 @@ import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, S
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
-interface Message {
+  interface Message {
   id: number;
   type: 'user' | 'isa';
   content: string;
@@ -138,7 +138,7 @@ const Chat = () => {
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-xl gap-6">
-        <div>You must be signed in to use Ask ISA.</div>
+        <div>You must be signed in to use Ask MyPlug.</div>
         <Button
           className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-full text-lg shadow-lg"
           onClick={() => setShowAuth(true)}
@@ -156,8 +156,8 @@ const Chat = () => {
         <Sidebar className="border-r border-gray-200">
           <SidebarHeader className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
-                              <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-6 w-6" />
-              <span className="font-semibold text-gray-800">ISA Chat</span>
+              <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="MyPlug Logo" className="h-6 w-6" />
+              <span className="font-semibold text-gray-800">MyPlug Chat</span>
             </div>
             <Button 
               onClick={startNewChat}
@@ -206,8 +206,8 @@ const Chat = () => {
               <div className="flex items-center space-x-3">
                 <SidebarTrigger />
                 <div className="flex items-center space-x-2">
-                  <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-6 w-6" />
-                  <h1 className="text-xl font-semibold text-gray-800">Ask ISA</h1>
+                  <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="MyPlug Logo" className="h-6 w-6" />
+                  <h1 className="text-xl font-semibold text-gray-800">Ask MyPlug</h1>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
@@ -227,9 +227,9 @@ const Chat = () => {
             <ScrollArea className="flex-1 p-4">
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-16 w-16 mb-4" />
+                  <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="MyPlug Logo" className="h-16 w-16 mb-4" />
                   <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-                    Hi! I'm ISA 👋
+                    Hi! I'm MyPlug 👋
                   </h2>
                   <p className="text-gray-600 mb-6 max-w-md">
                     Your AI Shopping Assistant is here to help you discover amazing products, 
@@ -270,8 +270,8 @@ const Chat = () => {
                       >
                         {message.type === 'isa' && (
                           <div className="flex items-center space-x-2 mb-2">
-                            <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-4 w-4" />
-                            <span className="text-xs font-medium text-orange-600">ISA</span>
+                            <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="MyPlug Logo" className="h-4 w-4" />
+                            <span className="text-xs font-medium text-orange-600">MyPlug</span>
                           </div>
                         )}
                         <p className="text-sm leading-relaxed">{message.content}</p>
@@ -293,7 +293,7 @@ const Chat = () => {
                     value={currentMessage}
                     onChange={(e) => setCurrentMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Ask ISA about products, prices, recommendations..."
+                    placeholder="Ask MyPlug about products, prices, recommendations..."
                     className="flex-1 rounded-full border-gray-300 focus:border-orange-500 focus:ring-orange-500"
                   />
                   <Button
@@ -305,7 +305,7 @@ const Chat = () => {
                   </Button>
                 </div>
                 <p className="text-xs text-gray-500 mt-2 text-center">
-                  ISA can make mistakes. Please verify important information.
+                  MyPlug can make mistakes. Please verify important information.
                 </p>
               </div>
             </div>

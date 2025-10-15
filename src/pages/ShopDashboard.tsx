@@ -74,10 +74,10 @@ const ShopDashboard = () => {
   // Show Ask ISA dialog only once per user/browser
   useEffect(() => {
     try {
-      const hasSeen = localStorage.getItem('isa_seen_ask_isa') === 'true';
+      const hasSeen = localStorage.getItem('myplug_seen_ask_myplug') === 'true';
       if (!hasSeen) {
         setShowAskIsaDialog(true);
-        localStorage.setItem('isa_seen_ask_isa', 'true');
+        localStorage.setItem('myplug_seen_ask_myplug', 'true');
       }
     } catch (e) {
       // ignore storage errors
@@ -388,11 +388,11 @@ const ShopDashboard = () => {
             <Link to="/" className="flex items-center space-x-2 sm:space-x-4 hover:scale-105 transition-transform">
               <img 
                 src="/isa-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" 
-                alt="ISA Logo" 
+                alt="MyPlug Logo" 
                 className="w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-md"
               />
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-orange-600">ISA Shop</h1>
+                <h1 className="text-lg sm:text-xl font-bold text-orange-600">MyPlug Shop</h1>
                 <p className="text-xs text-gray-500 hidden sm:block">Smart Shopping Assistant</p>
               </div>
             </Link>
@@ -418,7 +418,7 @@ const ShopDashboard = () => {
               <Link to="/chat">
                 <Button variant="ghost" className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg px-3 py-2">
                   <MessageCircle className="w-5 h-5" />
-                  <span className="text-sm font-medium">Ask ISA</span>
+                  <span className="text-sm font-medium">Ask MyPlug</span>
                 </Button>
               </Link>
               
@@ -607,7 +607,7 @@ const ShopDashboard = () => {
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                     <MessageCircle className="w-4 h-4 text-white" />
                   </div>
-                  <span className="font-medium">Ask ISA</span>
+                  <span className="font-medium">Ask MyPlug</span>
                 </Link>
                 
                 <Link 
@@ -1065,27 +1065,27 @@ const ShopDashboard = () => {
         onAddToCart={handleAddToCart}
       />
 
-      {/* Ask ISA Welcome Dialog */}
+      {/* Ask MyPlug Welcome Dialog */}
       <Dialog open={showAskIsaDialog} onOpenChange={setShowAskIsaDialog}>
         <DialogContent className="max-w-md text-center">
           <DialogHeader>
-            <DialogTitle className="sr-only">Ask ISA Chatbot Introduction</DialogTitle>
+            <DialogTitle className="sr-only">Ask MyPlug Chatbot Introduction</DialogTitle>
             <DialogDescription className="sr-only">
-              Learn about the Ask ISA chatbot and choose to proceed to shopping or try the chat feature.
+              Learn about the Ask MyPlug chatbot and choose to proceed to shopping or try the chat feature.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center gap-4 p-2">
-                            <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Logo" className="h-16 w-16 mb-2 rounded-full bg-white p-2" />
-            <h2 className="text-2xl font-bold mb-2">Welcome to ISA Shopping!</h2>
+            <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="MyPlug Logo" className="h-16 w-16 mb-2 rounded-full bg-white p-2" />
+            <h2 className="text-2xl font-bold mb-2">Welcome to MyPlug Shopping!</h2>
             <p className="text-gray-700 mb-4">
-              Did you know? You can get instant product recommendations, compare prices, and ask for shopping advice using our <span className="font-semibold text-orange-600">Ask ISA</span> chatbot.
+              Did you know? You can get instant product recommendations, compare prices, and ask for shopping advice using our <span className="font-semibold text-orange-600">Ask MyPlug</span> chatbot.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
               <Button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600" onClick={() => setShowAskIsaDialog(false)}>
                 Proceed to Shopping
               </Button>
               <Button className="w-full sm:w-auto" variant="outline" onClick={() => { setShowAskIsaDialog(false); navigate('/chat'); }}>
-                Try ISA Chat
+                Try MyPlug Chat
               </Button>
             </div>
           </div>

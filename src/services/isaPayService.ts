@@ -18,14 +18,14 @@ export async function initiateIsaPayment(params: { user_id: string; amount: numb
     headers,
     body: JSON.stringify(params)
   });
-  if (!res.ok) throw new Error(`ISA Pay initiate failed: ${res.status}`);
+  if (!res.ok) throw new Error(`MyPlug Pay initiate failed: ${res.status}`);
   return res.json();
 }
 
 export async function getIsaPaymentStatus(transactionId: string): Promise<any> {
   const headers = await getAuthHeader();
   const res = await fetch(`${supabaseUrl}/functions/v1/isa-pay/status/${transactionId}`, { headers });
-  if (!res.ok) throw new Error(`ISA Pay status failed: ${res.status}`);
+  if (!res.ok) throw new Error(`MyPlug Pay status failed: ${res.status}`);
   return res.json();
 }
 

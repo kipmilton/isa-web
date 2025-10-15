@@ -106,8 +106,8 @@ export default function IsaPayModal({ open, onOpenChange, userId, amount, curren
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="ISA Pay" className="h-6" />
-            <span>Pay securely with ISA Pay</span>
+            <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="MyPlug Pay" className="h-6" />
+            <span>Pay securely with MyPlug Pay</span>
           </DialogTitle>
           <DialogDescription>Encrypted checkout. We never share your card or wallet details with merchants.</DialogDescription>
         </DialogHeader>
@@ -134,7 +134,7 @@ export default function IsaPayModal({ open, onOpenChange, userId, amount, curren
               </div>
             </div>
           )}
-          <div className="text-xs text-muted-foreground text-center">Secured by ISA Pay™</div>
+          <div className="text-xs text-muted-foreground text-center">Secured by MyPlug Pay™</div>
           <details className="text-[10px] text-muted-foreground">
             <summary className="cursor-pointer text-center">View Terms of Service</summary>
             <div className="mt-2">
