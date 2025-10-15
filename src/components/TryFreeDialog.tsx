@@ -27,7 +27,7 @@ const TryFreeDialog = ({ open, onOpenChange }: TryFreeDialogProps) => {
     // Add user question
     const newConversation = [...conversation, { type: 'user' as const, message: question }];
     
-    // Simulate ISA response
+    // Simulate MyPlug response
     const responses = [
       "I'd be happy to help you find the best products! Based on your query, I recommend checking out our featured vendors.",
       "Great question! Let me search through our product database to find the perfect match for you.",
@@ -36,8 +36,8 @@ const TryFreeDialog = ({ open, onOpenChange }: TryFreeDialogProps) => {
       "Based on your preferences, I've found several great options that might interest you!"
     ];
     
-    const isaResponse = responses[Math.floor(Math.random() * responses.length)];
-    newConversation.push({ type: 'isa' as const, message: isaResponse });
+    const myplugResponse = responses[Math.floor(Math.random() * responses.length)];
+    newConversation.push({ type: 'isa' as const, message: myplugResponse });
     
     setConversation(newConversation);
     setQuestion("");
@@ -45,7 +45,7 @@ const TryFreeDialog = ({ open, onOpenChange }: TryFreeDialogProps) => {
     
     if (questionsLeft === 1) {
       setTimeout(() => {
-        toast.info("This was your last free question! Sign up to continue chatting with ISA.");
+        toast.info("This was your last free question! Sign up to continue chatting with MyPlug.");
       }, 2000);
     }
   };
@@ -61,13 +61,13 @@ const TryFreeDialog = ({ open, onOpenChange }: TryFreeDialogProps) => {
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Brain className="h-6 w-6 text-orange-500" />
-            <span>Chat with ISA - Free Trial</span>
+            <span>Chat with MyPlug - Free Trial</span>
             <span className="text-sm bg-orange-100 text-orange-600 px-2 py-1 rounded-full">
               {questionsLeft} questions left
             </span>
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Free trial chat with ISA AI Shopping Assistant. Ask questions about products and shopping.
+            Free trial chat with MyPlug AI Shopping Assistant. Ask questions about products and shopping.
           </DialogDescription>
         </DialogHeader>
         
@@ -78,7 +78,7 @@ const TryFreeDialog = ({ open, onOpenChange }: TryFreeDialogProps) => {
               <div className="flex items-center justify-center h-full text-gray-500">
                 <div className="text-center">
                   <Brain className="h-12 w-12 text-orange-500 mx-auto mb-2" />
-                  <p>Hi! I'm ISA, your AI Shopping Assistant.</p>
+                  <p>Hi! I'm MyPlug, your AI Shopping Assistant.</p>
                   <p className="text-sm">Ask me anything about products, prices, or shopping!</p>
                 </div>
               </div>
@@ -94,7 +94,7 @@ const TryFreeDialog = ({ open, onOpenChange }: TryFreeDialogProps) => {
                       {msg.type === 'isa' && (
                         <div className="flex items-center space-x-1 mb-1">
                           <Brain className="h-4 w-4 text-orange-500" />
-                          <span className="text-xs font-medium text-orange-600">ISA</span>
+                          <span className="text-xs font-medium text-orange-600">MyPlug</span>
                         </div>
                       )}
                       <p className="text-sm">{msg.message}</p>
@@ -111,7 +111,7 @@ const TryFreeDialog = ({ open, onOpenChange }: TryFreeDialogProps) => {
               <Input
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Ask ISA about products, prices, recommendations..."
+                placeholder="Ask MyPlug about products, prices, recommendations..."
                 onKeyPress={(e) => e.key === 'Enter' && handleAskQuestion()}
               />
               <Button onClick={handleAskQuestion} disabled={!question.trim()}>
@@ -121,7 +121,7 @@ const TryFreeDialog = ({ open, onOpenChange }: TryFreeDialogProps) => {
           ) : (
             <div className="text-center space-y-4 bg-orange-50 p-6 rounded-lg">
               <p className="text-orange-700 font-medium">You've used all your free questions!</p>
-              <p className="text-sm text-orange-600">Sign up to continue chatting with ISA and get unlimited access.</p>
+              <p className="text-sm text-orange-600">Sign up to continue chatting with MyPlug and get unlimited access.</p>
               <Button onClick={handleSignUp} className="bg-orange-500 hover:bg-orange-600">
                 Sign Up Now
               </Button>

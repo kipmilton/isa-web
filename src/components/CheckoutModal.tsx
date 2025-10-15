@@ -96,7 +96,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
         },
         customer_email: contactInfo.email,
         customer_phone: contactInfo.phone,
-        notes: `ISA Delivery - WhatsApp: ${contactInfo.whatsapp}\nDelivery Address: ${deliveryAddress}\n${notes}`,
+        notes: `MyPlug Delivery - WhatsApp: ${contactInfo.whatsapp}\nDelivery Address: ${deliveryAddress}\n${notes}`,
         payment_method: 'isa_pay',
         delivery_type: 'delivery',
         delivery_location_lat: null,
@@ -117,7 +117,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   };
 
   const downloadReceipt = () => {
-    const receiptContent = `Order Receipt\nOrder #: ${orderNumber}\nDate: ${new Date().toLocaleDateString()}\nCustomer: ${contactInfo.email}\nPhone: ${contactInfo.phone}\nWhatsApp: ${contactInfo.whatsapp}\n\nItems:\n${cartItems.map(item => `${item.product.name} x${item.quantity} - ${formatPrice(item.product.price * item.quantity)}`).join('\n')}\n\nSubtotal: ${formatPrice(subtotal)}\nDelivery Fee: ${formatPrice(deliveryFee)}\nTotal: ${formatPrice(totalAmount)}\n\nDelivery Address: ${deliveryAddress}\nDelivery Method: ISA Delivery\nPayment Method: ISA Pay\n    `;
+    const receiptContent = `Order Receipt\nOrder #: ${orderNumber}\nDate: ${new Date().toLocaleDateString()}\nCustomer: ${contactInfo.email}\nPhone: ${contactInfo.phone}\nWhatsApp: ${contactInfo.whatsapp}\n\nItems:\n${cartItems.map(item => `${item.product.name} x${item.quantity} - ${formatPrice(item.product.price * item.quantity)}`).join('\n')}\n\nSubtotal: ${formatPrice(subtotal)}\nDelivery Fee: ${formatPrice(deliveryFee)}\nTotal: ${formatPrice(totalAmount)}\n\nDelivery Address: ${deliveryAddress}\nDelivery Method: MyPlug Delivery\nPayment Method: MyPlug Pay\n    `;
     const blob = new Blob([receiptContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -295,7 +295,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
               )}
               {currentStep === 'pay' && (
                 <Button onClick={handlePayWithIsa} disabled={isProcessing} className="bg-green-600 hover:bg-green-700">
-                  {isProcessing ? 'Processing...' : `Pay with ISA Pay (${formatPrice(totalAmount)})`}
+                  {isProcessing ? 'Processing...' : `Pay with MyPlug Pay (${formatPrice(totalAmount)})`}
                 </Button>
               )}
             </div>
@@ -310,7 +310,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
           amount={totalAmount}
           currency={'KES'}
           orderId={orderNumber}
-          description={`ISA Order #${orderNumber}`}
+          description={`MyPlug Order #${orderNumber}`}
           onSuccess={() => {
             setCurrentStep('complete');
             onOrderComplete();

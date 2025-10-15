@@ -233,7 +233,7 @@ const VendorGuidelines = () => {
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., ISA Vendor Guidelines"
+                  placeholder="e.g., MyPlug Vendor Guidelines"
                 />
               </div>
               <div>

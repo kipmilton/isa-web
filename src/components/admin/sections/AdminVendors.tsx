@@ -494,7 +494,7 @@ const AdminVendors = () => {
                       <div>
                         <strong>How did you hear about us:</strong>
                         <p className="text-sm text-gray-600 capitalize">
-                          {vendorApplicationData.heardAboutUs === 'isa_contact' ? 'I was contacted by ISA' :
+                          {vendorApplicationData.heardAboutUs === 'isa_contact' ? 'I was contacted by MyPlug' :
                            vendorApplicationData.heardAboutUs === 'tiktok' ? 'TikTok' :
                            vendorApplicationData.heardAboutUs === 'facebook' ? 'Facebook' :
                            vendorApplicationData.heardAboutUs === 'instagram' ? 'Instagram' :

@@ -132,7 +132,7 @@ const CartModal = ({ isOpen, onClose, user, onRemoveFromCart, onUpdateQuantity }
             {isLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-gray-500 dark:text-gray-400 mt-2">ISA is loading your cart...</p>
+                <p className="text-gray-500 dark:text-gray-400 mt-2">MyPlug is loading your cart...</p>
               </div>
             ) : cartItems.length === 0 ? (
               <div className="text-center py-8">

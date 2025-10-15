@@ -24,7 +24,7 @@ const notificationTemplates: NotificationTemplate[] = [
   {
     id: 'welcome',
     name: 'Welcome Message',
-    title: 'Welcome to ISA! 🎉',
+    title: 'Welcome to MyPlug! 🎉',
     body: 'Thank you for joining our community. Start exploring amazing products!',
     category: 'marketing',
     icon: '🎉'

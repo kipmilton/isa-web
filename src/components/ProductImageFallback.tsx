@@ -45,7 +45,7 @@ const ProductImageFallback = ({ product, className = "", alt = "", onClick }: Pr
   };
 
   const availableImages = getAvailableImages();
-  const logoFallback = "/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png";
+  const logoFallback = "/myplug-logo.png";
 
   // Debug logging
   console.log('ProductImageFallback - Available images:', availableImages);
@@ -92,11 +92,11 @@ const ProductImageFallback = ({ product, className = "", alt = "", onClick }: Pr
     >
       <img 
         src={logoFallback} 
-        alt="ISA Logo" 
+        alt="MyPlug Logo" 
         className="w-16 h-16 opacity-20 blur-sm"
       />
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-gray-400 text-sm font-medium">ISA</span>
+        <span className="text-gray-400 text-sm font-medium">MyPlug</span>
       </div>
     </div>
   );

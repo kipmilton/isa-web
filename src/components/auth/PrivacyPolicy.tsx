@@ -7,13 +7,13 @@ export default function PrivacyPolicy({ userType }: PrivacyPolicyProps) {
     return (
       <div className="space-y-4 text-sm leading-relaxed">
         <div>
-          <h3 className="text-lg font-semibold">Vendor Privacy Policy – ISA AI Shopping Assistant</h3>
+          <h3 className="text-lg font-semibold">Vendor Privacy Policy – MyPlug Technologies Limited</h3>
           <p><strong>Effective Date:</strong> 7/17/2025</p>
           <p><strong>Version:</strong> 1.0</p>
         </div>
 
         <p>
-          ISA AI Shopping Assistant Ltd. ("ISA", "we", "our", "us") is committed to protecting the privacy of vendors ("you", "your") who use our platform. This Privacy Policy explains how we collect, use, and protect Vendor data during the onboarding process and while using the ISA platform.
+          MyPlug Technologies Limited ("MyPlug", "we", "our", "us") is committed to protecting the privacy of vendors ("you", "your") who use our platform. This Privacy Policy explains how we collect, use, and protect Vendor data during the onboarding process and while using the MyPlug platform.
         </p>
 
         <h4 className="text-base font-semibold mt-4">1. Information We Collect</h4>
@@ -34,12 +34,12 @@ export default function PrivacyPolicy({ userType }: PrivacyPolicyProps) {
           <li>Comply with tax and regulatory obligations</li>
           <li>Facilitate payments and settlements</li>
           <li>Manage product listings and transactions</li>
-          <li>Prevent fraud and misuse of the ISA platform</li>
+          <li>Prevent fraud and misuse of the MyPlug platform</li>
           <li>Provide support and communicate updates</li>
         </ul>
 
         <h4 className="text-base font-semibold mt-4">3. Data Sharing</h4>
-        <p><strong>Internal Use:</strong> Data is accessible only to ISA's authorized staff.</p>
+        <p><strong>Internal Use:</strong> Data is accessible only to MyPlug's authorized staff.</p>
         <p><strong>Third-Party Services:</strong> We may share payment details with financial institutions, regulators, or service providers (e.g., payment processors, courier partners).</p>
         <p><strong>Legal Requirements:</strong> We may disclose Vendor data if required by law or regulatory authorities.</p>
 
@@ -50,7 +50,7 @@ export default function PrivacyPolicy({ userType }: PrivacyPolicyProps) {
 
         <h4 className="text-base font-semibold mt-4">5. Data Retention</h4>
         <p>
-          Vendor data will be retained as long as the Vendor maintains an account with ISA, or as required by law (e.g., tax records). Upon account termination, ISA may retain certain records for compliance.
+          Vendor data will be retained as long as the Vendor maintains an account with MyPlug, or as required by law (e.g., tax records). Upon account termination, MyPlug may retain certain records for compliance.
         </p>
 
         <h4 className="text-base font-semibold mt-4">6. Vendor Rights</h4>
@@ -63,7 +63,7 @@ export default function PrivacyPolicy({ userType }: PrivacyPolicyProps) {
         </ul>
 
         <h4 className="text-base font-semibold mt-4">7. Contact</h4>
-        <p>For privacy inquiries, email: <a href="mailto:isashoppingai@gmail.com" className="text-blue-600 hover:underline">isashoppingai@gmail.com</a></p>
+        <p>For privacy inquiries, email: <a href="mailto:support@myplug.co.ke" className="text-blue-600 hover:underline">support@myplug.co.ke</a></p>
       </div>
     );
   }
@@ -72,17 +72,17 @@ export default function PrivacyPolicy({ userType }: PrivacyPolicyProps) {
   return (
     <div className="space-y-4 text-sm leading-relaxed">
       <div>
-        <h3 className="text-lg font-semibold">Customer Privacy Policy – ISA AI Shopping Assistant</h3>
+        <h3 className="text-lg font-semibold">Customer Privacy Policy – MyPlug Technologies Limited</h3>
         <p><strong>Effective Date:</strong> 7/17/2025</p>
         <p><strong>Version:</strong> 1.0</p>
       </div>
 
       <p>
-        ISA AI Shopping Assistant Ltd. ("ISA", "we", "our", "us") values your privacy. This Privacy Policy explains how we collect, use, and protect the personal data of customers ("you", "your") using our mobile app, website, or AI shopping services.
+        MyPlug Technologies Limited ("MyPlug", "we", "our", "us") values your privacy. This Privacy Policy explains how we collect, use, and protect the personal data of customers ("you", "your") using our mobile app, website, or AI shopping services.
       </p>
 
       <h4 className="text-base font-semibold mt-4">1. Information We Collect</h4>
-      <p>When you use ISA, we may collect:</p>
+      <p>When you use MyPlug, we may collect:</p>
       <ul className="list-disc ml-6 space-y-1">
         <li>Personal details: full name, date of birth, gender</li>
         <li>Contact details: phone number, email address</li>
@@ -99,7 +99,7 @@ export default function PrivacyPolicy({ userType }: PrivacyPolicyProps) {
         <li>Facilitate orders, payments, and deliveries</li>
         <li>Verify identity and prevent fraudulent activity</li>
         <li>Communicate updates, offers, and support messages</li>
-        <li>Improve ISA's AI recommendations and shopping experience</li>
+        <li>Improve MyPlug's AI recommendations and shopping experience</li>
         <li>Comply with legal and tax requirements</li>
       </ul>
 
@@ -115,7 +115,7 @@ export default function PrivacyPolicy({ userType }: PrivacyPolicyProps) {
 
       <h4 className="text-base font-semibold mt-4">5. Data Retention</h4>
       <p>
-        Customer data is stored as long as you maintain an ISA account. Upon account closure, certain data may still be retained to meet legal obligations (e.g., tax, fraud prevention).
+        Customer data is stored as long as you maintain a MyPlug account. Upon account closure, certain data may still be retained to meet legal obligations (e.g., tax, fraud prevention).
       </p>
 
       <h4 className="text-base font-semibold mt-4">6. Customer Rights</h4>
@@ -128,10 +128,10 @@ export default function PrivacyPolicy({ userType }: PrivacyPolicyProps) {
       </ul>
 
       <h4 className="text-base font-semibold mt-4">7. Children's Data</h4>
-      <p>ISA is not intended for children under 18 without parental/guardian consent.</p>
+      <p>MyPlug is not intended for children under 18 without parental/guardian consent.</p>
 
       <h4 className="text-base font-semibold mt-4">8. Contact</h4>
-      <p>For privacy inquiries, email: <a href="mailto:isashoppingai@gmail.com" className="text-blue-600 hover:underline">isashoppingai@gmail.com</a></p>
+      <p>For privacy inquiries, email: <a href="mailto:support@myplug.co.ke" className="text-blue-600 hover:underline">support@myplug.co.ke</a></p>
     </div>
   );
 }

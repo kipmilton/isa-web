@@ -607,24 +607,24 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <img src="/isa-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-8 w-8" />
-              <span className="text-xl font-bold text-gray-800">ISA</span>
+              <img src="/myplug-logo.png" alt="MyPlug Logo" className="h-8 w-8" />
+              <span className="text-xl font-bold text-gray-800">MyPlug</span>
             </div>
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-sm text-gray-500">
               <button className="hover:text-orange-600 transition-colors bg-transparent border-none p-0 m-0" onClick={() => { setAuthDefaultVendor(true); setShowAuth(true); }}>
                 Become a Vendor
               </button>
               <button className="hover:text-blue-600 transition-colors bg-transparent border-none p-0 m-0" onClick={() => setShowDeliverySignup(true)}>
-                Join ISA Delivery
+                Join MyPlug Delivery
               </button>
-              <a href="mailto:isashoppingai@gmail.com" className="hover:text-orange-600 transition-colors">Contact us</a>
+              <a href="mailto:support@myplug.co.ke" className="hover:text-orange-600 transition-colors">Contact us</a>
               <button className="hover:text-orange-600 transition-colors bg-transparent border-none p-0 m-0" onClick={() => setShowTerms(true)}>
                 Terms and Conditions
               </button>
             </div>
           </div>
           <div className="text-center text-gray-500 text-xs mt-4">
-            &copy; {new Date().getFullYear()} ISA. All rights reserved.
+            &copy; {new Date().getFullYear()} MyPlug Technologies Limited. All rights reserved.
           </div>
         </div>
       </footer>
@@ -646,9 +646,9 @@ const Index = () => {
       <Dialog open={showTerms} onOpenChange={setShowTerms}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold mb-4">ISA AI Shopping Assistant - Terms & Conditions</DialogTitle>
+            <DialogTitle className="text-2xl font-bold mb-4">MyPlug - Terms & Conditions</DialogTitle>
             <DialogDescription className="sr-only">
-              Terms and conditions for using the ISA AI Shopping Assistant platform.
+              Terms and conditions for using the MyPlug platform.
             </DialogDescription>
           </DialogHeader>
           <div className="p-6">

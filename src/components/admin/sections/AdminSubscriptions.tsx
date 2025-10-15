@@ -216,7 +216,7 @@ const AdminSubscriptions = () => {
                     <h4 className="font-medium">Premium Plan</h4>
                     <Badge className="bg-purple-500 text-white">Premium</Badge>
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">Full ISA experience with advanced features</p>
+                  <p className="text-sm text-gray-600 mb-2">Full MyPlug experience with advanced features</p>
                   <div className="text-sm text-gray-600 mb-2">
                     <strong>Pricing:</strong> KES 99/week | KES 499/month | KES 4,999/year
                   </div>
