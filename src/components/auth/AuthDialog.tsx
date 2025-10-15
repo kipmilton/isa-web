@@ -961,11 +961,11 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             
             <div className="text-center max-w-sm">
               <img 
-                src="/isa-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" 
-                alt="ISA Logo" 
+                src="/myplug-logo.png" 
+                alt="MyPlug Logo" 
                 className="h-20 w-20 mx-auto mb-6 bg-white rounded-full p-3"
               />
-              <h3 className="text-3xl font-bold mb-4">Welcome to ISA</h3>
+              <h3 className="text-3xl font-bold mb-4">Welcome to MyPlug</h3>
               <p className="text-lg mb-6 opacity-90">
                 Your AI-powered shopping companion that understands your style, budget, and preferences.
               </p>
@@ -980,7 +980,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                 </div>
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                  <span className="text-sm">ISA can suggest gifts for your loved ones</span>
+                  <span className="text-sm">MyPlug can suggest gifts for your loved ones</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
@@ -998,10 +998,10 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold mb-4">
-            {userType === 'customer' ? 'ISA AI Shopping Assistant - Customer Terms & Conditions' : 'ISA AI Shopping Assistant - Vendor Terms & Conditions'}
+            {userType === 'customer' ? 'MyPlug AI Shopping Assistant - Customer Terms & Conditions' : 'MyPlug AI Shopping Assistant - Vendor Terms & Conditions'}
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Terms and conditions for {userType === 'customer' ? 'customers' : 'vendors'} using the ISA AI Shopping Assistant platform.
+            Terms and conditions for {userType === 'customer' ? 'customers' : 'vendors'} using the MyPlug AI Shopping Assistant platform.
           </DialogDescription>
         </DialogHeader>
         <div className="p-6">
@@ -1014,17 +1014,17 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
               </div>
 
               <p>
-                These Terms and Conditions ("Terms") govern your use of the ISA AI Shopping Assistant
-                platform ("ISA", "we", "us", or "our"), which provides intelligent shopping assistance via app,
-                web, or messaging platforms. By accessing or using ISA, you ("User", "Customer", or "You")
+                These Terms and Conditions ("Terms") govern your use of the MyPlug AI Shopping Assistant
+                platform ("MyPlug", "we", "us", or "our"), which provides intelligent shopping assistance via app,
+                web, or messaging platforms. By accessing or using MyPlug, you ("User", "Customer", or "You")
                 agree to be bound by these Terms and our Privacy Policy.
                 Please read them carefully before using the service.
               </p>
 
               <h3 className="text-lg font-semibold mt-6">1. OVERVIEW</h3>
               <p>
-                ISA is a smart shopping assistant that uses AI to help users discover, compare, and shop from
-                a variety of brands and vendors. Through ISA, users can:
+                MyPlug is a smart shopping assistant that uses AI to help users discover, compare, and shop from
+                a variety of brands and vendors. Through MyPlug, users can:
               </p>
               <ul className="list-disc ml-6">
                 <li>Receive personalized product recommendations</li>
@@ -1058,10 +1058,10 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                 written consent.</p>
 
               <h3 className="text-lg font-semibold mt-6">4. PRODUCT LISTINGS & PRICING</h3>
-              <p><strong>4.1 Vendor Responsibility:</strong> All products listed on ISA are supplied by third-party vendors.
-                While ISA aims to curate high-quality, verified listings, the ultimate responsibility for product
+              <p><strong>4.1 Vendor Responsibility:</strong> All products listed on MyPlug are supplied by third-party vendors.
+                While MyPlug aims to curate high-quality, verified listings, the ultimate responsibility for product
                 descriptions, pricing, availability, and delivery lies with the vendor.</p>
-              <p><strong>4.2 Pricing Errors:</strong> If an item is listed at an incorrect price, ISA reserves the right to cancel the
+              <p><strong>4.2 Pricing Errors:</strong> If an item is listed at an incorrect price, MyPlug reserves the right to cancel the
                 transaction. You will be notified and refunded in such cases.</p>
               <p><strong>4.3 Availability:</strong> Product availability is subject to change and may differ from real-time listings
                 due to inventory or vendor system delays.</p>
@@ -1090,18 +1090,18 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
               <h3 className="text-lg font-semibold mt-6">7. PROMOTIONS, OFFERS & REWARDS</h3>
               <p><strong>7.1 Eligibility:</strong> Some promotions may be limited to specific users, regions, or product
                 categories.</p>
-              <p><strong>7.2 ISA Discretion:</strong> ISA may cancel or modify offers without prior notice. Abuse or misuse of
+              <p><strong>7.2 MyPlug Discretion:</strong> MyPlug may cancel or modify offers without prior notice. Abuse or misuse of
                 promotions may lead to account suspension.</p>
-              <p><strong>7.3 Referral Program:</strong> If ISA runs a referral program, rewards are only granted if terms are
+              <p><strong>7.3 Referral Program:</strong> If MyPlug runs a referral program, rewards are only granted if terms are
                 followed strictly (e.g., minimum spend, first-time user, etc.).</p>
 
               <h3 className="text-lg font-semibold mt-6">8. DATA PRIVACY & COMMUNICATION</h3>
-              <p><strong>8.1 Privacy Policy:</strong> Use of ISA is subject to our [Privacy Policy]. We collect and process your
+              <p><strong>8.1 Privacy Policy:</strong> Use of MyPlug is subject to our [Privacy Policy]. We collect and process your
                 data to provide personalized shopping experiences, improve our services, and for operational
                 analytics.</p>
-              <p><strong>8.2 Marketing Communication:</strong> By using ISA, you may receive promotional emails, SMS, or
+              <p><strong>8.2 Marketing Communication:</strong> By using MyPlug, you may receive promotional emails, SMS, or
                 in-app notifications. You can opt-out at any time via your account settings.</p>
-              <p><strong>8.3 Third-Party Data:</strong> ISA may share non-personal data with vendors or partners to improve
+              <p><strong>8.3 Third-Party Data:</strong> MyPlug may share non-personal data with vendors or partners to improve
                 product recommendations and service delivery.</p>
 
               <h3 className="text-lg font-semibold mt-6">9. ACCOUNT SECURITY</h3>
@@ -1128,10 +1128,10 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                 proceedings must be brought before courts located in Kenya.</p>
 
               <h3 className="text-lg font-semibold mt-6">12. MODIFICATIONS</h3>
-              <p>ISA reserves the right to update or modify these Terms at any time. Changes will be
+              <p>MyPlug reserves the right to update or modify these Terms at any time. Changes will be
                 communicated via email or posted on the platform. Continued use after updates indicates
                 acceptance of the new Terms.</p>
-              <p>By accessing or using ISA, you agree to be bound by these Terms and our Privacy
+              <p>By accessing or using MyPlug, you agree to be bound by these Terms and our Privacy
                 Policy.</p>
             </div>
           ) : (

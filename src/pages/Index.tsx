@@ -436,7 +436,7 @@ const Index = () => {
             <div className="bg-white rounded-lg p-6 shadow-md hover-scale">
               <Quote className="h-8 w-8 text-orange-500 mb-4" />
               <p className="text-gray-600 mb-4 italic">
-                "We're building ISA to make quality products accessible to everyone in Africa. Our AI doesn't just recommend products—it understands your unique style and budget to find exactly what you need."
+                "We're building MyPlug to make quality products accessible to everyone in Africa. Our AI doesn't just recommend products—it understands your unique style and budget to find exactly what you need."
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center mr-4">
@@ -451,7 +451,7 @@ const Index = () => {
             <div className="bg-white rounded-lg p-6 shadow-md hover-scale">
               <Quote className="h-8 w-8 text-orange-500 mb-4" />
               <p className="text-gray-600 mb-4 italic">
-                "Technology should simplify life, not complicate it. We've designed ISA to be as intuitive as chatting with a friend who happens to know everything about shopping and style."
+                "Technology should simplify life, not complicate it. We've designed MyPlug to be as intuitive as chatting with a friend who happens to know everything about shopping and style."
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center mr-4">
@@ -537,7 +537,7 @@ const Index = () => {
       <section className="py-16 bg-gradient-to-r from-orange-50 to-yellow-50 overflow-hidden">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-            What People Say About ISA
+            What People Say About MyPlug
           </h2>
           <div className="relative">
             <div className="flex animate-scroll space-x-6" style={{
@@ -658,9 +658,9 @@ const Index = () => {
                 <p><strong>Effective Date:</strong> 7/17/2025</p>
                 <p><strong>Version:</strong> 1.0</p>
               </div>
-              <p>These Terms and Conditions ("Terms") govern your use of the ISA AI Shopping Assistant platform ("ISA", "we", "us", or "our"), which provides intelligent shopping assistance via app, web, or messaging platforms. By accessing or using ISA, you ("User", "Customer", or "You") agree to be bound by these Terms and our Privacy Policy. Please read them carefully before using the service.</p>
+              <p>These Terms and Conditions ("Terms") govern your use of the MyPlug AI Shopping Assistant platform ("MyPlug", "we", "us", or "our"), which provides intelligent shopping assistance via app, web, or messaging platforms. By accessing or using MyPlug, you ("User", "Customer", or "You") agree to be bound by these Terms and our Privacy Policy. Please read them carefully before using the service.</p>
               <h3 className="text-lg font-semibold mt-6">1. OVERVIEW</h3>
-              <p>ISA is a smart shopping assistant that uses AI to help users discover, compare, and shop from a variety of brands and vendors. Through ISA, users can:</p>
+              <p>MyPlug is a smart shopping assistant that uses AI to help users discover, compare, and shop from a variety of brands and vendors. Through MyPlug, users can:</p>
               <ul className="list-disc ml-6">
                 <li>Receive personalized product recommendations</li>
                 <li>Compare prices, styles, and features across vendors</li>
@@ -687,23 +687,23 @@ const Index = () => {
               <p><strong>4.2 Pricing Errors:</strong> If an item is listed at an incorrect price, ISA reserves the right to cancel the transaction. You will be notified and refunded in such cases.</p>
               <p><strong>4.3 Availability:</strong> Product availability is subject to change and may differ from real-time listings due to inventory or vendor system delays.</p>
               <h3 className="text-lg font-semibold mt-6">5. ORDERS, PAYMENTS & DELIVERY</h3>
-              <p><strong>5.1 Order Process:</strong> You may purchase items directly through ISA or via vendor redirection. You will receive confirmation once an order is successfully placed.</p>
+              <p><strong>5.1 Order Process:</strong> You may purchase items directly through MyPlug or via vendor redirection. You will receive confirmation once an order is successfully placed.</p>
               <p><strong>5.2 Payment Methods:</strong> Payments can be made through supported mobile money, debit/credit cards, or other approved payment gateways.</p>
-              <p><strong>5.3 ISA as Facilitator:</strong> In most cases, ISA acts only as a facilitator, not the seller. The transaction contract is between you and the vendor.</p>
+              <p><strong>5.3 MyPlug as Facilitator:</strong> In most cases, MyPlug acts only as a facilitator, not the seller. The transaction contract is between you and the vendor.</p>
               <p><strong>5.4 Delivery:</strong> Delivery times and logistics depend on the vendor or courier service. Estimated delivery times are provided for convenience but are not guaranteed.</p>
-              <p><strong>5.5 Fees & Charges:</strong> ISA may charge a service fee, convenience fee, or include promotional discounts. All charges will be clearly displayed before purchase confirmation.</p>
+              <p><strong>5.5 Fees & Charges:</strong> MyPlug may charge a service fee, convenience fee, or include promotional discounts. All charges will be clearly displayed before purchase confirmation.</p>
               <h3 className="text-lg font-semibold mt-6">6. CANCELLATIONS, RETURNS & REFUNDS</h3>
               <p><strong>6.1 Cancellation Policy:</strong> Cancellations may be allowed within a specific timeframe. Please check the vendor's terms or contact ISA support for help.</p>
               <p><strong>6.2 Returns & Refunds:</strong> Refunds are handled per the vendor’s policy. If a product is defective, incorrect, or undelivered, ISA may assist in dispute resolution but is not liable for compensation unless it is a direct seller.</p>
               <p><strong>6.3 Refund Timeline:</strong> Refunds (where approved) may take up to 14 working days depending on your payment method.</p>
               <h3 className="text-lg font-semibold mt-6">7. PROMOTIONS, OFFERS & REWARDS</h3>
               <p><strong>7.1 Eligibility:</strong> Some promotions may be limited to specific users, regions, or product categories.</p>
-              <p><strong>7.2 ISA Discretion:</strong> ISA may cancel or modify offers without prior notice. Abuse or misuse of promotions may lead to account suspension.</p>
-              <p><strong>7.3 Referral Program:</strong> If ISA runs a referral program, rewards are only granted if terms are followed strictly (e.g., minimum spend, first-time user, etc.).</p>
+              <p><strong>7.2 MyPlug Discretion:</strong> MyPlug may cancel or modify offers without prior notice. Abuse or misuse of promotions may lead to account suspension.</p>
+              <p><strong>7.3 Referral Program:</strong> If MyPlug runs a referral program, rewards are only granted if terms are followed strictly (e.g., minimum spend, first-time user, etc.).</p>
               <h3 className="text-lg font-semibold mt-6">8. DATA PRIVACY & COMMUNICATION</h3>
-              <p><strong>8.1 Privacy Policy:</strong> Use of ISA is subject to our [Privacy Policy]. We collect and process your data to provide personalized shopping experiences, improve our services, and for operational analytics.</p>
-              <p><strong>8.2 Marketing Communication:</strong> By using ISA, you may receive promotional emails, SMS, or in-app notifications. You can opt-out at any time via your account settings.</p>
-              <p><strong>8.3 Third-Party Data:</strong> ISA may share non-personal data with vendors or partners to improve product recommendations and service delivery.</p>
+              <p><strong>8.1 Privacy Policy:</strong> Use of MyPlug is subject to our [Privacy Policy]. We collect and process your data to provide personalized shopping experiences, improve our services, and for operational analytics.</p>
+              <p><strong>8.2 Marketing Communication:</strong> By using MyPlug, you may receive promotional emails, SMS, or in-app notifications. You can opt-out at any time via your account settings.</p>
+              <p><strong>8.3 Third-Party Data:</strong> MyPlug may share non-personal data with vendors or partners to improve product recommendations and service delivery.</p>
               <h3 className="text-lg font-semibold mt-6">9. ACCOUNT SECURITY</h3>
               <p><strong>9.1 Responsibility:</strong> You are responsible for maintaining the confidentiality of your account login details. ISA is not liable for unauthorized access resulting from negligence.</p>
               <p><strong>9.2 Termination:</strong> ISA reserves the right to suspend or terminate accounts that violate these Terms, post offensive content, engage in fraud, or harm the platform’s reputation.</p>
@@ -719,8 +719,8 @@ const Index = () => {
               <p><strong>11.1 Dispute Resolution:</strong> If you are dissatisfied, please first contact isashoppingai@gmail.com. We aim to resolve issues promptly and fairly.</p>
               <p><strong>11.2 Legal Jurisdiction:</strong> These Terms are governed by the laws of Kenya. Any legal proceedings must be brought before courts located in Kenya.</p>
               <h3 className="text-lg font-semibold mt-6">12. MODIFICATIONS</h3>
-              <p>ISA reserves the right to update or modify these Terms at any time. Changes will be communicated via email or posted on the platform. Continued use after updates indicates acceptance of the new Terms.</p>
-              <p>By accessing or using ISA, you agree to be bound by these Terms and our Privacy Policy.</p>
+              <p>MyPlug reserves the right to update or modify these Terms at any time. Changes will be communicated via email or posted on the platform. Continued use after updates indicates acceptance of the new Terms.</p>
+              <p>By accessing or using MyPlug, you agree to be bound by these Terms and our Privacy Policy.</p>
             </div>
             <h3 className="text-lg font-semibold mt-6">Vendor Terms</h3>
             <div className="space-y-4 text-sm leading-relaxed">

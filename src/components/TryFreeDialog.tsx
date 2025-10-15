@@ -14,7 +14,7 @@ interface TryFreeDialogProps {
 const TryFreeDialog = ({ open, onOpenChange }: TryFreeDialogProps) => {
   const [questionsLeft, setQuestionsLeft] = useState(5);
   const [question, setQuestion] = useState("");
-  const [conversation, setConversation] = useState<Array<{type: 'user' | 'isa', message: string}>>([]);
+  const [conversation, setConversation] = useState<Array<{type: 'user' | 'myplug', message: string}>>([]);
 
   const handleAskQuestion = () => {
     if (!question.trim()) return;
@@ -37,7 +37,7 @@ const TryFreeDialog = ({ open, onOpenChange }: TryFreeDialogProps) => {
     ];
     
     const myplugResponse = responses[Math.floor(Math.random() * responses.length)];
-    newConversation.push({ type: 'isa' as const, message: myplugResponse });
+    newConversation.push({ type: 'myplug' as const, message: myplugResponse });
     
     setConversation(newConversation);
     setQuestion("");
@@ -91,7 +91,7 @@ const TryFreeDialog = ({ open, onOpenChange }: TryFreeDialogProps) => {
                         ? 'bg-blue-500 text-white' 
                         : 'bg-white border border-orange-200 text-gray-800'
                     }`}>
-                      {msg.type === 'isa' && (
+                      {msg.type === 'myplug' && (
                         <div className="flex items-center space-x-1 mb-1">
                           <Brain className="h-4 w-4 text-orange-500" />
                           <span className="text-xs font-medium text-orange-600">MyPlug</span>
