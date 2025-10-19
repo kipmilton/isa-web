@@ -42,6 +42,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   });
   const [showIsaPay, setShowIsaPay] = useState(false);
   const [notes, setNotes] = useState('');
+  const [isGift, setIsGift] = useState(false);
   const { toast } = useToast();
   const playCheckoutSuccess = useUISound('checkout_success');
 
@@ -222,6 +223,19 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       className="bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600"
                       rows={3}
                     />
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                    <input
+                      type="checkbox"
+                      id="isGift"
+                      checked={isGift}
+                      onChange={(e) => setIsGift(e.target.checked)}
+                      className="w-4 h-4 text-orange-600 rounded focus:ring-orange-500"
+                    />
+                    <Label htmlFor="isGift" className="text-sm font-medium cursor-pointer">
+                      This is a gift 🎁
+                    </Label>
                   </div>
                 </div>
 
