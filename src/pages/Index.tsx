@@ -310,7 +310,7 @@ const Index = () => {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <div className="flex justify-center mb-6 animate-fade-in">
-            <img src="/myplug-logo.png" alt="MyPlug Logo" className="h-32 w-32" />
+            <img src="isa-web/public/myplug-loading.png" alt="MyPlug Logo" className="h-32 w-32" />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-fade-in">
             Shop Smarter, Buy Better
