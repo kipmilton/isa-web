@@ -250,7 +250,7 @@ const Gift = () => {
               Back to Home
             </Link>
             <div className="flex items-center space-x-3">
-              <img src="/isa-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" alt="ISA Logo" className="h-8 w-8" />
+              <img src="/MyPlug.png" alt="ISA Logo" className="h-8 w-8" />
               <span className="text-xl font-bold text-gray-800">ISA Gifts</span>
             </div>
             <Button

@@ -387,7 +387,7 @@ const ShopDashboard = () => {
             {/* Logo and Title */}
             <Link to="/" className="flex items-center space-x-2 sm:space-x-4 hover:scale-105 transition-transform">
               <img 
-                src="/isa-uploads/ea738f8c-13db-4727-a9cd-4e4770a84d3b.png" 
+                src="/MyPlug.png" 
                 alt="MyPlug Logo" 
                 className="w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-md"
               />
@@ -1075,7 +1075,7 @@ const ShopDashboard = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center gap-4 p-2">
-            <img src="/isa-uploads/7ca124d8-f236-48e9-9584-a2cd416c5b6b.png" alt="MyPlug Logo" className="h-16 w-16 mb-2 rounded-full bg-white p-2" />
+            <img src="/MyPlug.png" alt="MyPlug Logo" className="h-16 w-16 mb-2 rounded-full bg-white p-2" />
             <h2 className="text-2xl font-bold mb-2">Welcome to MyPlug Shopping!</h2>
             <p className="text-gray-700 mb-4">
               Did you know? You can get instant product recommendations, compare prices, and ask for shopping advice using our <span className="font-semibold text-orange-600">Ask MyPlug</span> chatbot.
