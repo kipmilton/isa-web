@@ -97,13 +97,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
         },
         customer_email: contactInfo.email,
         customer_phone: contactInfo.phone,
-        notes: `MyPlug Delivery - WhatsApp: ${contactInfo.whatsapp}\nDelivery Address: ${deliveryAddress}\n${notes}`,
+        notes: `MyPlug Delivery - WhatsApp: ${contactInfo.whatsapp}\nDelivery Address: ${deliveryAddress}\n${isGift ? 'This is a gift order' : ''}\n${notes}`,
         payment_method: 'isa_pay',
         delivery_type: 'delivery',
         delivery_location_lat: null,
         delivery_location_lng: null,
         delivery_location_address: deliveryAddress,
-        delivery_fee: deliveryFee
+        delivery_fee: deliveryFee,
+        is_gift: isGift
       });
   };
 

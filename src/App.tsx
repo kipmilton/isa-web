@@ -32,6 +32,7 @@ import VendorSubscription from "./components/vendor/VendorSubscription";
 import { Analytics } from "@vercel/analytics/react";
 import VendorOnboarding from "./pages/VendorOnboarding";
 import VendorOrderDetailPage from "./pages/VendorOrderDetail";
+import SharedContentPage from "./pages/SharedContent";
 
 const queryClient = new QueryClient();
 
@@ -127,6 +128,7 @@ const App = () => (
                 <CustomerPremium />
               </AuthGuard>
             } />
+            <Route path="/shared/:shareCode" element={<SharedContentPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

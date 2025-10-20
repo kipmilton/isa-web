@@ -24,9 +24,9 @@ import NotificationBell from "@/components/ui/notification-bell";
 import { useNavigate, Link } from "react-router-dom";
 import ProductImageFallback from "@/components/ProductImageFallback";
 import { useUISound } from "@/contexts/SoundContext";
-import ShareButton from "@/components/shop/ShareButton";
-import SupportTicketDialog from "@/components/support/SupportTicketDialog";
+import ShareButton from "@/components/sharing/ShareButton";
 import EnhancedWishlistModal from "@/components/wishlist/EnhancedWishlistModal";
+import SupportTicketDialog from "@/components/support/SupportTicketDialog";
 
 const categories = ["All", "Electronics", "Fashion", "Home", "Beauty", "Sports", "Books"];
 
@@ -924,15 +924,27 @@ const ShopDashboard = () => {
                     
                     <CardContent className="p-4 space-y-3">
                       <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <h3 
+                            className="font-semibold text-gray-900 line-clamp-2 group-hover:text-orange-600 transition-colors cursor-pointer flex-1"
+                            onClick={() => navigate(`/product/${product.id}`)}
+                          >
+                            {product.name}
+                          </h3>
+                          <ShareButton
+                            contentType="product"
+                            contentId={product.id}
+                            contentTitle={product.name}
+                            contentImage={product.main_image}
+                            variant="ghost"
+                            size="sm"
+                            showText={false}
+                            className="ml-2"
+                          />
+                        </div>
                         <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
                           {product.category}
                         </Badge>
-                        <h3 
-                          className="font-semibold text-gray-900 line-clamp-2 group-hover:text-orange-600 transition-colors cursor-pointer"
-                          onClick={() => navigate(`/product/${product.id}`)}
-                        >
-                          {product.name}
-                        </h3>
                       </div>
                       
                       <div className="flex items-center justify-between">

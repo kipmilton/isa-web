@@ -26,6 +26,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import ProductImageFallback from "@/components/ProductImageFallback";
 import { useUISound } from "@/contexts/SoundContext";
+import ShareButton from "@/components/sharing/ShareButton";
 
 const ProductDetail = () => {
   const playAddToCart = useUISound("add_to_cart");
@@ -413,7 +414,17 @@ const ProductDetail = () => {
           {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+              <div className="flex items-center justify-between mb-2">
+                <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
+                <ShareButton
+                  contentType="product"
+                  contentId={product.id}
+                  contentTitle={product.name}
+                  contentImage={product.main_image}
+                  variant="outline"
+                  size="sm"
+                />
+              </div>
                              <div className="flex items-center gap-4 mb-4">
                  <div className="flex items-center">
                    <Star className="w-5 h-5 fill-yellow-400 text-yellow-400 mr-1" />

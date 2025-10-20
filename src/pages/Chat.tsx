@@ -2,13 +2,16 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { Send, Plus, History, Menu, Home } from "lucide-react";
+import { Send, Plus, History, Menu, Home, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { ConversationService, ChatConversation, ChatMessage } from "@/services/conversationService";
+import ShareButton from "@/components/sharing/ShareButton";
+import { toast } from "sonner";
 
   interface Message {
   id: number;
@@ -30,26 +33,16 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
   const navigate = useNavigate();
-  const [chatHistory, setChatHistory] = useState<ChatHistory[]>([
-    {
-      id: "1",
-      title: "Best smartphones under 50k",
-      lastMessage: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      preview: "Looking for affordable smartphones..."
-    },
-    {
-      id: "2", 
-      title: "Fashion trends for summer",
-      lastMessage: new Date(Date.now() - 24 * 60 * 60 * 1000),
-      preview: "What are the latest summer fashion trends?"
-    },
-    {
-      id: "3",
-      title: "Home decor ideas",
-      lastMessage: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-      preview: "Need some home decoration inspiration..."
+  const [chatHistory, setChatHistory] = useState<ChatConversation[]>([]);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+
+  // Load conversations when user is available
+  useEffect(() => {
+    if (user) {
+      loadConversations();
     }
-  ]);
+  }, [user]);
 
   // Check for rejected vendors on page load
   useEffect(() => {
@@ -75,8 +68,39 @@ const Chat = () => {
     checkUserStatus();
   }, [navigate]);
 
-  const handleSendMessage = () => {
-    if (!currentMessage.trim()) return;
+  const loadConversations = async () => {
+    if (!user) return;
+    
+    setIsLoadingConversations(true);
+    try {
+      const conversations = await ConversationService.getUserConversations(user.id);
+      setChatHistory(conversations);
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+      toast.error('Failed to load conversation history');
+    } finally {
+      setIsLoadingConversations(false);
+    }
+  };
+
+  const loadConversationMessages = async (conversationId: string) => {
+    try {
+      const dbMessages = await ConversationService.getConversationMessages(conversationId);
+      const formattedMessages: Message[] = dbMessages.map(msg => ({
+        id: parseInt(msg.id.replace(/-/g, '').substring(0, 8), 16),
+        type: msg.role === 'myplug' ? 'isa' : 'user',
+        content: msg.content,
+        timestamp: new Date(msg.created_at)
+      }));
+      setMessages(formattedMessages);
+    } catch (error) {
+      console.error('Error loading conversation messages:', error);
+      toast.error('Failed to load conversation');
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!currentMessage.trim() || !user) return;
 
     const newUserMessage: Message = {
       id: Date.now(),
@@ -87,8 +111,34 @@ const Chat = () => {
 
     setMessages(prev => [...prev, newUserMessage]);
 
+    // Create conversation if it doesn't exist
+    let conversationId = currentConversationId;
+    if (!conversationId) {
+      try {
+        const title = ConversationService.generateConversationTitle(currentMessage);
+        const conversation = await ConversationService.createConversation(user.id, title, currentMessage);
+        conversationId = conversation.id;
+        setCurrentConversationId(conversationId);
+        
+        // Add to chat history
+        setChatHistory(prev => [conversation, ...prev]);
+      } catch (error) {
+        console.error('Error creating conversation:', error);
+        toast.error('Failed to save conversation');
+      }
+    }
+
+    // Save user message to database
+    if (conversationId) {
+      try {
+        await ConversationService.addMessage(conversationId, user.id, 'user', currentMessage);
+      } catch (error) {
+        console.error('Error saving user message:', error);
+      }
+    }
+
     // Simulate ISA response
-    setTimeout(() => {
+    setTimeout(async () => {
       const responses = [
         "I'd be happy to help you find the perfect products! Let me search through our curated selection...",
         "Great question! Based on your preferences, I can recommend several options that match your style and budget.",
@@ -105,6 +155,15 @@ const Chat = () => {
       };
       
       setMessages(prev => [...prev, isaResponse]);
+
+      // Save ISA response to database
+      if (conversationId) {
+        try {
+          await ConversationService.addMessage(conversationId, user.id, 'myplug', isaResponse.content);
+        } catch (error) {
+          console.error('Error saving ISA message:', error);
+        }
+      }
     }, 1500);
 
     setCurrentMessage("");
@@ -119,6 +178,12 @@ const Chat = () => {
 
   const startNewChat = () => {
     setMessages([]);
+    setCurrentConversationId(null);
+  };
+
+  const selectConversation = async (conversationId: string) => {
+    setCurrentConversationId(conversationId);
+    await loadConversationMessages(conversationId);
   };
 
   const formatTime = (date: Date) => {
@@ -177,23 +242,43 @@ const Chat = () => {
               </div>
               
               <SidebarMenu>
-                {chatHistory.map((chat) => (
-                  <SidebarMenuItem key={chat.id}>
-                    <SidebarMenuButton className="w-full text-left p-3 hover:bg-gray-100 rounded-lg">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-gray-800 truncate">
-                          {chat.title}
+                {isLoadingConversations ? (
+                  <div className="text-center py-4 text-gray-500">Loading conversations...</div>
+                ) : chatHistory.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500">No conversations yet</div>
+                ) : (
+                  chatHistory.map((chat) => (
+                    <SidebarMenuItem key={chat.id}>
+                      <SidebarMenuButton 
+                        className="w-full text-left p-3 hover:bg-gray-100 rounded-lg"
+                        onClick={() => selectConversation(chat.id)}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm text-gray-800 truncate">
+                            {chat.title}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate mt-1">
+                            {chat.preview}
+                          </div>
+                          <div className="text-xs text-gray-400 mt-1">
+                            {formatTime(new Date(chat.updated_at))}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500 truncate mt-1">
-                          {chat.preview}
-                        </div>
-                        <div className="text-xs text-gray-400 mt-1">
-                          {formatTime(chat.lastMessage)}
-                        </div>
-                      </div>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                        {currentConversationId === chat.id && (
+                          <ShareButton
+                            contentType="conversation"
+                            contentId={chat.id}
+                            contentTitle={chat.title}
+                            variant="ghost"
+                            size="sm"
+                            showText={false}
+                            className="ml-2"
+                          />
+                        )}
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))
+                )}
               </SidebarMenu>
             </div>
           </SidebarContent>
@@ -214,6 +299,15 @@ const Chat = () => {
                 <div className="text-sm text-gray-500">
                   Your AI Shopping Assistant
                 </div>
+                {currentConversationId && (
+                  <ShareButton
+                    contentType="conversation"
+                    contentId={currentConversationId}
+                    contentTitle={chatHistory.find(c => c.id === currentConversationId)?.title || 'MyPlug Conversation'}
+                    variant="outline"
+                    size="sm"
+                  />
+                )}
                 <Link to="/">
                   <Button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 hover:scale-105 transition-transform flex items-center">
                     <Home className="h-4 w-4 mr-2" />
@@ -269,9 +363,22 @@ const Chat = () => {
                         }`}
                       >
                         {message.type === 'isa' && (
-                          <div className="flex items-center space-x-2 mb-2">
-                            <img src="/MyPlug.png" alt="MyPlug Logo" className="h-4 w-4" />
-                            <span className="text-xs font-medium text-orange-600">MyPlug</span>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-2">
+                              <img src="/MyPlug.png" alt="MyPlug Logo" className="h-4 w-4" />
+                              <span className="text-xs font-medium text-orange-600">MyPlug</span>
+                            </div>
+                            {currentConversationId && (
+                              <ShareButton
+                                contentType="conversation"
+                                contentId={currentConversationId}
+                                contentTitle={chatHistory.find(c => c.id === currentConversationId)?.title || 'MyPlug Conversation'}
+                                variant="ghost"
+                                size="sm"
+                                showText={false}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                              />
+                            )}
                           </div>
                         )}
                         <p className="text-sm leading-relaxed">{message.content}</p>

@@ -7,6 +7,7 @@ import { OrderService } from "@/services/orderService";
 import { CartItemWithProduct } from "@/types/order";
 import CheckoutModal from "./CheckoutModal";
 import { useUISound } from "@/contexts/SoundContext";
+import ShareButton from "@/components/sharing/ShareButton";
 
 interface CartModalProps {
   isOpen: boolean;
@@ -123,9 +124,20 @@ const CartModal = ({ isOpen, onClose, user, onRemoveFromCart, onUpdateQuantity }
             >
               <X className="w-4 h-4" />
             </Button>
-            <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-              Shopping Cart ({cartItems.length})
+            <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center justify-between">
+              <div className="flex items-center">
+                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                Shopping Cart ({cartItems.length})
+              </div>
+              {cartItems.length > 0 && (
+                <ShareButton
+                  contentType="cart"
+                  contentId={user?.id || ''}
+                  contentTitle="My Cart"
+                  variant="outline"
+                  size="sm"
+                />
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 sm:p-6">
