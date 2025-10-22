@@ -251,6 +251,99 @@ export class DeliveryCostService {
   }
 
   /**
+   * Calculate delivery costs for multiple products, grouping by vendor
+   * Only charges delivery fee once per vendor
+   */
+  static async calculateVendorGroupedDeliveryCosts(
+    cartItems: Array<{ product: { id: string; vendor_id?: string; name: string } }>,
+    customerLocation: LocationInfo
+  ): Promise<{
+    vendorGroups: Array<{
+      vendorId: string;
+      vendorName?: string;
+      products: Array<{ product: { id: string; name: string } }>;
+      deliveryCost: DeliveryCostCalculation;
+    }>;
+    totalDeliveryCost: number;
+  }> {
+    try {
+      // Group cart items by vendor
+      const vendorGroups = new Map<string, Array<{ product: { id: string; name: string } }>>();
+      
+      for (const item of cartItems) {
+        const vendorId = item.product.vendor_id || 'unknown';
+        if (!vendorGroups.has(vendorId)) {
+          vendorGroups.set(vendorId, []);
+        }
+        vendorGroups.get(vendorId)!.push(item);
+      }
+
+      // Calculate delivery cost for each vendor group
+      const vendorDeliveryCosts = await Promise.all(
+        Array.from(vendorGroups.entries()).map(async ([vendorId, products]) => {
+          // Use the first product from the vendor to calculate delivery cost
+          const firstProduct = products[0];
+          const deliveryCost = await this.calculateProductDeliveryCost(
+            firstProduct.product.id,
+            customerLocation
+          );
+
+          // Get vendor name if available
+          let vendorName: string | undefined;
+          if (vendorId !== 'unknown') {
+            try {
+              const { data: vendor } = await supabase
+                .from('profiles')
+                .select('first_name, last_name, vendor_serial_number')
+                .eq('id', vendorId)
+                .single();
+              
+              if (vendor) {
+                vendorName = vendor.vendor_serial_number || 
+                  `${vendor.first_name || ''} ${vendor.last_name || ''}`.trim() || 
+                  'Vendor';
+              }
+            } catch (error) {
+              console.error('Error fetching vendor name:', error);
+            }
+          }
+
+          return {
+            vendorId,
+            vendorName: vendorName || 'Unknown Vendor',
+            products,
+            deliveryCost: deliveryCost || {
+              baseCost: 200,
+              countyCost: 0,
+              constituencyCost: 0,
+              wardCost: 0,
+              totalCost: 200,
+              breakdown: { base: 200, county: 0, constituency: 0, ward: 0 }
+            }
+          };
+        })
+      );
+
+      const totalDeliveryCost = vendorDeliveryCosts.reduce(
+        (sum, group) => sum + group.deliveryCost.totalCost, 
+        0
+      );
+
+      return {
+        vendorGroups: vendorDeliveryCosts,
+        totalDeliveryCost
+      };
+    } catch (error) {
+      console.error('Error calculating vendor grouped delivery costs:', error);
+      // Return fallback structure
+      return {
+        vendorGroups: [],
+        totalDeliveryCost: 0
+      };
+    }
+  }
+
+  /**
    * Format delivery cost for display
    */
   static formatDeliveryCost(cost: DeliveryCostCalculation): string {

@@ -48,6 +48,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [isGift, setIsGift] = useState(false);
   const [deliveryLocation, setDeliveryLocation] = useState({ county: '', constituency: '', ward: '' });
   const [deliveryCosts, setDeliveryCosts] = useState<DeliveryCostCalculation[]>([]);
+  const [vendorDeliveryGroups, setVendorDeliveryGroups] = useState<Array<{
+    vendorId: string;
+    vendorName?: string;
+    products: Array<{ product: { id: string; name: string } }>;
+    deliveryCost: DeliveryCostCalculation;
+  }>>([]);
   const [totalDeliveryCost, setTotalDeliveryCost] = useState(0);
   const [deliveryCostLoading, setDeliveryCostLoading] = useState(false);
   const [showLocationEdit, setShowLocationEdit] = useState(false);
@@ -106,21 +112,18 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     setDeliveryCostLoading(true);
     try {
-      const costs = await Promise.all(
-        cartItems.map(async (item) => {
-          const cost = await DeliveryCostService.calculateProductDeliveryCost(
-            item.product.id,
-            deliveryLocation
-          );
-          return cost;
-        })
+      // Use the new vendor-grouped delivery cost calculation
+      const result = await DeliveryCostService.calculateVendorGroupedDeliveryCosts(
+        cartItems,
+        deliveryLocation
       );
 
-      const validCosts = costs.filter(cost => cost !== null) as DeliveryCostCalculation[];
-      setDeliveryCosts(validCosts);
-      
-      const total = validCosts.reduce((sum, cost) => sum + cost.totalCost, 0);
-      setTotalDeliveryCost(total);
+      setVendorDeliveryGroups(result.vendorGroups);
+      setTotalDeliveryCost(result.totalDeliveryCost);
+
+      // Keep the old deliveryCosts for backward compatibility (flattened)
+      const allCosts = result.vendorGroups.map(group => group.deliveryCost);
+      setDeliveryCosts(allCosts);
     } catch (error) {
       console.error('Error calculating delivery costs:', error);
     } finally {
@@ -355,19 +358,31 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <div className="text-center py-4">
                       <p className="text-sm text-gray-500">Calculating delivery costs...</p>
                     </div>
-                  ) : deliveryCosts.length > 0 ? (
-                    <div className="space-y-2">
-                      {deliveryCosts.map((cost, index) => (
-                        <div key={index} className="flex justify-between items-center p-2 bg-white dark:bg-slate-600 rounded">
-                          <div>
-                            <p className="text-sm font-medium">{cartItems[index]?.product.name}</p>
-                            <p className="text-xs text-gray-500">
-                              {DeliveryCostService.getDeliveryCostBreakdown(cost)}
-                            </p>
+                  ) : vendorDeliveryGroups.length > 0 ? (
+                    <div className="space-y-3">
+                      {vendorDeliveryGroups.map((group, groupIndex) => (
+                        <div key={groupIndex} className="bg-white dark:bg-slate-600 rounded-lg p-3">
+                          <div className="flex justify-between items-center mb-2">
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                {group.vendorName}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {group.products.length} product{group.products.length > 1 ? 's' : ''} • 
+                                {DeliveryCostService.getDeliveryCostBreakdown(group.deliveryCost)}
+                              </p>
+                            </div>
+                            <span className="font-semibold text-green-600">
+                              {DeliveryCostService.formatDeliveryCost(group.deliveryCost)}
+                            </span>
                           </div>
-                          <span className="font-semibold text-green-600">
-                            {DeliveryCostService.formatDeliveryCost(cost)}
-                          </span>
+                          <div className="ml-2 space-y-1">
+                            {group.products.map((item, itemIndex) => (
+                              <p key={itemIndex} className="text-xs text-gray-600 dark:text-gray-300">
+                                • {item.product.name}
+                              </p>
+                            ))}
+                          </div>
                         </div>
                       ))}
                       <div className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded border-t">
@@ -375,6 +390,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         <span className="font-bold text-blue-600 text-lg">
                           {DeliveryCostService.formatDeliveryCost({ totalCost: totalDeliveryCost } as DeliveryCostCalculation)}
                         </span>
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 bg-green-50 dark:bg-green-900/20 p-2 rounded">
+                        💡 Delivery fee is charged once per vendor, regardless of how many products you buy from them
                       </div>
                     </div>
                   ) : (
