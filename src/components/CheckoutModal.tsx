@@ -8,11 +8,14 @@ import { Separator } from '@/components/ui/separator';
 import { X, Check, Download, Truck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrderService } from '@/services/orderService';
+import { DeliveryCostService, DeliveryCostCalculation } from '@/services/deliveryCostService';
 import IsaPayModal from '@/components/payments/IsaPayModal';
+import LocationSelect from '@/components/auth/LocationSelect';
 // import { AirtelMoneyService } from '@/services/airtelMoneyService'; // Uncomment if you have this service
 import { CartItemWithProduct, Address, PaymentMethod, DeliveryDetails } from '@/types/order';
 import { Product } from '@/types/product';
 import { useUISound } from '@/contexts/SoundContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -43,11 +46,16 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [showIsaPay, setShowIsaPay] = useState(false);
   const [notes, setNotes] = useState('');
   const [isGift, setIsGift] = useState(false);
+  const [deliveryLocation, setDeliveryLocation] = useState({ county: '', constituency: '', ward: '' });
+  const [deliveryCosts, setDeliveryCosts] = useState<DeliveryCostCalculation[]>([]);
+  const [totalDeliveryCost, setTotalDeliveryCost] = useState(0);
+  const [deliveryCostLoading, setDeliveryCostLoading] = useState(false);
+  const [showLocationEdit, setShowLocationEdit] = useState(false);
   const { toast } = useToast();
   const playCheckoutSuccess = useUISound('checkout_success');
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-  const deliveryFee = 500; // Fixed delivery fee
+  const deliveryFee = totalDeliveryCost || 500; // Use calculated delivery cost or fallback
   const totalAmount = subtotal + deliveryFee;
 
   const formatPrice = (price: number) => {
@@ -57,6 +65,71 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);
+  };
+
+  // Fetch customer location on component mount
+  useEffect(() => {
+    if (user) {
+      fetchCustomerLocation();
+    }
+  }, [user]);
+
+  // Calculate delivery costs when location or cart items change
+  useEffect(() => {
+    if (deliveryLocation.county && cartItems.length > 0) {
+      calculateDeliveryCosts();
+    }
+  }, [deliveryLocation, cartItems]);
+
+  const fetchCustomerLocation = async () => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('county, constituency, ward')
+        .eq('id', user?.id)
+        .single();
+
+      if (profile) {
+        setDeliveryLocation({
+          county: profile.county || '',
+          constituency: profile.constituency || '',
+          ward: profile.ward || ''
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching customer location:', error);
+    }
+  };
+
+  const calculateDeliveryCosts = async () => {
+    if (!deliveryLocation.county || cartItems.length === 0) return;
+
+    setDeliveryCostLoading(true);
+    try {
+      const costs = await Promise.all(
+        cartItems.map(async (item) => {
+          const cost = await DeliveryCostService.calculateProductDeliveryCost(
+            item.product.id,
+            deliveryLocation
+          );
+          return cost;
+        })
+      );
+
+      const validCosts = costs.filter(cost => cost !== null) as DeliveryCostCalculation[];
+      setDeliveryCosts(validCosts);
+      
+      const total = validCosts.reduce((sum, cost) => sum + cost.totalCost, 0);
+      setTotalDeliveryCost(total);
+    } catch (error) {
+      console.error('Error calculating delivery costs:', error);
+    } finally {
+      setDeliveryCostLoading(false);
+    }
+  };
+
+  const handleLocationChange = (county: string, constituency: string, ward?: string) => {
+    setDeliveryLocation({ county, constituency, ward: ward || '' });
   };
 
 
@@ -187,7 +260,41 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="deliveryAddress">Where do you want the item to be delivered to?</Label>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label>Delivery Location</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowLocationEdit(!showLocationEdit)}
+                      >
+                        {showLocationEdit ? 'Cancel' : 'Edit Location'}
+                      </Button>
+                    </div>
+                    
+                    {showLocationEdit ? (
+                      <LocationSelect 
+                        onLocationChange={handleLocationChange} 
+                        required 
+                        initialLocation={deliveryLocation}
+                      />
+                    ) : (
+                      <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-md">
+                        <p className="text-sm">
+                          {deliveryLocation.county}
+                          {deliveryLocation.constituency && `, ${deliveryLocation.constituency}`}
+                          {deliveryLocation.ward && `, ${deliveryLocation.ward}`}
+                        </p>
+                      </div>
+                    )}
+                    
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      Confirm your delivery location for accurate cost calculation
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="deliveryAddress">Detailed Delivery Address</Label>
                     <Textarea
                       id="deliveryAddress"
                       value={deliveryAddress}
@@ -240,13 +347,43 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
                 </div>
 
+                {/* Delivery Cost Display */}
                 <div className="mt-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Delivery Fee(Our delivery team will negotiate this amount with you.)</h4>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-300">Standard Delivery:</span>
-                    <span className="text-gray-900 dark:text-white">{formatPrice(deliveryFee)}</span>
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Estimated delivery: 1-2 business days</p>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Delivery Costs</h4>
+                  
+                  {deliveryCostLoading ? (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-gray-500">Calculating delivery costs...</p>
+                    </div>
+                  ) : deliveryCosts.length > 0 ? (
+                    <div className="space-y-2">
+                      {deliveryCosts.map((cost, index) => (
+                        <div key={index} className="flex justify-between items-center p-2 bg-white dark:bg-slate-600 rounded">
+                          <div>
+                            <p className="text-sm font-medium">{cartItems[index]?.product.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {DeliveryCostService.getDeliveryCostBreakdown(cost)}
+                            </p>
+                          </div>
+                          <span className="font-semibold text-green-600">
+                            {DeliveryCostService.formatDeliveryCost(cost)}
+                          </span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded border-t">
+                        <span className="font-semibold text-gray-900 dark:text-white">Total Delivery Cost:</span>
+                        <span className="font-bold text-blue-600 text-lg">
+                          {DeliveryCostService.formatDeliveryCost({ totalCost: totalDeliveryCost } as DeliveryCostCalculation)}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-gray-500">Delivery costs will be calculated based on your location</p>
+                    </div>
+                  )}
+                  
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Estimated delivery: 1-2 business days</p>
                 </div>
               </div>
               <Separator />

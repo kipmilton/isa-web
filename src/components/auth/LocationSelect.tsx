@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface LocationSelectProps {
-  onLocationChange: (county: string, constituency: string) => void;
+  onLocationChange: (county: string, constituency: string, ward?: string) => void;
   required?: boolean;
 }
 
@@ -58,19 +58,84 @@ const locationData = {
   "West Pokot County": ["Sigor", "Kacheliba", "Kapenguria", "West Pokot"]
 };
 
+// Counties with ward data (Nairobi, Kiambu, Kajiado, Machakos)
+const countiesWithWards = ["Nairobi County", "Kiambu County", "Kajiado County", "Machakos County"];
+
+// Ward data for specific counties
+const wardData = {
+  "Nairobi County": {
+    "Westlands": ["Kitisuru", "Parklands/Highridge", "Karura", "Kangemi", "Mountain View"],
+    "Dagoretti North": ["Kilimani", "Kawangware", "Gatina", "Kileleshwa", "Kabiro"],
+    "Dagoretti South": ["Mutu-Ini", "Ngando", "Riruta", "Uthiru/Ruthimitu", "Waithaka"],
+    "Langata": ["Karen", "Nairobi West", "Mugumu-Ini", "South C", "Nyayo Highrise"],
+    "Kibra": ["Woodley/Kenyatta Golf Course", "Sarang'ombe", "Makina", "Lindi", "Laini Saba"],
+    "Roysambu": ["Kahawa West", "Roysambu", "Githurai", "Kahawa", "Zimmerman"],
+    "Kasarani": ["Kasarani", "Njiru", "Clay City", "Mwiki", "Ruai"],
+    "Ruaraka": ["Utalii", "Korogocho", "Lucky Summer", "Mathare North", "Baba Dogo"],
+    "Embakasi South": ["Kwa Njenga", "Imara Daima", "Kware", "Kwa Reuben", "Pipeline"],
+    "Embakasi North": ["Dandora Area I", "Dandora Area II", "Dandora Area III", "Dandora Area IV", "Kariobangi North"],
+    "Embakasi Central": ["Kayole North", "Kayole Central", "Kariobangi South", "Komarock", "Matopeni / Spring Valley"],
+    "Embakasi East": ["Utawala", "Upper Savanna", "Lower Savanna", "Embakasi", "Mihango"],
+    "Embakasi West": ["Umoja 1", "Umoja 2", "Mowlem", "Kariobangi south", "Maringo/ Hamza"],
+    "Makadara": ["Viwandani", "Harambee", "Makongeni", "Pumwani", "Eastleigh North"],
+    "Kamukunji": ["Eastleigh South", "Nairobi Central", "Airbase", "California", "Mgara"],
+    "Starehe": ["Nairobi South", "Hospital", "Ngara", "Pangani", "Landimawe", "Ziwani / Kariokor"],
+    "Mathare": ["Mlango Kubwa", "Kiamaiko", "Ngei", "Huruma", "Mabatini"]
+  },
+  "Kiambu County": {
+    "Gatundu South": ["Kiamwangi", "Kiganjo", "Ndarugu", "Ngenda"],
+    "Gatundu North": ["Gituamba", "Githobokoni", "Chania", "Mang'u"],
+    "Juja": ["Murera", "Theta", "Juja", "Witeithie", "Kalimoni"],
+    "Thika Town": ["Township", "Kamenu", "Hospital", "Gatuanyaga", "Ngoliba"],
+    "Ruiru": ["Gitothua", "Biashara", "Gatongora", "Kahawa Sukari", "Kahawa Wendani", "Kiuu", "Mwiki", "Mwihoko"],
+    "Githunguri": ["Githunguri", "Githiga", "Ikinu", "Ngewa", "Komothai"],
+    "Kiambu": ["Ting'gang'a", "Ndumberi", "Riabai", "Township"],
+    "Kiambaa": ["Cianda", "Karuiri", "Ndenderu", "Muchatha", "Kihara"],
+    "Kabete": ["Gitaru", "Muguga", "Nyathuna", "Kabete", "Uthiru"],
+    "Kikuyu": ["Karai", "Nachu", "Sigona", "Kikuyu", "Kinoo"],
+    "Limuru": ["Bibirioni", "Limuru Central", "Ndeiya", "Limuru East", "Ngecha Tigoni"],
+    "Lari": ["Kijabe", "Nyanduma", "Kamburu", "Lari/Kirenga"]
+  },
+  "Kajiado County": {
+    "Kajiado North": ["Olkeri", "Ongata Rongai", "Nkaimurunya", "Oloolua", "Ngong"],
+    "Kajiado Central": ["Purko", "Ildamat", "Dalalekutuk", "Matapato North", "Matapato South"],
+    "Kajiado East": ["Kaputiei North", "Kitengela", "Oloosirkon/Sholinke", "Kenyawa-Poka", "Imaroro"],
+    "Kajiado West": ["Keekonyokie", "Iloodokilani", "Magadi", "Ewuaso Oonkidong'i", "Mosiro"],
+    "Kajiado South": ["Entonet/Lenkisi", "Mbirikani/Eselen", "Keikuku", "Rombo", "Kimana"]
+  },
+  "Machakos County": {
+    "Machakos Town": ["Kalama", "Mua", "Mutitini", "Machakos Central", "Mumbuni North", "Muvuti/Kiima-Kimwe", "Kola"],
+    "Mavoko": ["Athi River", "Kinanie", "Muthwani", "Syokimau/Mulolongo"],
+    "Masinga": ["Kivaa", "Masinga", "Central", "Ekalakala", "Muthesya", "Ndithini"],
+    "Yatta": ["Ndalani", "Matuu", "Kithimani", "Ikomba", "Katangi"],
+    "Kangundo": ["Kangundo North", "Kangundo Central", "Kangundo East", "Kangundo West"],
+    "Matungulu": ["Tala", "Matungulu North", "Matungulu East", "Matungulu West", "Kyeleni"],
+    "Kathiani": ["Mitaboni", "Kathiani Central", "Upper Kaewa/Iveti", "Lower Kaewa/Kaani"],
+    "Mwala": ["Mbiuni", "Makutano/Mwala", "Masii", "Muthetheni", "Wamunyu", "Kibauni"]
+  }
+};
+
 const LocationSelect = ({ onLocationChange, required = false }: LocationSelectProps) => {
   const [selectedCounty, setSelectedCounty] = useState<string>("");
   const [selectedConstituency, setSelectedConstituency] = useState<string>("");
+  const [selectedWard, setSelectedWard] = useState<string>("");
 
   const handleCountyChange = (county: string) => {
     setSelectedCounty(county);
     setSelectedConstituency(""); // Reset constituency when county changes
-    onLocationChange(county, "");
+    setSelectedWard(""); // Reset ward when county changes
+    onLocationChange(county, "", "");
   };
 
   const handleConstituencyChange = (constituency: string) => {
     setSelectedConstituency(constituency);
-    onLocationChange(selectedCounty, constituency);
+    setSelectedWard(""); // Reset ward when constituency changes
+    onLocationChange(selectedCounty, constituency, "");
+  };
+
+  const handleWardChange = (ward: string) => {
+    setSelectedWard(ward);
+    onLocationChange(selectedCounty, selectedConstituency, ward);
   };
 
   return (
@@ -102,6 +167,25 @@ const LocationSelect = ({ onLocationChange, required = false }: LocationSelectPr
               {locationData[selectedCounty as keyof typeof locationData].map((constituency) => (
                 <SelectItem key={constituency} value={constituency}>
                   {constituency}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Ward selection - only show for counties with ward data */}
+      {selectedCounty && selectedConstituency && countiesWithWards.includes(selectedCounty) && (
+        <div>
+          <Label htmlFor="ward">Ward</Label>
+          <Select value={selectedWard} onValueChange={handleWardChange}>
+            <SelectTrigger className="mt-1">
+              <SelectValue placeholder="Select Ward (Optional)" />
+            </SelectTrigger>
+            <SelectContent>
+              {wardData[selectedCounty as keyof typeof wardData]?.[selectedConstituency]?.map((ward) => (
+                <SelectItem key={ward} value={ward}>
+                  {ward}
                 </SelectItem>
               ))}
             </SelectContent>

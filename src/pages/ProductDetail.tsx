@@ -21,6 +21,7 @@ import {
 import { Product, ProductAttribute, ProductImage, ProductReview } from "@/types/product";
 import { ProductService } from "@/services/productService";
 import { OrderService } from "@/services/orderService";
+import { DeliveryCostService, DeliveryCostCalculation } from "@/services/deliveryCostService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +49,9 @@ const ProductDetail = () => {
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
+  const [deliveryCost, setDeliveryCost] = useState<DeliveryCostCalculation | null>(null);
+  const [customerLocation, setCustomerLocation] = useState<{county: string, constituency?: string, ward?: string} | null>(null);
+  const [deliveryCostLoading, setDeliveryCostLoading] = useState(false);
   const [userReview, setUserReview] = useState<ProductReview | null>(null);
   const [isInCart, setIsInCart] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
@@ -84,6 +88,55 @@ const ProductDetail = () => {
 
     checkUserStatus();
   }, [navigate]);
+
+  useEffect(() => {
+    if (user) {
+      fetchCustomerLocation();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (product && customerLocation) {
+      calculateDeliveryCost();
+    }
+  }, [product, customerLocation]);
+
+  const fetchCustomerLocation = async () => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('county, constituency, ward')
+        .eq('id', user?.id)
+        .single();
+
+      if (profile) {
+        setCustomerLocation({
+          county: profile.county || '',
+          constituency: profile.constituency || undefined,
+          ward: profile.ward || undefined
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching customer location:', error);
+    }
+  };
+
+  const calculateDeliveryCost = async () => {
+    if (!product || !customerLocation) return;
+
+    setDeliveryCostLoading(true);
+    try {
+      const cost = await DeliveryCostService.calculateProductDeliveryCost(
+        product.id,
+        customerLocation
+      );
+      setDeliveryCost(cost);
+    } catch (error) {
+      console.error('Error calculating delivery cost:', error);
+    } finally {
+      setDeliveryCostLoading(false);
+    }
+  };
 
   const loadProductDetails = async () => {
     setLoading(true);
@@ -462,6 +515,48 @@ const ProductDetail = () => {
                 </Badge>
               )}
             </div>
+
+            {/* Delivery Cost */}
+            {deliveryCost && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-semibold text-gray-900">
+                    Delivery Cost: {DeliveryCostService.formatDeliveryCost(deliveryCost)}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600">
+                  It costs {DeliveryCostService.formatDeliveryCost(deliveryCost)} to deliver to your location ({customerLocation?.county}
+                  {customerLocation?.constituency && `, ${customerLocation.constituency}`}
+                  {customerLocation?.ward && `, ${customerLocation.ward}`})
+                </p>
+                <p className="text-xs text-gray-500">
+                  Breakdown: {DeliveryCostService.getDeliveryCostBreakdown(deliveryCost)}
+                </p>
+              </div>
+            )}
+
+            {deliveryCostLoading && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-semibold text-gray-900">
+                    Calculating delivery cost...
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {!deliveryCost && !deliveryCostLoading && customerLocation && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-semibold text-gray-900">
+                    Delivery cost not available
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Unable to calculate delivery cost for your location
+                </p>
+              </div>
+            )}
 
             {/* Product Attributes */}
             {productAttributes.length > 0 && (

@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Upload, AlertCircle, CheckCircle } from "lucide-react";
 import imageCompression from 'browser-image-compression';
+import LocationSelect from "./LocationSelect";
 
 interface DeliverySignupDialogProps {
   open: boolean;
@@ -33,6 +34,9 @@ const DeliverySignupDialog = ({ open, onOpenChange }: DeliverySignupDialogProps)
     experience: "",
     availability: "",
     areas: "",
+    county: "",
+    constituency: "",
+    ward: "",
     documents: {
       idCard: null as File | null,
       license: null as File | null,
@@ -64,6 +68,10 @@ const DeliverySignupDialog = ({ open, onOpenChange }: DeliverySignupDialogProps)
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+  };
+
+  const handleLocationChange = (county: string, constituency: string, ward?: string) => {
+    setFormData(prev => ({ ...prev, county, constituency, ward: ward || "" }));
   };
 
   const handleDocumentUpload = async (field: string, file: File | null) => {
@@ -106,6 +114,8 @@ const DeliverySignupDialog = ({ open, onOpenChange }: DeliverySignupDialogProps)
         if (!formData.lastName) newErrors.lastName = 'Last name is required';
         if (!formData.phoneNumber) newErrors.phoneNumber = 'Phone number is required';
         if (!formData.idNumber) newErrors.idNumber = 'ID number is required';
+        if (!formData.county) newErrors.county = 'County is required';
+        if (!formData.constituency) newErrors.constituency = 'Constituency is required';
         break;
       case 3:
         if (!formData.vehicleType) newErrors.vehicleType = 'Vehicle type is required';
@@ -128,7 +138,7 @@ const DeliverySignupDialog = ({ open, onOpenChange }: DeliverySignupDialogProps)
       case 1:
         return formData.email && formData.password && formData.confirmPassword && formData.password === formData.confirmPassword;
       case 2:
-        return formData.firstName && formData.lastName && formData.phoneNumber && formData.idNumber;
+        return formData.firstName && formData.lastName && formData.phoneNumber && formData.idNumber && formData.county && formData.constituency;
       case 3:
         return formData.vehicleType && formData.vehicleRegistration && formData.licenseNumber;
       case 4:
@@ -189,8 +199,8 @@ const DeliverySignupDialog = ({ open, onOpenChange }: DeliverySignupDialogProps)
             last_name: formData.lastName,
             phone_number: formData.phoneNumber,
             email: formData.email,
-            constituency: 'Unknown', // Placeholder value
-            county: 'Unknown', // Placeholder value
+            constituency: formData.constituency,
+            county: formData.county,
             drivers_license_url: formData.documents.license ? 'uploaded' : '',
             id_card_url: formData.documents.idCard ? 'uploaded' : ''
           });
@@ -332,6 +342,13 @@ const DeliverySignupDialog = ({ open, onOpenChange }: DeliverySignupDialogProps)
                 placeholder="Enter your national ID number"
               />
               {errors.idNumber && <p className="text-red-500 text-sm mt-1">{errors.idNumber}</p>}
+            </div>
+
+            <div>
+              <Label className="text-base font-semibold text-gray-900">Location *</Label>
+              <div className="mt-2">
+                <LocationSelect onLocationChange={handleLocationChange} required />
+              </div>
             </div>
           </div>
         );

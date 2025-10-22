@@ -47,7 +47,7 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
     otherBusinessType: '',
     description: '',
     websiteUrl: '',
-    location: { county: '', constituency: '' },
+    location: { county: '', constituency: '', ward: '' },
     documents: {
       idCard: null as File | null,
       businessCert: null as File | null,
@@ -93,10 +93,10 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
     updateProgress();
   };
 
-  const handleLocationChange = (county: string, constituency: string) => {
+  const handleLocationChange = (county: string, constituency: string, ward?: string) => {
     setFormData(prev => ({
       ...prev,
-      location: { county, constituency }
+      location: { county, constituency, ward: ward || '' }
     }));
     updateProgress();
   };
@@ -251,7 +251,9 @@ const VendorApplicationForm = ({ userId, onComplete, onProgressChange }: VendorA
           phone_number: formData.phone,
           user_type: 'vendor',
           status: 'pending',
-          location: `${formData.location.county}, ${formData.location.constituency}`
+          location: formData.location.ward 
+            ? `${formData.location.county}, ${formData.location.constituency}, ${formData.location.ward}`
+            : `${formData.location.county}, ${formData.location.constituency}`
         })
         .eq('id', userId);
 

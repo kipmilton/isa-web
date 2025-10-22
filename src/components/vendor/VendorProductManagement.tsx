@@ -35,6 +35,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import ImageUpload from "./ImageUpload";
 import ProductAttributes from "./ProductAttributes";
+import LocationSelect from "@/components/auth/LocationSelect";
 
 
 interface VendorProductManagementProps {
@@ -62,6 +63,9 @@ interface VendorProductManagementProps {
     commission_percentage?: number;
     pickup_location?: string;
     pickup_phone_number?: string;
+    pickup_county?: string;
+    pickup_constituency?: string;
+    pickup_ward?: string;
     status?: "pending" | "approved" | "rejected";
     rejection_reason?: string | null;
     return_eligible?: boolean;
@@ -355,9 +359,23 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
       window.location.href = '/vendor-dashboard?section=store';
     }
   };
+
+  const handlePickupLocationChange = (county: string, constituency: string, ward?: string) => {
+    setPickupLocation({ county, constituency, ward: ward || "" });
+    setFormData(prev => ({ 
+      ...prev, 
+      pickup_county: county, 
+      pickup_constituency: constituency, 
+      pickup_ward: ward || "",
+      pickup_location: ward 
+        ? `${county}, ${constituency}, ${ward}`
+        : `${county}, ${constituency}`
+    }));
+  };
   const [banReasonDialogOpen, setBanReasonDialogOpen] = useState(false);
   const [banReasonText, setBanReasonText] = useState("");
   const [statusFilter, setStatusFilter] = useState('All');
+  const [pickupLocation, setPickupLocation] = useState({ county: "", constituency: "", ward: "" });
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
@@ -379,6 +397,9 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
     commission_percentage: undefined,
     pickup_location: "",
     pickup_phone_number: "",
+    pickup_county: "",
+    pickup_constituency: "",
+    pickup_ward: "",
     return_eligible: true,
     return_policy_guidelines: "",
     return_policy_reason: "",
@@ -523,6 +544,9 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
         location_lat: null,
         location_lng: null,
         location_address: formData.pickup_location,
+        pickup_county: formData.pickup_county,
+        pickup_constituency: formData.pickup_constituency,
+        pickup_ward: formData.pickup_ward,
       };
 
       let productId: string;
@@ -605,7 +629,10 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
       images: product.images || [],
       commission_percentage: product.commission_percentage,
       pickup_location: product.pickup_location || "",
-      pickup_phone_number: product.pickup_phone_number || ""
+      pickup_phone_number: product.pickup_phone_number || "",
+      pickup_county: product.pickup_county || "",
+      pickup_constituency: product.pickup_constituency || "",
+      pickup_ward: product.pickup_ward || ""
     });
 
     setMainCategory(product.category);
@@ -654,7 +681,10 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
       images: [],
       commission_percentage: undefined,
       pickup_location: "",
-      pickup_phone_number: ""
+      pickup_phone_number: "",
+      pickup_county: "",
+      pickup_constituency: "",
+      pickup_ward: ""
     });
     
     setTagInput("");
@@ -1396,15 +1426,19 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
 
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="pickup_location">Where do you want the item to be picked from? *</Label>
-                        <Textarea
-                          id="pickup_location"
-                          value={formData.pickup_location}
-                          onChange={(e) => setFormData(prev => ({ ...prev, pickup_location: e.target.value }))}
-                          placeholder="Please provide detailed pickup address (e.g., 3KM off Limuru Road, near Shell Petrol Station, blue gate house)"
-                          className="min-h-[100px]"
-                          required
+                        <Label>Pickup Location *</Label>
+                        <LocationSelect 
+                          onLocationChange={handlePickupLocationChange} 
+                          required 
+                          initialLocation={{
+                            county: formData.pickup_county || "",
+                            constituency: formData.pickup_constituency || "",
+                            ward: formData.pickup_ward || ""
+                          }}
                         />
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Confirm your pickup location for delivery cost calculation
+                        </p>
                       </div>
                       
                       <div>
@@ -2355,15 +2389,19 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
 
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="pickup_location">Where do you want the item to be picked from? *</Label>
-                    <Textarea
-                      id="pickup_location"
-                      value={formData.pickup_location}
-                      onChange={(e) => setFormData(prev => ({ ...prev, pickup_location: e.target.value }))}
-                      placeholder="Please provide detailed pickup address (e.g., 3KM off Limuru Road, near Shell Petrol Station, blue gate house)"
-                      className="min-h-[100px]"
-                      required
+                    <Label>Pickup Location *</Label>
+                    <LocationSelect 
+                      onLocationChange={handlePickupLocationChange} 
+                      required 
+                      initialLocation={{
+                        county: formData.pickup_county || "",
+                        constituency: formData.pickup_constituency || "",
+                        ward: formData.pickup_ward || ""
+                      }}
                     />
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Confirm your pickup location for delivery cost calculation
+                    </p>
                   </div>
                   
                   <div>

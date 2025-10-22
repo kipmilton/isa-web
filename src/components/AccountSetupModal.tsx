@@ -17,7 +17,7 @@ interface AccountSetupModalProps {
 
 const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps) => {
   const [loading, setLoading] = useState(false);
-  const [location, setLocation] = useState({ county: "", constituency: "" });
+  const [location, setLocation] = useState({ county: "", constituency: "", ward: "" });
   const { triggerConfetti } = useConfetti();
   const [formData, setFormData] = useState({
     firstName: "",
@@ -25,8 +25,10 @@ const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps)
     dateOfBirth: "",
     gender: "",
     phoneNumber: "",
+    whatsappNumber: "",
     county: "",
-    constituency: ""
+    constituency: "",
+    ward: ""
   });
 
   useEffect(() => {
@@ -53,9 +55,9 @@ const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps)
     return age;
   };
 
-  const handleLocationChange = (county: string, constituency: string) => {
-    setLocation({ county, constituency });
-    setFormData(prev => ({ ...prev, county, constituency }));
+  const handleLocationChange = (county: string, constituency: string, ward?: string) => {
+    setLocation({ county, constituency, ward: ward || "" });
+    setFormData(prev => ({ ...prev, county, constituency, ward: ward || "" }));
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -68,7 +70,7 @@ const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps)
 
     try {
       // Validate required fields
-      const requiredFields = ['firstName', 'lastName', 'dateOfBirth', 'gender', 'phoneNumber', 'county', 'constituency'];
+      const requiredFields = ['firstName', 'lastName', 'dateOfBirth', 'gender', 'phoneNumber', 'whatsappNumber', 'county', 'constituency'];
       const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
       
       if (missingFields.length > 0) {
@@ -90,7 +92,13 @@ const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps)
           age: calculatedAge,
           gender: formData.gender,
           phone_number: formData.phoneNumber,
-          location: `${formData.county}, ${formData.constituency}`,
+          whatsapp_number: formData.whatsappNumber,
+          county: formData.county,
+          constituency: formData.constituency,
+          ward: formData.ward,
+          location: formData.ward 
+            ? `${formData.county}, ${formData.constituency}, ${formData.ward}`
+            : `${formData.county}, ${formData.constituency}`,
           account_setup_completed: true
         })
         .eq('id', user.id);
@@ -183,17 +191,31 @@ const AccountSetupModal = ({ open, onOpenChange, user }: AccountSetupModalProps)
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="phoneNumber">Phone Number *</Label>
-            <Input
-              id="phoneNumber"
-              type="tel"
-              required
-              value={formData.phoneNumber}
-              onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-              className="mt-1"
-              placeholder="e.g., +254700000000"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="phoneNumber">Phone Number *</Label>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                required
+                value={formData.phoneNumber}
+                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                className="mt-1"
+                placeholder="e.g., +254700000000"
+              />
+            </div>
+            <div>
+              <Label htmlFor="whatsappNumber">WhatsApp Number *</Label>
+              <Input
+                id="whatsappNumber"
+                type="tel"
+                required
+                value={formData.whatsappNumber}
+                onChange={(e) => handleInputChange('whatsappNumber', e.target.value)}
+                className="mt-1"
+                placeholder="e.g., +254700000000"
+              />
+            </div>
           </div>
 
           <LocationSelect onLocationChange={handleLocationChange} required />

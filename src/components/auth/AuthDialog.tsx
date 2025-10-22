@@ -24,7 +24,7 @@ interface AuthDialogProps {
 
 const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const [isSignUp, setIsSignUp] = useState(false);
-  const [location, setLocation] = useState({ county: "", constituency: "" });
+  const [location, setLocation] = useState({ county: "", constituency: "", ward: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
@@ -46,6 +46,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
     dob: "",
     county: "",
     constituency: "",
+    ward: "",
     gender: "",
     phoneNumber: "",
   });
@@ -75,10 +76,10 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const handleResetCaptchaVerify = (token: string) => setResetCaptchaToken(token);
   const handleResetCaptchaError = () => setResetCaptchaToken(null);
 
-  const handleLocationChange = (county: string, constituency: string) => {
-    setLocation({ county, constituency });
+  const handleLocationChange = (county: string, constituency: string, ward?: string) => {
+    setLocation({ county, constituency, ward: ward || "" });
     if (userType === 'customer') {
-      setCustomerData(prev => ({ ...prev, county, constituency }));
+      setCustomerData(prev => ({ ...prev, county, constituency, ward: ward || "" }));
     }
   };
 
@@ -199,7 +200,9 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                 phone_number: customerData.phoneNumber,
                 date_of_birth: customerData.dob,
                 gender: customerData.gender,
-                location: `${customerData.county}, ${customerData.constituency}`
+                location: customerData.ward 
+                  ? `${customerData.county}, ${customerData.constituency}, ${customerData.ward}`
+                  : `${customerData.county}, ${customerData.constituency}`
               } : userType === 'vendor' ? {
                 first_name: vendorData.firstName,
                 last_name: vendorData.lastName,
@@ -264,7 +267,9 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             profileData.age = calculatedAge;
             profileData.gender = customerData.gender || '';
             profileData.location = customerData.county && customerData.constituency 
-              ? `${customerData.constituency}, ${customerData.county}` 
+              ? customerData.ward 
+                ? `${customerData.county}, ${customerData.constituency}, ${customerData.ward}`
+                : `${customerData.county}, ${customerData.constituency}`
               : '';
           } else if (userType === 'vendor') {
             profileData.first_name = vendorData.firstName || '';
@@ -428,7 +433,9 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                 phone_number: customerData.phoneNumber,
                 date_of_birth: customerData.dob,
                 gender: customerData.gender,
-                location: `${customerData.county}, ${customerData.constituency}`
+                location: customerData.ward 
+                  ? `${customerData.county}, ${customerData.constituency}, ${customerData.ward}`
+                  : `${customerData.county}, ${customerData.constituency}`
               } : userType === 'vendor' ? {
                 first_name: vendorData.firstName,
                 last_name: vendorData.lastName,

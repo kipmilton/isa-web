@@ -32,6 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import UserWallet from "@/components/loyalty/UserWallet";
 import StyleQuiz from "@/components/loyalty/StyleQuiz";
+import LocationSelect from "@/components/auth/LocationSelect";
 
 const Profile = () => {
   const [user, setUser] = useState<any>(null);
@@ -50,6 +51,7 @@ const Profile = () => {
     new: false,
     confirm: false
   });
+  const [location, setLocation] = useState({ county: "", constituency: "", ward: "" });
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -77,6 +79,12 @@ const Profile = () => {
           toast({ title: 'Error', description: 'Failed to load profile', variant: 'destructive' });
         } else {
           setProfile(profileData);
+          // Populate location state for editing
+          setLocation({
+            county: profileData.county || "",
+            constituency: profileData.constituency || "",
+            ward: profileData.ward || ""
+          });
         }
       } catch (error) {
         console.error('Error getting session:', error);
@@ -102,6 +110,9 @@ const Profile = () => {
           phone_number: profile.phone_number,
           gender: profile.gender,
           location: profile.location,
+          county: profile.county,
+          constituency: profile.constituency,
+          ward: profile.ward,
         })
         .eq('id', user.id);
 
@@ -190,6 +201,19 @@ const Profile = () => {
 
   const handleProfileChange = (field: string, value: string) => {
     setProfile(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleLocationChange = (county: string, constituency: string, ward?: string) => {
+    setLocation({ county, constituency, ward: ward || "" });
+    setProfile(prev => ({ 
+      ...prev, 
+      county, 
+      constituency, 
+      ward: ward || "",
+      location: ward 
+        ? `${county}, ${constituency}, ${ward}`
+        : `${county}, ${constituency}`
+    }));
   };
 
   const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
@@ -408,13 +432,15 @@ const Profile = () => {
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="location">Location</Label>
-                      <Input
-                        id="location"
-                        value={profile.location || ''}
-                        onChange={(e) => handleProfileChange('location', e.target.value)}
-                        className="mt-1"
+                      <Label>Location</Label>
+                      <LocationSelect 
+                        onLocationChange={handleLocationChange} 
+                        required 
+                        initialLocation={location}
                       />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Update your location for accurate delivery cost calculation
+                      </p>
                     </div>
                     <div className="flex gap-3">
                       <Button 
