@@ -62,6 +62,7 @@ export function AdminSidebar({ activeSection, onSectionChange, onLogout, userNam
     { id: 'trending-posts', label: 'Trending Posts', icon: TrendingUp },
     { id: 'admin_management', label: 'Admin Management', icon: UserCog },
     { id: 'vendor_guidelines', label: 'Vendor Guidelines', icon: FileText },
+    { id: 'moderation', label: 'Chat Moderation', icon: Shield },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 

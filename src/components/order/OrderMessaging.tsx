@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Send, Image, AlertTriangle } from 'lucide-react';
+import { Send, Image, AlertTriangle, Shield, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { ChatModerationService } from '@/services/chatModerationService';
 
 interface Message {
   id: string;
@@ -28,12 +29,15 @@ const OrderMessaging = ({ orderId, userType, userId }: OrderMessagingProps) => {
   const [messageText, setMessageText] = useState('');
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isSuspended, setIsSuspended] = useState(false);
+  const [moderationWarning, setModerationWarning] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchMessages();
+    checkUserSuspension();
     const channel = supabase
       .channel(`order_messages:${orderId}`)
       .on('postgres_changes', {
@@ -49,7 +53,7 @@ const OrderMessaging = ({ orderId, userType, userId }: OrderMessagingProps) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [orderId]);
+  }, [orderId, userId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -57,6 +61,15 @@ const OrderMessaging = ({ orderId, userType, userId }: OrderMessagingProps) => {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const checkUserSuspension = async () => {
+    try {
+      const suspended = await ChatModerationService.isUserSuspended(userId);
+      setIsSuspended(suspended);
+    } catch (error) {
+      console.error('Error checking user suspension status:', error);
+    }
   };
 
   const fetchMessages = async () => {
@@ -86,23 +99,68 @@ const OrderMessaging = ({ orderId, userType, userId }: OrderMessagingProps) => {
       return;
     }
 
+    // Check if user is suspended
+    if (isSuspended) {
+      toast({
+        title: "Account Suspended",
+        description: "Your account has been suspended due to policy violations. Please contact support.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Moderate the message
+    const moderationResult = ChatModerationService.moderateMessage(messageText);
+    
+    // Log the moderation result
+    await ChatModerationService.logModeratedMessage(userId, orderId, moderationResult);
+
+    // If message is blocked, show warning and don't send
+    if (moderationResult.isBlocked) {
+      setModerationWarning(moderationResult.warningMessage || 'Message contains restricted content');
+      
+      // Record violations for each violation type
+      for (const violation of moderationResult.violations) {
+        await ChatModerationService.recordViolation(userId, violation);
+      }
+
+      toast({
+        title: "Message Blocked",
+        description: moderationResult.warningMessage || 'Message contains restricted content',
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
+      const messageToSend = moderationResult.isMasked ? moderationResult.moderatedMessage : messageText;
+      
       const { error } = await supabase
         .from('order_messages')
         .insert({
           order_id: orderId,
           sender_id: userId,
           sender_type: userType,
-          message_text: messageText
+          message_text: messageToSend
         });
 
       if (error) throw error;
 
       setMessageText('');
-      toast({
-        title: "Message sent",
-        description: "Your message has been sent successfully"
-      });
+      setModerationWarning(null);
+      
+      // Show different messages based on moderation result
+      if (moderationResult.isMasked) {
+        toast({
+          title: "Message sent",
+          description: "Your message was sent with sensitive information masked for security"
+        });
+      } else {
+        toast({
+          title: "Message sent",
+          description: "Your message has been sent successfully"
+        });
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -176,14 +234,29 @@ const OrderMessaging = ({ orderId, userType, userId }: OrderMessagingProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Order Messages</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Shield className="w-5 h-5" />
+          Order Messages
+        </CardTitle>
         <div className="text-xs text-gray-600 space-y-1">
           <div className="flex items-center gap-1">
             <AlertTriangle className="w-3 h-3" />
-            <span>Do not share personal contact information (phone, email)</span>
+            <span>Do not share personal contact information (phone, email, social media)</span>
           </div>
           {userType === 'vendor' && (
             <div className="text-orange-600">Vendors can only send images, no text messages</div>
+          )}
+          {isSuspended && (
+            <div className="flex items-center gap-1 text-red-600 bg-red-50 p-2 rounded">
+              <AlertCircle className="w-3 h-3" />
+              <span>Your account is suspended due to policy violations. Please contact support.</span>
+            </div>
+          )}
+          {moderationWarning && (
+            <div className="flex items-center gap-1 text-amber-600 bg-amber-50 p-2 rounded">
+              <AlertCircle className="w-3 h-3" />
+              <span>{moderationWarning}</span>
+            </div>
           )}
         </div>
       </CardHeader>
@@ -236,10 +309,11 @@ const OrderMessaging = ({ orderId, userType, userId }: OrderMessagingProps) => {
                 <Input
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
-                  placeholder="Type your message..."
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  placeholder={isSuspended ? "Account suspended - contact support" : "Type your message..."}
+                  onKeyPress={(e) => e.key === 'Enter' && !isSuspended && sendMessage()}
+                  disabled={isSuspended}
                 />
-                <Button onClick={sendMessage}>
+                <Button onClick={sendMessage} disabled={isSuspended}>
                   <Send className="w-4 h-4" />
                 </Button>
               </>
@@ -250,11 +324,12 @@ const OrderMessaging = ({ orderId, userType, userId }: OrderMessagingProps) => {
               accept="image/*"
               className="hidden"
               onChange={handleImageUpload}
+              disabled={isSuspended}
             />
             <Button
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
+              disabled={uploading || isSuspended}
             >
               <Image className="w-4 h-4 mr-2" />
               {uploading ? 'Uploading...' : 'Image'}

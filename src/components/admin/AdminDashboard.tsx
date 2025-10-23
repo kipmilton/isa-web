@@ -22,6 +22,7 @@ import AdminWallet from "./sections/AdminWallet";
 import AdminManagement from "./sections/AdminManagement";
 import VendorGuidelines from "./sections/VendorGuidelines";
 import AdminSKUSearch from "./sections/AdminSKUSearch";
+import AdminModeration from "./sections/AdminModeration";
 import PasswordResetDialog from "./PasswordResetDialog";
 
 interface AdminDashboardProps {
@@ -41,8 +42,8 @@ const AdminDashboard = ({ user, onLogout, mustResetPassword, adminRole }: AdminD
     
     const rolePermissions: Record<string, string[]> = {
       'vendor_admin': ['home', 'vendors', 'products', 'tickets', 'vendor_guidelines', 'sku_search'],
-      'customer_service_admin': ['home', 'vendors', 'tickets', 'customer_support', 'returns'],
-      'order_admin': ['home', 'orders', 'products', 'returns', 'sku_search']
+      'customer_service_admin': ['home', 'vendors', 'tickets', 'customer_support', 'returns', 'moderation'],
+      'order_admin': ['home', 'orders', 'products', 'returns', 'sku_search', 'moderation']
     };
     
     return rolePermissions[adminRole?.role]?.includes(section) || false;
@@ -94,6 +95,8 @@ const AdminDashboard = ({ user, onLogout, mustResetPassword, adminRole }: AdminD
         return <AdminManagement currentUserId={user.id} />;
       case "vendor_guidelines":
         return <VendorGuidelines />;
+      case "moderation":
+        return <AdminModeration />;
       case "settings":
         return (
           <div className="space-y-4">

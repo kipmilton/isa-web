@@ -26,8 +26,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [location, setLocation] = useState({ county: "", constituency: "", ward: "" });
   const [isLoading, setIsLoading] = useState(false);
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [acceptedTermsAndPrivacy, setAcceptedTermsAndPrivacy] = useState(false);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
   const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
   const [userType, setUserType] = useState<'customer' | 'vendor' | null>(null); // New state for user type
@@ -157,8 +156,8 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
     try {
       if (isSignUp) {
         // Check if terms and privacy are accepted for signup
-        if (!acceptedTerms || !acceptedPrivacy) {
-          toast.error("Please accept both Terms & Conditions and Privacy Policy to continue");
+        if (!acceptedTermsAndPrivacy) {
+          toast.error("Please accept the Terms & Conditions and Privacy Policy to continue");
           setIsLoading(false);
           return;
         }
@@ -416,7 +415,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
     try {
       if (isSignUp) {
         // Re-run a minimal subset of validations from above
-        if (!acceptedTerms || !acceptedPrivacy || (signUpData.password !== signUpData.confirmPassword)) {
+        if (!acceptedTermsAndPrivacy || (signUpData.password !== signUpData.confirmPassword)) {
           setIsLoading(false);
           return;
         }
@@ -510,12 +509,12 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       <DialogContent className="max-w-4xl p-0 max-h-[90vh]">
         <DialogHeader className="sr-only">
           <DialogTitle>
-            {userType === 'customer' ? 'Customer' : 'Vendor'} {isSignUp ? 'Sign Up' : 'Sign In'}
+            {isSignUp ? 'New User Signup' : 'Current User Login'}
           </DialogTitle>
           <DialogDescription>
             {isSignUp 
-              ? `Create your ${userType} account to get started` 
-              : `Welcome back! Sign in to your ${userType} account`
+              ? 'Create your account to get started' 
+              : 'Welcome back! Sign in to your account'
             }
           </DialogDescription>
         </DialogHeader>
@@ -525,19 +524,19 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           <div className="flex-1 p-8">
             <div className="max-w-md mx-auto">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {userType === 'customer' ? 'Customer' : 'Vendor'} {isSignUp ? 'Sign Up' : 'Sign In'}
+                {isSignUp ? 'New User Signup' : 'Current User Login'}
               </h2>
               <p className="text-gray-600 mb-6">
                 {isSignUp 
-                  ? `Create your ${userType} account to get started` 
-                  : `Welcome back! Sign in to your ${userType} account`
+                  ? 'Create your account to get started' 
+                  : 'Welcome back! Sign in to your account'
                 }
               </p>
 
               <Tabs value={isSignUp ? "signup" : "signin"} onValueChange={(value) => setIsSignUp(value === "signup")}>
                 <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="signin">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                  <TabsTrigger value="signin">Current User Login</TabsTrigger>
+                  <TabsTrigger value="signup">New User Signup</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="signin">
@@ -873,15 +872,15 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                       </>
                     )}
                     
-                    {/* Terms and Conditions */}
+                    {/* Terms and Privacy Policy */}
                     <div className="flex items-start space-x-2">
                       <Checkbox 
-                        id="terms" 
-                        checked={acceptedTerms} 
-                        onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                        id="termsAndPrivacy" 
+                        checked={acceptedTermsAndPrivacy} 
+                        onCheckedChange={(checked) => setAcceptedTermsAndPrivacy(checked as boolean)}
                       />
                       <div className="text-sm">
-                        <label htmlFor="terms" className="text-gray-700">
+                        <label htmlFor="termsAndPrivacy" className="text-gray-700">
                           I agree to the{" "}
                           <button 
                             type="button"
@@ -890,20 +889,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                           >
                             Terms & Conditions
                           </button>
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Privacy Policy */}
-                    <div className="flex items-start space-x-2">
-                      <Checkbox 
-                        id="privacy" 
-                        checked={acceptedPrivacy} 
-                        onCheckedChange={(checked) => setAcceptedPrivacy(checked as boolean)}
-                      />
-                      <div className="text-sm">
-                        <label htmlFor="privacy" className="text-gray-700">
-                          I agree to the{" "}
+                          {" "}and{" "}
                           <button 
                             type="button"
                             onClick={() => setShowPrivacyDialog(true)}
@@ -928,7 +914,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                     <Button 
                       type="submit" 
                       className="w-full bg-orange-500 hover:bg-orange-600" 
-                      disabled={isLoading || !acceptedTerms || !acceptedPrivacy}
+                      disabled={isLoading || !acceptedTermsAndPrivacy}
                     >
                       {isLoading ? 'Creating Account...' : 'Create Account'}
                     </Button>
