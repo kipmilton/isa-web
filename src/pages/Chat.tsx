@@ -331,24 +331,6 @@ const Chat = () => {
                     Your AI Shopping Assistant is here to help you discover amazing products, 
                     compare prices, and find exactly what you're looking for!
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-                    <div className="p-4 bg-white rounded-lg border border-gray-200 hover:border-orange-200 cursor-pointer transition-colors">
-                      <h3 className="font-medium text-gray-800 mb-2">🛍️ Find Products</h3>
-                      <p className="text-sm text-gray-600">Search for items across multiple stores and platforms</p>
-                    </div>
-                    <div className="p-4 bg-white rounded-lg border border-gray-200 hover:border-orange-200 cursor-pointer transition-colors">
-                      <h3 className="font-medium text-gray-800 mb-2">💰 Compare Prices</h3>
-                      <p className="text-sm text-gray-600">Get the best deals and price comparisons</p>
-                    </div>
-                    <div className="p-4 bg-white rounded-lg border border-gray-200 hover:border-orange-200 cursor-pointer transition-colors">
-                      <h3 className="font-medium text-gray-800 mb-2">✨ Get Recommendations</h3>
-                      <p className="text-sm text-gray-600">Personalized suggestions based on your preferences</p>
-                    </div>
-                    <div className="p-4 bg-white rounded-lg border border-gray-200 hover:border-orange-200 cursor-pointer transition-colors">
-                      <h3 className="font-medium text-gray-800 mb-2">🎁 Suggest gifts for loved one</h3>
-                      <p className="text-sm text-gray-600">Get thoughtful gift ideas for special occasions</p>
-                    </div>
-                  </div>
                 </div>
               ) : (
                 <div className="space-y-4 max-w-4xl mx-auto">
