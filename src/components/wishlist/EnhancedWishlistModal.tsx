@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Heart, Plus, X, Hash, ShoppingCart, Gift } from "lucide-react";
 import ProductImageFallback from "@/components/ProductImageFallback";
-import ShareButton from "@/components/sharing/ShareButton";
+import EnhancedShareButton from "@/components/sharing/EnhancedShareButton";
 
 interface WishlistGroup {
   id: string;
@@ -222,10 +222,11 @@ const EnhancedWishlistModal = ({ open, onOpenChange, userId, onAddToCart }: Enha
               <Badge variant="secondary">{wishlistItems.length} items</Badge>
             </div>
             {wishlistItems.length > 0 && (
-              <ShareButton
+              <EnhancedShareButton
                 contentType="wishlist"
                 contentId={userId}
                 contentTitle="My Wishlist"
+                contentData={wishlistItems}
                 variant="outline"
                 size="sm"
               />

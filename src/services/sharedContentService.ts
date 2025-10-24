@@ -166,7 +166,7 @@ export class SharedContentService {
     try {
       // Get wishlist items count for metadata
       const { data: wishlistItems } = await supabase
-        .from('wishlist_items')
+        .from('user_likes')
         .select('id')
         .eq('user_id', userId);
 
@@ -183,9 +183,10 @@ export class SharedContentService {
     try {
       // Get cart items count for metadata
       const { data: cartItems } = await supabase
-        .from('cart_items')
+        .from('user_cart_items')
         .select('id')
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .is('removed_at', null);
 
       return await this.createShare(userId, 'cart', userId, {
         items_count: cartItems?.length || 0

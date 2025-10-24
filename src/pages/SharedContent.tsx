@@ -13,6 +13,8 @@ import { useAuth } from '@/hooks/useAuth';
 import AuthDialog from '@/components/auth/AuthDialog';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { usePageMeta } from '@/hooks/usePageMeta';
+import { SocialShareService } from '@/services/socialShareService';
 
 const SharedContentPage = () => {
   const { shareCode } = useParams<{ shareCode: string }>();
@@ -23,6 +25,29 @@ const SharedContentPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [contentData, setContentData] = useState<any>(null);
   const [showAppChoice, setShowAppChoice] = useState(false);
+
+  // Generate share metadata based on content type
+  const shareMetadata = React.useMemo(() => {
+    if (!sharedContent || !contentData) return undefined;
+    
+    const shareUrl = window.location.href;
+    
+    switch (sharedContent.content_type) {
+      case 'product':
+        return SocialShareService.generateProductMetadata(contentData, shareUrl);
+      case 'wishlist':
+        return SocialShareService.generateWishlistMetadata(contentData, shareUrl);
+      case 'cart':
+        return SocialShareService.generateCartMetadata(contentData, shareUrl);
+      case 'conversation':
+        return SocialShareService.generateConversationMetadata(contentData.conversation, shareUrl);
+      default:
+        return undefined;
+    }
+  }, [sharedContent, contentData]);
+
+  // Update page meta tags
+  usePageMeta(shareMetadata);
 
   useEffect(() => {
     if (shareCode) {
@@ -57,8 +82,11 @@ const SharedContentPage = () => {
     try {
       switch (content.content_type) {
         case 'product':
-          const product = await ProductService.getProductById(content.content_id);
-          setContentData(product);
+          const productResult = await ProductService.getProduct(content.content_id);
+          if (productResult.error) {
+            throw new Error('Product not found');
+          }
+          setContentData(productResult.data);
           break;
         case 'conversation':
           const conversation = await ConversationService.getSharedConversation(content.content_id);
@@ -66,12 +94,60 @@ const SharedContentPage = () => {
           setContentData({ conversation, messages });
           break;
         case 'wishlist':
-          const wishlistItems = await OrderService.getWishlistItems(content.content_id);
-          setContentData(wishlistItems);
+          const { data: wishlistItems, error: wishlistError } = await supabase
+            .from('user_likes')
+            .select(`
+              *,
+              products (
+                id,
+                name,
+                price,
+                main_image,
+                category,
+                original_price
+              )
+            `)
+            .eq('user_id', content.user_id);
+          
+          if (wishlistError) {
+            console.error('Error fetching wishlist items:', wishlistError);
+            setContentData([]);
+          } else {
+            setContentData(wishlistItems || []);
+          }
           break;
         case 'cart':
-          const cartItems = await OrderService.getCartItems(content.content_id);
-          setContentData(cartItems);
+          const { data: cartItems, error: cartError } = await supabase
+            .from('user_cart_items')
+            .select(`
+              *,
+              products (
+                id,
+                name,
+                price,
+                main_image,
+                category,
+                original_price
+              )
+            `)
+            .eq('user_id', content.user_id)
+            .is('removed_at', null);
+          
+          if (cartError) {
+            console.error('Error fetching cart items:', cartError);
+            setContentData([]);
+          } else {
+            // Transform to match the expected format
+            const transformedCartItems = (cartItems || []).map(item => ({
+              id: item.id,
+              user_id: item.user_id,
+              product_id: item.product_id,
+              quantity: item.quantity,
+              added_at: item.added_at,
+              product: Array.isArray(item.products) ? item.products[0] : item.products
+            }));
+            setContentData(transformedCartItems);
+          }
           break;
       }
     } catch (error) {

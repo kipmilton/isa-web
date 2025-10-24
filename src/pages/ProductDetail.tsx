@@ -27,7 +27,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import ProductImageFallback from "@/components/ProductImageFallback";
 import { useUISound } from "@/contexts/SoundContext";
-import ShareButton from "@/components/sharing/ShareButton";
+import EnhancedShareButton from "@/components/sharing/EnhancedShareButton";
+import { usePageMeta } from "@/hooks/usePageMeta";
+import { SocialShareService } from "@/services/socialShareService";
 
 const ProductDetail = () => {
   const playAddToCart = useUISound("add_to_cart");
@@ -55,6 +57,12 @@ const ProductDetail = () => {
   const [userReview, setUserReview] = useState<ProductReview | null>(null);
   const [isInCart, setIsInCart] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+
+  // Generate share metadata for this product
+  const shareMetadata = product ? SocialShareService.generateProductMetadata(product, window.location.href) : undefined;
+  
+  // Update page meta tags
+  usePageMeta(shareMetadata);
 
   useEffect(() => {
     if (productId) {
@@ -469,11 +477,12 @@ const ProductDetail = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-                <ShareButton
+                <EnhancedShareButton
                   contentType="product"
                   contentId={product.id}
                   contentTitle={product.name}
                   contentImage={product.main_image}
+                  contentData={product}
                   variant="outline"
                   size="sm"
                 />

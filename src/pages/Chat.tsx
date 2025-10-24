@@ -10,7 +10,7 @@ import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, S
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ConversationService, ChatConversation, ChatMessage } from "@/services/conversationService";
-import ShareButton from "@/components/sharing/ShareButton";
+import EnhancedShareButton from "@/components/sharing/EnhancedShareButton";
 import { toast } from "sonner";
 
   interface Message {
@@ -265,10 +265,11 @@ const Chat = () => {
                           </div>
                         </div>
                         {currentConversationId === chat.id && (
-                          <ShareButton
+                          <EnhancedShareButton
                             contentType="conversation"
                             contentId={chat.id}
                             contentTitle={chat.title}
+                            contentData={chat}
                             variant="ghost"
                             size="sm"
                             showText={false}
@@ -300,10 +301,11 @@ const Chat = () => {
                   Your AI Shopping Assistant
                 </div>
                 {currentConversationId && (
-                  <ShareButton
+                  <EnhancedShareButton
                     contentType="conversation"
                     contentId={currentConversationId}
                     contentTitle={chatHistory.find(c => c.id === currentConversationId)?.title || 'MyPlug Conversation'}
+                    contentData={chatHistory.find(c => c.id === currentConversationId)}
                     variant="outline"
                     size="sm"
                   />
@@ -369,10 +371,11 @@ const Chat = () => {
                               <span className="text-xs font-medium text-orange-600">MyPlug</span>
                             </div>
                             {currentConversationId && (
-                              <ShareButton
+                              <EnhancedShareButton
                                 contentType="conversation"
                                 contentId={currentConversationId}
                                 contentTitle={chatHistory.find(c => c.id === currentConversationId)?.title || 'MyPlug Conversation'}
+                                contentData={chatHistory.find(c => c.id === currentConversationId)}
                                 variant="ghost"
                                 size="sm"
                                 showText={false}

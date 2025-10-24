@@ -7,7 +7,7 @@ import { OrderService } from "@/services/orderService";
 import { CartItemWithProduct } from "@/types/order";
 import CheckoutModal from "./CheckoutModal";
 import { useUISound } from "@/contexts/SoundContext";
-import ShareButton from "@/components/sharing/ShareButton";
+import EnhancedShareButton from "@/components/sharing/EnhancedShareButton";
 
 interface CartModalProps {
   isOpen: boolean;
@@ -130,10 +130,11 @@ const CartModal = ({ isOpen, onClose, user, onRemoveFromCart, onUpdateQuantity }
                 Shopping Cart ({cartItems.length})
               </div>
               {cartItems.length > 0 && (
-                <ShareButton
+                <EnhancedShareButton
                   contentType="cart"
                   contentId={user?.id || ''}
                   contentTitle="My Cart"
+                  contentData={cartItems}
                   variant="outline"
                   size="sm"
                 />
