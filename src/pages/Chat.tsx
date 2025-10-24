@@ -328,8 +328,7 @@ const Chat = () => {
                     Hi! I'm MyPlug 👋
                   </h2>
                   <p className="text-gray-600 mb-6 max-w-md">
-                    Your AI Shopping Assistant is here to help you discover amazing products, 
-                    compare prices, and find exactly what you're looking for!
+                  Tell me what you want - I'll ask about your budget and preferences - I'll instantly display the best products curated just for you - you can then proceed to checkout.
                   </p>
                 </div>
               ) : (
