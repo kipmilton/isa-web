@@ -547,6 +547,9 @@ const VendorProductManagement = ({ user, isFullPage = false }: VendorProductMana
         pickup_county: formData.pickup_county,
         pickup_constituency: formData.pickup_constituency,
         pickup_ward: formData.pickup_ward,
+        // Convert arrays to JSONB-compatible format
+        delivery_methods: formData.delivery_methods || [],
+        materials: formData.materials || [],
       };
 
       let productId: string;
