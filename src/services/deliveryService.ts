@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { DeliveryOrder } from '@/types/delivery';
+import { FikishaIntegrationService } from './fikishaIntegrationService';
 
 export interface Location {
   lat: number;
@@ -63,6 +64,28 @@ export class DeliveryService {
         })
         .select()
         .single();
+
+      if (error) {
+        return { data: null, error };
+      }
+
+      // Automatically send to Fikisha if delivery order was created successfully
+      if (data) {
+        try {
+          const fikishaResult = await FikishaIntegrationService.sendDeliveryTaskToFikisha(
+            data.id,
+            orderId
+          );
+          
+          if (!fikishaResult.success) {
+            console.warn('Failed to send delivery task to Fikisha:', fikishaResult.error);
+            // Don't fail the entire operation, just log the warning
+          }
+        } catch (fikishaError) {
+          console.warn('Error sending to Fikisha:', fikishaError);
+          // Don't fail the entire operation
+        }
+      }
 
       return { data: data as DeliveryOrder, error };
     } catch (error) {

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -24,6 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { OrderWithDetails, OrderItem } from '@/types/order';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import TrackingCodeDisplay from '@/components/TrackingCodeDisplay';
 
 interface OrderReturn {
   id: string;
@@ -103,20 +104,40 @@ const MyOrders = () => {
 
   const fetchOrderReturns = async () => {
     try {
+      // Check if order_returns table exists first
       const { data, error } = await supabase
+        .from('order_returns')
+        .select('*')
+        .eq('customer_id', user?.id)
+        .limit(1);
+
+      if (error) {
+        console.error('Error fetching order returns:', error);
+        // If table doesn't exist or has policy issues, just set empty returns
+        setOrderReturns({});
+        return;
+      }
+      
+      // If we got here, table exists, fetch all returns
+      const { data: allReturns, error: fetchError } = await supabase
         .from('order_returns')
         .select('*')
         .eq('customer_id', user?.id);
 
-      if (error) throw error;
+      if (fetchError) {
+        console.error('Error fetching all order returns:', fetchError);
+        setOrderReturns({});
+        return;
+      }
       
       const returnsMap: Record<string, any> = {};
-      data?.forEach(returnItem => {
+      allReturns?.forEach(returnItem => {
         returnsMap[returnItem.order_id] = returnItem;
       });
       setOrderReturns(returnsMap);
     } catch (error) {
       console.error('Error fetching order returns:', error);
+      setOrderReturns({});
     }
   };
 
@@ -325,62 +346,59 @@ const MyOrders = () => {
                               Qty: {item.quantity} × {formatPrice(item.unit_price)}
                             </p>
                           </div>
-                          <p className="font-semibold">{formatPrice(item.total_price)}</p>
                         </div>
                       ))}
                     </div>
 
-                    {order.status === 'delivered' && (
-                      <div className="mt-4 pt-4 border-t">
-                        <div className="flex flex-wrap gap-2">
+                    <div className="mt-4 pt-4 border-t">
+                      <div className="flex flex-wrap gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setSelectedOrder(order)}
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          View Details
+                        </Button>
+                          
+                        {order.status === 'delivered' && isReturnEligible(order) && !returnRequest && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowReturnForm(true);
+                            }}
+                          >
+                            <RotateCcw className="w-4 h-4 mr-2" />
+                            Return Item
+                          </Button>
+                        )}
+                        
+                        {order.status === 'delivered' && returnRequest && (
+                          <Badge variant="outline" className="text-orange-600 border-orange-200">
+                            Return {returnRequest.status}
+                          </Badge>
+                        )}
+                        
+                        {order.status === 'delivered' && !(order as any).product_rating && (
                           <Button 
                             variant="outline" 
                             size="sm"
                             onClick={() => setSelectedOrder(order)}
                           >
-                            <Eye className="w-4 h-4 mr-2" />
-                            View Details
+                            <Star className="w-4 h-4 mr-2" />
+                            Rate Order
                           </Button>
-                          
-                          {isReturnEligible(order) && !returnRequest && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => {
-                                setSelectedOrder(order);
-                                setShowReturnForm(true);
-                              }}
-                            >
-                              <RotateCcw className="w-4 h-4 mr-2" />
-                              Return Item
-                            </Button>
-                          )}
-                          
-                          {returnRequest && (
-                            <Badge variant="outline" className="text-orange-600 border-orange-200">
-                              Return {returnRequest.status}
-                            </Badge>
-                          )}
-                          
-                          {!(selectedOrder as any).product_rating && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => setSelectedOrder(order)}
-                            >
-                              <Star className="w-4 h-4 mr-2" />
-                              Rate Order
-                            </Button>
-                          )}
-                        </div>
-                        
-                        {!isReturnEligible(order) && order.actual_delivery_date && !returnRequest && (
-                          <p className="text-xs text-gray-500 mt-2">
-                            Return period expired (24hrs after delivery)
-                          </p>
                         )}
                       </div>
-                    )}
+                      
+                      {order.status === 'delivered' && !isReturnEligible(order) && order.actual_delivery_date && !returnRequest && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          Return period expired (24hrs after delivery)
+                        </p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -393,9 +411,15 @@ const MyOrders = () => {
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Order Details #{selectedOrder?.order_number}</DialogTitle>
+              <DialogDescription>
+                View detailed information about your order including items, tracking, and delivery status.
+              </DialogDescription>
             </DialogHeader>
             {selectedOrder && (
               <div className="space-y-6">
+                {/* Tracking Code Display */}
+                <TrackingCodeDisplay orderId={selectedOrder.id} />
+                
                 <div>
                   <h3 className="font-semibold mb-3">Items</h3>
                   <div className="space-y-3">
@@ -578,6 +602,9 @@ const MyOrders = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Return Request</DialogTitle>
+              <DialogDescription>
+                Submit a return request for your order. Please provide details about why you want to return the item.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
