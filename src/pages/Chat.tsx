@@ -298,7 +298,7 @@ const Chat = () => {
               </div>
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-gray-500">
-                  Your AI Shopping Assistant
+                  Your Shopping Assistant
                 </div>
                 {currentConversationId && (
                   <EnhancedShareButton
