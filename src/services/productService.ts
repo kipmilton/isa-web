@@ -241,4 +241,41 @@ export class ProductService {
       .from('notifications')
       .insert([{ product_id, vendor_id, type, message, read: false }]);
   }
+
+  static async getSimilarProducts(productId: string, subcategory?: string) {
+    // First get the current product to get its subcategory
+    const { data: currentProduct, error: productError } = await supabase
+      .from('products')
+      .select('subcategory, category')
+      .eq('id', productId)
+      .single();
+
+    if (productError || !currentProduct) {
+      console.error('Error fetching current product:', productError);
+      return [];
+    }
+
+    // Fetch products with same subcategory (if available) or same category
+    let query = supabase
+      .from('products')
+      .select('*')
+      .neq('id', productId)
+      .eq('status', 'approved')
+      .limit(20);
+
+    if (currentProduct.subcategory) {
+      query = query.eq('subcategory', currentProduct.subcategory);
+    } else {
+      query = query.eq('category', currentProduct.category);
+    }
+
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error fetching similar products:', error);
+      return [];
+    }
+    
+    return data || [];
+  }
 }
