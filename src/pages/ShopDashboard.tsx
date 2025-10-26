@@ -60,6 +60,7 @@ const ShopDashboard = () => {
   const [showSubscriptionManager, setShowSubscriptionManager] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<string>('KES');
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
+  const [showUpgradeBanner, setShowUpgradeBanner] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -69,6 +70,15 @@ const ShopDashboard = () => {
       setLoading(false);
     };
     getSession();
+  }, []);
+
+  // Hide upgrade banner after 60 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowUpgradeBanner(false);
+    }, 60000); // 60 seconds
+
+    return () => clearTimeout(timer);
   }, []);
 
   // Show Ask MyPlug AI dialog only once per user/browser
@@ -751,7 +761,7 @@ const ShopDashboard = () => {
         )}
 
         {/* Upgrade to Premium Banner */}
-        {!currentSubscription && (
+        {!currentSubscription && showUpgradeBanner && (
           <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
