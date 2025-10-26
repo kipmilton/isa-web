@@ -22,6 +22,8 @@ export interface Product {
     first_name?: string;
     last_name?: string;
     vendor_serial_number?: string;
+    company?: string;
+    brand_name?: string;
   };
   pickup_location?: string;
   pickup_phone_number?: string;

@@ -137,7 +137,7 @@ const Chat = () => {
       }
     }
 
-    // Simulate ISA response
+    // Simulate MyPlug AI response
     setTimeout(async () => {
       const responses = [
         "I'd be happy to help you find the perfect products! Let me search through our curated selection...",
@@ -156,12 +156,12 @@ const Chat = () => {
       
       setMessages(prev => [...prev, isaResponse]);
 
-      // Save ISA response to database
+      // Save MyPlug AI response to database
       if (conversationId) {
         try {
           await ConversationService.addMessage(conversationId, user.id, 'myplug', isaResponse.content);
         } catch (error) {
-          console.error('Error saving ISA message:', error);
+          console.error('Error saving MyPlug AI message:', error);
         }
       }
     }, 1500);

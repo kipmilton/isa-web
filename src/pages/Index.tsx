@@ -533,7 +533,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* What People Say About ISA */}
+      {/* What People Say About MyPlug */}
       <section className="py-16 bg-gradient-to-r from-orange-50 to-yellow-50 overflow-hidden">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
@@ -744,16 +744,16 @@ const Index = () => {
               <p><strong>3.1 Responsibility:</strong> Vendors are solely responsible for ensuring all listed Products comply with applicable laws, are accurately described, safe, and meet quality standards.</p>
               <p><strong>3.2 Accuracy:</strong> Product names, descriptions, prices, images, shipping timelines, stock levels, and variations must be complete and truthful. Misleading content may result in removal.</p>
               <p><strong>3.3 Intellectual Property:</strong> Vendors must not use copyrighted content, trademarks, or logos without permission. You agree to indemnify MyPlug against claims related to IP violations.</p>
-              <p><strong>3.4 Restricted Items:</strong> Vendors may not list illegal products, counterfeit goods, expired items, or anything ISA deems unsafe or unethical (e.g., weapons, hate merchandise, etc.).</p>
+              <p><strong>3.4 Restricted Items:</strong> Vendors may not list illegal products, counterfeit goods, expired items, or anything MyPlug deems unsafe or unethical (e.g., weapons, hate merchandise, etc.).</p>
               <h3 className="text-lg font-semibold mt-6">4. ORDER FULFILMENT & CUSTOMER SERVICE</h3>
               <p><strong>4.1 Timeliness:</strong> Vendors must fulfill orders within the agreed timeline. Delays must be communicated to MyPlug and customers in real time.</p>
               <p><strong>4.2 Delivery:</strong> Where Vendors manage logistics, clear shipping policies and delivery schedules must be defined. Vendors are liable for damaged or undelivered goods if using third-party couriers.</p>
-              <p><strong>4.3 Returns & Refunds:</strong> Vendors must adhere to ISA's refund/return policy or provide an equivalent policy approved during onboarding.</p>
+              <p><strong>4.3 Returns & Refunds:</strong> Vendors must adhere to MyPlug's refund/return policy or provide an equivalent policy approved during onboarding.</p>
               <p><strong>4.4 Customer Complaints:</strong> Vendors are expected to respond to any customer-related complaint or inquiry referred by MyPlug within 24–48 hours.</p>
               <h3 className="text-lg font-semibold mt-6">5. COMMISSIONS, PAYMENTS & FEES</h3>
               <p><strong>5.1 Commission Structure:</strong> MyPlug retains a commission on each sale, as agreed upon during onboarding or updated periodically with notice. This may vary by category or volume.</p>
               <p><strong>5.2 Payouts:</strong> Net revenue (after commissions and applicable charges) will be remitted to the Vendor on a [weekly/bi-weekly/monthly] basis, depending on the payout schedule.</p>
-              <p><strong>5.3 Deductions:</strong> ISA reserves the right to deduct amounts for:</p>
+              <p><strong>5.3 Deductions:</strong> MyPlug reserves the right to deduct amounts for:</p>
               <ul className="list-disc ml-6">
                 <li>Refunds or chargebacks</li>
                 <li>Promotional discounts</li>
@@ -777,7 +777,7 @@ const Index = () => {
               <ul className="list-disc ml-6">
                 <li>Breaches these Terms</li>
                 <li>Provides false or harmful listings</li>
-                <li>Damages ISA's brand or user trust</li>
+                <li>Damages MyPlug's brand or user trust</li>
                 <li>Violates laws or ethical guidelines</li>
               </ul>
               <p><strong>9.2</strong> Upon termination:</p>
@@ -786,7 +786,7 @@ const Index = () => {
                 <li>Outstanding dues will be settled after accounting for refunds, claims, and disputes.</li>
               </ul>
               <h3 className="text-lg font-semibold mt-6">10. LIABILITY & INDEMNITY</h3>
-              <p><strong>10.1</strong> Vendors agree to indemnify and hold harmless ISA, its officers, and agents from any claims, damages, or liabilities resulting from:</p>
+              <p><strong>10.1</strong> Vendors agree to indemnify and hold harmless MyPlug, its officers, and agents from any claims, damages, or liabilities resulting from:</p>
               <ul className="list-disc ml-6">
                 <li>Product defects, misinformation, or regulatory violations</li>
                 <li>Intellectual property disputes</li>

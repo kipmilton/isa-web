@@ -63,7 +63,7 @@ export class ProductService {
       .from('products')
       .select(`
         *,
-        vendor:profiles!products_vendor_id_fkey(first_name, last_name)
+        vendor:profiles!products_vendor_id_fkey(first_name, last_name, company, brand_name)
       `)
       .eq('id', id)
       .single();

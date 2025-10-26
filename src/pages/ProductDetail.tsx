@@ -44,7 +44,7 @@ const ProductDetail = () => {
   const [productImages, setProductImages] = useState<ProductImage[]>([]);
   const [productAttributes, setProductAttributes] = useState<ProductAttribute[]>([]);
   const [productReviews, setProductReviews] = useState<ProductReview[]>([]);
-  const [vendorInfo, setVendorInfo] = useState<{ first_name?: string; last_name?: string } | null>(null);
+  const [vendorInfo, setVendorInfo] = useState<{ first_name?: string; last_name?: string; company?: string; brand_name?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
@@ -803,18 +803,22 @@ const ProductDetail = () => {
               </div>
             </div>
 
-                         {/* Pickup Information */}
+                         {/* Supplier Information */}
              <Card>
                <CardHeader>
-                 <CardTitle className="text-lg">Pickup Information</CardTitle>
+                 <CardTitle className="text-lg">Supplier Information</CardTitle>
                </CardHeader>
                <CardContent className="space-y-2">
                  <div>
-                   <span className="text-sm font-medium text-gray-600">Vendor:</span>
+                   <span className="text-sm font-medium text-gray-600">Supplier:</span>
                    <p className="text-sm">
-                     {vendorInfo 
-                       ? `${vendorInfo.first_name || ''} ${vendorInfo.last_name || ''}`.trim() || 'Unknown Vendor'
-                       : 'Fullfilled by ISA'
+                     {vendorInfo?.brand_name 
+                       ? vendorInfo.brand_name
+                       : vendorInfo?.company 
+                         ? vendorInfo.company
+                         : vendorInfo 
+                           ? `${vendorInfo.first_name || ''} ${vendorInfo.last_name || ''}`.trim() || 'Unknown Supplier'
+                           : 'Unknown Supplier'
                      }
                    </p>
                  </div>

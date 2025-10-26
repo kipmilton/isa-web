@@ -71,7 +71,7 @@ const ShopDashboard = () => {
     getSession();
   }, []);
 
-  // Show Ask ISA dialog only once per user/browser
+  // Show Ask MyPlug AI dialog only once per user/browser
   useEffect(() => {
     try {
       const hasSeen = localStorage.getItem('myplug_seen_ask_myplug') === 'true';
