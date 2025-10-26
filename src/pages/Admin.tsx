@@ -23,17 +23,22 @@ const Admin = () => {
         return;
       }
 
-      // Check admin_roles table for admin access
-      const { data: adminRole, error: adminError } = await supabase
+      // Check admin_roles table for admin access - query all then filter client-side to avoid RLS issues
+      const { data: adminRoles, error: adminError } = await supabase
         .from('admin_roles')
         .select('*')
-        .eq('user_id', session.user.id)
-        .eq('is_active', true)
-        .eq('is_suspended', false)
-        .single();
+        .eq('user_id', session.user.id);
+
+      console.log('Admin roles query result:', { adminRoles, adminError });
+
+      // Filter results client-side to avoid RLS policy issues
+      const adminRole = adminRoles?.find(role => 
+        role.is_active === true && 
+        role.is_suspended === false
+      );
 
       if (adminError || !adminRole) {
-        // Fallback: check user_roles and profiles
+        // Fallback: check profiles
         const { data: profile } = await supabase
           .from('profiles')
           .select('user_type')

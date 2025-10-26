@@ -236,13 +236,11 @@ const AdminProducts = () => {
       console.log('Current user ID:', user?.id);
       console.log('Attempting to approve product:', product.id);
       
-      // Update product status directly since RPC function doesn't exist
+      // Update product status directly
       const { error, data } = await supabase
         .from('products')
         .update({ 
           status: 'approved',
-          approved_at: new Date().toISOString(),
-          approved_by: user?.id,
           is_active: true
         })
         .eq('id', product.id);
@@ -271,13 +269,12 @@ const AdminProducts = () => {
     try {
       console.log('Attempting to reject product:', approvalProduct.id, 'with reason:', rejectionReason);
       
-      // Update product status directly since RPC function doesn't exist
+      // Update product status directly
       const { error, data } = await supabase
         .from('products')
         .update({ 
           status: 'rejected',
           rejection_reason: rejectionReason.trim(),
-          rejected_at: new Date().toISOString(),
           is_active: false
         })
         .eq('id', approvalProduct.id);

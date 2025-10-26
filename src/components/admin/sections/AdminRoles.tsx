@@ -63,7 +63,7 @@ const AdminRoles = () => {
       const { data: rolesData, error: rolesError } = await supabase
         .from('admin_roles')
         .select('*')
-        .order('assigned_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (rolesError) {
         console.error('Admin roles error:', rolesError);
