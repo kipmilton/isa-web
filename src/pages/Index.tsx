@@ -313,7 +313,7 @@ const Index = () => {
             <img src="/myplug-loading.png" alt="MyPlug Logo" className="h-40 w-40" />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-fade-in">
-            Shop Smarter, Buy Better
+            Shop Smarter, Through Chat
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto animate-fade-in">
             Discover fashion, lifestyle & essentials curated just for you — powered by AI.
@@ -324,7 +324,7 @@ const Index = () => {
               className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 hover-scale"
               onClick={handleTryISA}
             >
-              Try MyPlug Free
+              Shop Through Chat
             </Button>
             <Button 
               size="lg" 
@@ -336,7 +336,7 @@ const Index = () => {
             </Button>
           </div>
           <p className="text-sm text-gray-500 mt-4 animate-fade-in">
-            Powered by AI. Designed for Trust. Built for Africa.
+            Developed in Kenya. Designed for Trust. Built for Africa.
           </p>
         </div>
       </section>
@@ -399,7 +399,7 @@ const Index = () => {
                 <h3 className="text-2xl font-semibold text-gray-800 mb-4">Get personalized results</h3>
               </div>
               <p className="text-gray-600 text-lg leading-relaxed">
-                Our AI finds the best products & deals based on your style, preferences, and budget.
+                MyPlug finds the best products & deals based on your style, preferences, and budget.
               </p>
               <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-100">
                 <p className="text-sm text-green-700 italic">✨ 5 perfect matches found!</p>
@@ -458,7 +458,7 @@ const Index = () => {
                   <span className="text-orange-700 font-bold">MK</span>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-800">Milton Kiprop</h4>
+                  <h4 className="font-semibold text-gray-800">Kiprop Arap Kirui</h4>
                   <p className="text-gray-500 text-sm">CTO & Co-founder</p>
                 </div>
               </div>
