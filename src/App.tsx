@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { VendorProvider } from "@/contexts/VendorContext";
 import { ConfettiProvider } from "@/contexts/ConfettiContext";
 import AuthGuard from "./components/auth/AuthGuard";
@@ -36,6 +37,18 @@ import SharedContentPage from "./pages/SharedContent";
 
 const queryClient = new QueryClient();
 
+const GATracker = () => {
+  const location = useLocation();
+  useEffect(() => {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("config", "G-T2X6NTDCL6", {
+        page_path: location.pathname + location.search,
+      });
+    }
+  }, [location.pathname, location.search]);
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <VendorProvider>
@@ -45,6 +58,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+          <GATracker />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/vendors" element={<Vendors />} />
