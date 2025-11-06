@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { STATUS_CODE } from "https://deno.land/std@0.224.0/http/status.ts";
 import { routeRequest } from "./utils.ts";
-import { initiateCardPayment, verifyCardPayment } from "./providers/dpo.ts";
+import { initiateCardPayment, verifyCardPayment } from "./providers/pesapal.ts";
 import { initiateMpesaPayment, verifyMpesaPayment } from "./providers/mpesa.ts";
 import { initiateAirtelPayment, verifyAirtelPayment } from "./providers/airtel.ts";
 import { initiatePaypalPayment, verifyPaypalPayment } from "./providers/paypal.ts";
@@ -29,10 +29,10 @@ async function handleInitiate(req: Request): Promise<Response> {
     return Response.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const provider: ProviderName = payload.method === 'card_bank' ? 'DPO' : (payload.method === 'mpesa' ? 'M-Pesa' : (payload.method === 'airtel' ? 'Airtel' : 'PayPal'));
+  const provider: ProviderName = payload.method === 'card_bank' ? 'Pesapal' : (payload.method === 'mpesa' ? 'M-Pesa' : (payload.method === 'airtel' ? 'Airtel' : 'PayPal'));
 
   let result: IsaPayResponse;
-  if (provider === 'DPO') {
+  if (provider === 'Pesapal') {
     result = await initiateCardPayment(payload);
   } else if (provider === 'M-Pesa') {
     result = await initiateMpesaPayment(payload);
@@ -78,13 +78,13 @@ async function handleStatus(_req: Request, transactionId: string): Promise<Respo
 
 async function handleWebhook(req: Request): Promise<Response> {
   const providerHeader = req.headers.get('x-isa-provider');
-  const provider = (providerHeader as ProviderName) || 'DPO';
+  const provider = (providerHeader as ProviderName) || 'Pesapal';
 
   // Verify signature (provider-specific) inside respective verify functions
   const body = await req.json();
 
   let verified: { status: 'success' | 'failed' | 'pending'; reference_id?: string; transaction_id?: string } | null = null;
-  if (provider === 'DPO') verified = await verifyCardPayment(req, body);
+  if (provider === 'Pesapal') verified = await verifyCardPayment(req, body);
   else if (provider === 'M-Pesa') verified = await verifyMpesaPayment(req, body);
   else if (provider === 'Airtel') verified = await verifyAirtelPayment(req, body);
   else verified = await verifyPaypalPayment(req, body);

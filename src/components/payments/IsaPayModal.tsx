@@ -112,7 +112,7 @@ export default function IsaPayModal({ open, onOpenChange, userId, amount, curren
           <DialogDescription>Encrypted checkout. We never share your card or wallet details with merchants.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Button disabled={loading !== null} onClick={() => handlePay('card_bank')} className="w-full">Pay with Card / Bank (DPO)</Button>
+          <Button disabled={loading !== null} onClick={() => handlePay('card_bank')} className="w-full">Pay with Card / Bank (Pesapal)</Button>
           <Button disabled={loading !== null} onClick={() => handlePay('mpesa')} variant="secondary" className="w-full">Pay with M-Pesa</Button>
           <Button disabled={loading !== null} onClick={() => handlePay('airtel')} variant="secondary" className="w-full">Pay with Airtel Money</Button>
           <Button disabled={loading !== null} onClick={() => handlePay('paypal')} variant="outline" className="w-full">Pay with PayPal</Button>

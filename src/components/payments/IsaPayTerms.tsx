@@ -6,7 +6,7 @@ export default function IsaPayTerms() {
       <p><strong>Company:</strong> MyPlug Technologies Limited</p>
       <p>Welcome to MyPlug Pay ("we," "our," or "us"). By using MyPlug Pay, you ("customer" or "merchant") agree to the following Terms of Service. Please read carefully.</p>
       <h4>1. Payment Processing</h4>
-      <p>MyPlug Pay provides a secure payment gateway for transactions between customers and merchants. Payments may be processed through third-party providers (such as DPO, PayPal, M-Pesa, Airtel Money) but will always be branded and managed under MyPlug Pay. By using MyPlug Pay, you authorize us to hold, transfer, and disburse funds in accordance with these Terms.</p>
+      <p>MyPlug Pay provides a secure payment gateway for transactions between customers and merchants. Payments may be processed through third-party providers (such as Pesapal, PayPal, M-Pesa, Airtel Money) but will always be branded and managed under MyPlug Pay. By using MyPlug Pay, you authorize us to hold, transfer, and disburse funds in accordance with these Terms.</p>
       <h4>2. Fund Holding</h4>
       <p>All payments made through MyPlug Pay are held in escrow until the following conditions are met: The customer confirms receipt of the purchased item or service, OR a period of 72 hours after delivery lapses without a return request. Once either condition is satisfied, MyPlug Pay will release funds to the merchant's designated account.</p>
       <h4>3. Returns and Refunds</h4>
@@ -18,7 +18,7 @@ export default function IsaPayTerms() {
       <h4>6. Customer Obligations</h4>
       <p>Customers must provide accurate contact, delivery, and payment information. Customers agree to confirm receipt of goods or services promptly upon delivery. Failure to confirm receipt may result in automatic release of funds to the merchant after the 72-hour period.</p>
       <h4>7. Dispute Resolution</h4>
-      <p>Any disputes regarding transactions must first be raised through MyPlug Pay's dispute resolution system. If unresolved, disputes may be escalated to the respective payment provider (DPO, M-Pesa, Airtel, PayPal). MyPlug Pay's decision in a dispute will be final, subject to applicable laws.</p>
+      <p>Any disputes regarding transactions must first be raised through MyPlug Pay's dispute resolution system. If unresolved, disputes may be escalated to the respective payment provider (Pesapal, M-Pesa, Airtel, PayPal). MyPlug Pay's decision in a dispute will be final, subject to applicable laws.</p>
       <h4>8. Liability</h4>
       <p>MyPlug Pay acts as a payment intermediary and is not responsible for the quality, safety, or legality of goods/services purchased. Our liability is limited to the amount of the transaction processed through MyPlug Pay.</p>
       <h4>9. Changes to Terms</h4>
