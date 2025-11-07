@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
@@ -53,18 +53,8 @@ export const EnhancedShareButton: React.FC<EnhancedShareButtonProps> = ({
   const [copied, setCopied] = useState(false);
 
   const getContentIcon = () => {
-    switch (contentType) {
-      case 'product':
-        return <Package className="h-4 w-4" />;
-      case 'wishlist':
-        return <Heart className="h-4 w-4" />;
-      case 'cart':
-        return <ShoppingCart className="h-4 w-4" />;
-      case 'conversation':
-        return <MessageSquare className="h-4 w-4" />;
-      default:
-        return <Share2 className="h-4 w-4" />;
-    }
+    // Always use Share2 icon (three dots connected by lines)
+    return <Share2 className="h-4 w-4" />;
   };
 
   const getContentLabel = () => {
@@ -219,7 +209,10 @@ export const EnhancedShareButton: React.FC<EnhancedShareButtonProps> = ({
   return (
     <>
       <Button
-        onClick={handleShare}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleShare();
+        }}
         disabled={isSharing}
         variant={variant}
         size={size}
@@ -231,26 +224,29 @@ export const EnhancedShareButton: React.FC<EnhancedShareButtonProps> = ({
       </Button>
 
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Share2 className="h-5 w-5" />
+        <DialogContent className="max-w-2xl max-h-[90vh] w-[95vw] sm:w-full flex flex-col p-0 gap-0">
+          <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-4 border-b flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
               Share {getContentLabel()}
             </DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm mt-1">
+              Share this {contentType} with others using the link or social media platforms below.
+            </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-6">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4 sm:space-y-6 min-h-0">
             {/* Social Media Preview */}
             {shareMetadata && (
-              <div className="space-y-4">
-                <Label>How it will look when shared:</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3 sm:space-y-4">
+                <Label className="text-xs sm:text-sm">How it will look when shared:</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Facebook Preview</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-700 mb-2">Facebook Preview</p>
                     <SocialPreviewCard metadata={shareMetadata} platform="facebook" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Twitter Preview</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-700 mb-2">Twitter Preview</p>
                     <SocialPreviewCard metadata={shareMetadata} platform="twitter" />
                   </div>
                 </div>
@@ -259,53 +255,54 @@ export const EnhancedShareButton: React.FC<EnhancedShareButtonProps> = ({
 
             {/* Share Link */}
             <div className="space-y-2">
-              <Label htmlFor="share-url">Share Link</Label>
+              <Label htmlFor="share-url" className="text-xs sm:text-sm">Share Link</Label>
               <div className="flex gap-2">
                 <Input
                   id="share-url"
                   value={shareUrl}
                   readOnly
-                  className="flex-1"
+                  className="flex-1 text-xs sm:text-sm"
                 />
                 <Button
                   onClick={handleCopyLink}
                   variant="outline"
                   size="sm"
-                  className="px-3"
+                  className="px-2 sm:px-3 flex-shrink-0"
                 >
-                  {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                  {copied ? <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
                 </Button>
               </div>
             </div>
 
             {/* Social Share Buttons */}
-            <div className="space-y-3">
-              <Label>Share on Social Media</Label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            <div className="space-y-2 sm:space-y-3">
+              <Label className="text-xs sm:text-sm">Share on Social Media</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                 {socialPlatforms.map((platform) => (
                   <Button
                     key={platform.key}
                     onClick={() => handleSocialShare(platform.key)}
-                    className={`flex items-center gap-2 ${getSocialColor(platform.key)}`}
+                    className={`flex items-center justify-center gap-2 ${getSocialColor(platform.key)} text-xs sm:text-sm`}
                     size="sm"
                   >
                     {getSocialIcon(platform.key)}
-                    <span className="hidden sm:inline">{platform.name}</span>
+                    <span>{platform.name}</span>
                   </Button>
                 ))}
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2 pt-2">
-              <Button
-                onClick={() => setShowShareDialog(false)}
-                variant="outline"
-                className="flex-1"
-              >
-                Close
-              </Button>
-            </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex gap-2 pt-3 sm:pt-4 pb-4 sm:pb-6 px-4 sm:px-6 border-t flex-shrink-0">
+            <Button
+              onClick={() => setShowShareDialog(false)}
+              variant="outline"
+              className="flex-1 text-xs sm:text-sm"
+            >
+              Close
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -6,7 +6,7 @@ import { Send, Plus, History, Menu, Home, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuAction, SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ConversationService, ChatConversation, ChatMessage } from "@/services/conversationService";
@@ -197,7 +197,7 @@ const Chat = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center text-xl">Loading...</div>;
+    return <div className="min-h-screen flex items-center justify-center text-xl">Plugging...</div>;
   }
 
   if (!user) {
@@ -217,44 +217,44 @@ const Chat = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+      <div className="min-h-screen flex w-full bg-gray-50 overflow-hidden">
         <Sidebar className="border-r border-gray-200">
-          <SidebarHeader className="p-4 border-b border-gray-200">
+          <SidebarHeader className="p-3 md:p-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
-              <img src="/MyPlug.png" alt="MyPlug Logo" className="h-6 w-6" />
-              <span className="font-semibold text-gray-800">MyPlug Chat</span>
+              <img src="/MyPlug.png" alt="MyPlug Logo" className="h-5 w-5 md:h-6 md:w-6" />
+              <span className="font-semibold text-gray-800 text-sm md:text-base">MyPlug Chat</span>
             </div>
             <Button 
               onClick={startNewChat}
-              className="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-white"
+              className="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-white text-xs md:text-sm"
               size="sm"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-3 w-3 md:h-4 md:w-4 mr-2" />
               New Chat
             </Button>
           </SidebarHeader>
           
           <SidebarContent>
-            <div className="p-4">
-              <div className="flex items-center space-x-2 text-sm text-gray-600 mb-3">
-                <History className="h-4 w-4" />
+            <div className="p-3 md:p-4">
+              <div className="flex items-center space-x-2 text-xs md:text-sm text-gray-600 mb-3">
+                <History className="h-3 w-3 md:h-4 md:w-4" />
                 <span>Recent Chats</span>
               </div>
               
               <SidebarMenu>
                 {isLoadingConversations ? (
-                  <div className="text-center py-4 text-gray-500">Loading conversations...</div>
+                  <div className="text-center py-4 text-gray-500 text-xs md:text-sm">Loading conversations...</div>
                 ) : chatHistory.length === 0 ? (
-                  <div className="text-center py-4 text-gray-500">No conversations yet</div>
+                  <div className="text-center py-4 text-gray-500 text-xs md:text-sm">No conversations yet</div>
                 ) : (
                   chatHistory.map((chat) => (
                     <SidebarMenuItem key={chat.id}>
                       <SidebarMenuButton 
-                        className="w-full text-left p-3 hover:bg-gray-100 rounded-lg"
+                        className="w-full text-left p-2 md:p-3 hover:bg-gray-100 rounded-lg"
                         onClick={() => selectConversation(chat.id)}
                       >
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm text-gray-800 truncate">
+                          <div className="font-medium text-xs md:text-sm text-gray-800 truncate">
                             {chat.title}
                           </div>
                           <div className="text-xs text-gray-500 truncate mt-1">
@@ -264,7 +264,9 @@ const Chat = () => {
                             {formatTime(new Date(chat.updated_at))}
                           </div>
                         </div>
-                        {currentConversationId === chat.id && (
+                      </SidebarMenuButton>
+                      {currentConversationId === chat.id && (
+                        <SidebarMenuAction>
                           <EnhancedShareButton
                             contentType="conversation"
                             contentId={chat.id}
@@ -273,10 +275,9 @@ const Chat = () => {
                             variant="ghost"
                             size="sm"
                             showText={false}
-                            className="ml-2"
                           />
-                        )}
-                      </SidebarMenuButton>
+                        </SidebarMenuAction>
+                      )}
                     </SidebarMenuItem>
                   ))
                 )}
@@ -285,19 +286,19 @@ const Chat = () => {
           </SidebarContent>
         </Sidebar>
 
-        <SidebarInset className="flex-1">
-          <div className="flex flex-col h-screen">
+        <SidebarInset className="flex-1 overflow-hidden">
+          <div className="flex flex-col h-screen max-w-full">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
-              <div className="flex items-center space-x-3">
+            <div className="flex items-center justify-between p-3 md:p-4 border-b border-gray-200 bg-white">
+              <div className="flex items-center space-x-2 md:space-x-3 min-w-0 flex-1">
                 <SidebarTrigger />
-                <div className="flex items-center space-x-2">
-                  <img src="/MyPlug.png" alt="MyPlug Logo" className="h-6 w-6" />
-                  <h1 className="text-xl font-semibold text-gray-800">Ask MyPlug</h1>
+                <div className="flex items-center space-x-2 min-w-0">
+                  <img src="/MyPlug.png" alt="MyPlug Logo" className="h-5 w-5 md:h-6 md:w-6 flex-shrink-0" />
+                  <h1 className="text-lg md:text-xl font-semibold text-gray-800 truncate">Ask MyPlug</h1>
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
-                <div className="text-sm text-gray-500">
+              <div className="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
+                <div className="text-xs md:text-sm text-gray-500 hidden md:block">
                   Your Shopping Assistant
                 </div>
                 {currentConversationId && (
@@ -308,38 +309,40 @@ const Chat = () => {
                     contentData={chatHistory.find(c => c.id === currentConversationId)}
                     variant="outline"
                     size="sm"
+                    showText={false}
+                    className="flex"
                   />
                 )}
                 <Link to="/">
-                  <Button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 hover:scale-105 transition-transform flex items-center">
-                    <Home className="h-4 w-4 mr-2" />
-                    Back Home
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-white px-2 md:px-4 py-2 hover:scale-105 transition-transform flex items-center">
+                    <Home className="h-4 w-4 md:mr-2" />
+                    <span className="hidden md:inline">Back Home</span>
                   </Button>
                 </Link>
               </div>
             </div>
 
             {/* Chat Messages */}
-            <ScrollArea className="flex-1 p-4">
+            <ScrollArea className="flex-1 p-3 md:p-4">
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <img src="/MyPlug.png" alt="MyPlug Logo" className="h-16 w-16 mb-4" />
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+                <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                  <img src="/MyPlug.png" alt="MyPlug Logo" className="h-12 w-12 md:h-16 md:w-16 mb-4" />
+                  <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-2">
                     Hi! I'm MyPlug 👋
                   </h2>
-                  <p className="text-gray-600 mb-6 max-w-md">
+                  <p className="text-sm md:text-base text-gray-600 mb-6 max-w-md">
                   Tell me what you want - I'll ask about your budget and preferences - I'll instantly display the best products curated just for you - you can then proceed to checkout.
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4 max-w-4xl mx-auto">
+                <div className="space-y-3 md:space-y-4 max-w-4xl mx-auto px-2 md:px-0">
                   {messages.map((message) => (
                     <div
                       key={message.id}
                       className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+                        className={`max-w-[85%] sm:max-w-xs lg:max-w-md px-3 md:px-4 py-2 md:py-3 rounded-2xl ${
                           message.type === 'user'
                             ? 'bg-orange-500 text-white'
                             : 'bg-white border border-gray-200 text-gray-800'
@@ -348,25 +351,26 @@ const Chat = () => {
                         {message.type === 'isa' && (
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center space-x-2">
-                              <img src="/MyPlug.png" alt="MyPlug Logo" className="h-4 w-4" />
+                              <img src="/MyPlug.png" alt="MyPlug Logo" className="h-3 w-3 md:h-4 md:w-4" />
                               <span className="text-xs font-medium text-orange-600">MyPlug</span>
                             </div>
                             {currentConversationId && (
-                              <EnhancedShareButton
-                                contentType="conversation"
-                                contentId={currentConversationId}
-                                contentTitle={chatHistory.find(c => c.id === currentConversationId)?.title || 'MyPlug Conversation'}
-                                contentData={chatHistory.find(c => c.id === currentConversationId)}
-                                variant="ghost"
-                                size="sm"
-                                showText={false}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                              />
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex">
+                                <EnhancedShareButton
+                                  contentType="conversation"
+                                  contentId={currentConversationId}
+                                  contentTitle={chatHistory.find(c => c.id === currentConversationId)?.title || 'MyPlug Conversation'}
+                                  contentData={chatHistory.find(c => c.id === currentConversationId)}
+                                  variant="ghost"
+                                  size="sm"
+                                  showText={false}
+                                />
+                              </div>
                             )}
                           </div>
                         )}
-                        <p className="text-sm leading-relaxed">{message.content}</p>
-                        <div className="text-xs opacity-70 mt-2">
+                        <p className="text-xs md:text-sm leading-relaxed break-words">{message.content}</p>
+                        <div className="text-xs opacity-70 mt-1 md:mt-2">
                           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
@@ -377,25 +381,26 @@ const Chat = () => {
             </ScrollArea>
 
             {/* Input Area */}
-            <div className="p-4 border-t border-gray-200 bg-white">
+            <div className="p-3 md:p-4 border-t border-gray-200 bg-white">
               <div className="max-w-4xl mx-auto">
-                <div className="flex space-x-3">
+                <div className="flex space-x-2 md:space-x-3">
                   <Input
                     value={currentMessage}
                     onChange={(e) => setCurrentMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Ask MyPlug about products, prices, recommendations..."
-                    className="flex-1 rounded-full border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                    placeholder="Ask MyPlug about products..."
+                    className="flex-1 rounded-full border-gray-300 focus:border-orange-500 focus:ring-orange-500 text-sm md:text-base"
                   />
                   <Button
                     onClick={handleSendMessage}
                     disabled={!currentMessage.trim()}
-                    className="rounded-full bg-orange-500 hover:bg-orange-600 text-white px-4"
+                    className="rounded-full bg-orange-500 hover:bg-orange-600 text-white px-3 md:px-4 flex-shrink-0"
+                    size="icon"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2 text-center">
+                <p className="text-xs text-gray-500 mt-2 text-center hidden md:block">
                   MyPlug can make mistakes. Please verify important information.
                 </p>
               </div>
