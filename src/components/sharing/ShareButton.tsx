@@ -1,29 +1,31 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Share2, Copy, Check, MessageSquare, Heart, ShoppingCart, Package } from 'lucide-react';
+import { Share2, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { SharedContentService } from '@/services/sharedContentService';
 import { useAuth } from '@/hooks/useAuth';
 
 interface ShareButtonProps {
-  contentType: 'product' | 'wishlist' | 'cart' | 'conversation';
-  contentId: string;
+  contentType?: 'product' | 'wishlist' | 'cart' | 'conversation' | 'site';
+  contentId?: string;
   contentTitle?: string;
   contentImage?: string;
+  shareUrl?: string;
   className?: string;
   variant?: 'default' | 'outline' | 'ghost';
-  size?: 'sm' | 'default' | 'lg';
+  size?: 'sm' | 'default' | 'lg' | 'icon';
   showText?: boolean;
 }
 
 export const ShareButton: React.FC<ShareButtonProps> = ({
-  contentType,
+  contentType = 'site',
   contentId,
-  contentTitle,
+  contentTitle = 'Check this out on MyPlug',
   contentImage,
+  shareUrl: initialShareUrl,
   className = '',
   variant = 'outline',
   size = 'sm',
@@ -32,7 +34,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   const { user } = useAuth();
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
-  const [shareUrl, setShareUrl] = useState('');
+  const [shareUrl, setShareUrl] = useState(initialShareUrl || '');
   const [copied, setCopied] = useState(false);
 
   const getContentIcon = () => {
@@ -50,14 +52,35 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         return 'Share Cart';
       case 'conversation':
         return 'Share Conversation';
+      case 'site':
+        return 'Share Website';
       default:
         return 'Share';
     }
   };
 
   const handleShare = async () => {
+    if (contentType === 'site') {
+      const urlToShare = initialShareUrl || shareUrl || (typeof window !== 'undefined' ? window.location.href : '');
+
+      if (!urlToShare) {
+        toast.error('Unable to generate share link right now.');
+        return;
+      }
+
+      setShareUrl(urlToShare);
+      setShowShareDialog(true);
+      toast.success('Share link ready!');
+      return;
+    }
+
     if (!user) {
       toast.error('Please sign in to share content');
+      return;
+    }
+
+    if ((contentType === 'product' || contentType === 'conversation') && !contentId) {
+      toast.error('Missing content details to share.');
       return;
     }
 
@@ -67,7 +90,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
       
       switch (contentType) {
         case 'product':
-          result = await SharedContentService.shareProduct(user.id, contentId);
+          result = await SharedContentService.shareProduct(user.id, contentId!);
           break;
         case 'wishlist':
           result = await SharedContentService.shareWishlist(user.id);
@@ -76,7 +99,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
           result = await SharedContentService.shareCart(user.id);
           break;
         case 'conversation':
-          result = await SharedContentService.shareConversation(user.id, contentId);
+          result = await SharedContentService.shareConversation(user.id, contentId!);
           break;
         default:
           throw new Error('Invalid content type');
@@ -106,6 +129,11 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   };
 
   const handleSocialShare = (platform: 'facebook' | 'twitter' | 'whatsapp') => {
+    if (!shareUrl) {
+      toast.error('Generate a share link first.');
+      return;
+    }
+
     const encodedUrl = encodeURIComponent(shareUrl);
     const encodedTitle = encodeURIComponent(contentTitle || 'Check this out on MyPlug');
     
@@ -146,6 +174,9 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
               <Share2 className="h-5 w-5" />
               Share {getContentLabel()}
             </DialogTitle>
+            <DialogDescription>
+              Share this link directly or send it through your favorite social platform.
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">

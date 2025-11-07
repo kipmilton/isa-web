@@ -426,20 +426,36 @@ const ShopDashboard = () => {
               </div>
 
               <Link to="/chat">
-                <Button variant="ghost" className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg px-3 py-2">
-                  <MessageCircle className="w-5 h-5" />
-                  <span className="text-sm font-medium">Ask MyPlug</span>
-                </Button>
-              </Link>
+
+          <Button 
+            // Use 'outline' variant for a clean, professional look
+            variant="outline" 
+            className="flex items-center space-x-2 
+                      border-gray-300 text-gray-700 
+                      hover:bg-orange-50 hover:border-orange-500 hover:text-orange-600 
+                      transition-colors duration-200 
+                      px-4 py-2 rounded-lg shadow-sm"
+          >
+            <MessageCircle className="w-4 h-4" /> {/* Slightly smaller icon */}
+            <span className="text-sm font-semibold">Ask MyPlug</span>
+          </Button>
+        </Link>
               
               
               
               <Link to="/gift">
-                <Button variant="ghost" className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-lg px-3 py-2">
-                  <Gift className="w-5 h-5" />
-                  <span className="text-sm font-medium">Gift Someone</span>
-                </Button>
-              </Link>
+  <Button 
+    // Use 'default' or a solid color for the primary action
+    className="flex items-center space-x-2 
+               bg-orange-500 text-white 
+               hover:bg-orange-600 
+               transition-colors duration-200 
+               px-4 py-2 rounded-lg shadow-md"
+  >
+    <Gift className="w-4 h-4" /> {/* Slightly smaller icon */}
+    <span className="text-sm font-semibold">Gift Someone</span>
+  </Button>
+</Link>
               
               {/* Notification Bell */}
               {user && (
@@ -1137,7 +1153,14 @@ const ShopDashboard = () => {
       <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
         {/* Share Button - positioned above ticket button */}
         <div className="relative group">
-          <ShareButton className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0" />
+          <ShareButton
+            contentType="site"
+            contentTitle="Explore the MyPlug Shop"
+            showText={false}
+            variant="ghost"
+            size="lg"
+            className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0"
+          />
         </div>
         
         {/* Support Ticket Button */}
