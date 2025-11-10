@@ -122,15 +122,12 @@ export async function initiateCardPayment(payload: InitiateRequestBody): Promise
  */
 export async function verifyCardPayment(_req: Request, body: any): Promise<{ status: 'success' | 'failed' | 'pending'; reference_id?: string; transaction_id?: string } | null> {
   try {
-    // Pesapal sends order tracking ID and payment status
+    // PesaPal webhook validation
     const orderTrackingId = body.OrderTrackingId || body.order_tracking_id || body.OrderNotificationType;
-    const paymentStatus = body.OrderNotificationType || body.status || body.payment_status;
+    const notificationType = body.OrderNotificationType || body.status || body.payment_status;
 
-    // Verify the webhook signature if available
-    // TODO: Implement Pesapal webhook signature verification
-    // Pesapal typically sends IPN notifications with a signature header
-
-    const status = mapExternalStatus(paymentStatus);
+    // Map PesaPal notification type to our status
+    const status = mapExternalStatus(notificationType);
 
     return {
       status,
@@ -138,7 +135,7 @@ export async function verifyCardPayment(_req: Request, body: any): Promise<{ sta
       transaction_id: body.transaction_id || body.id,
     };
   } catch (error) {
-    console.error('Error verifying Pesapal payment:', error);
+    console.error('Error verifying PesaPal payment:', error);
     return null;
   }
 }

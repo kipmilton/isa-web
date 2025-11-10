@@ -9,11 +9,9 @@ import { X, Check, Download, Truck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrderService } from '@/services/orderService';
 import { DeliveryCostService, DeliveryCostCalculation } from '@/services/deliveryCostService';
-import IsaPayModal from '@/components/payments/IsaPayModal';
+import PesaPalPayment from '@/components/payments/PesaPalPayment';
 import LocationSelect from '@/components/auth/LocationSelect';
-// import { AirtelMoneyService } from '@/services/airtelMoneyService'; // Uncomment if you have this service
-import { CartItemWithProduct, Address, PaymentMethod, DeliveryDetails } from '@/types/order';
-import { Product } from '@/types/product';
+import { CartItemWithProduct } from '@/types/order';
 import { useUISound } from '@/contexts/SoundContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -43,7 +41,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     phone: '',
     whatsapp: ''
   });
-  const [showIsaPay, setShowIsaPay] = useState(false);
+  const [showPesaPal, setShowPesaPal] = useState(false);
   const [notes, setNotes] = useState('');
   const [isGift, setIsGift] = useState(false);
   const [deliveryLocation, setDeliveryLocation] = useState({ county: '', constituency: '', ward: '' });
@@ -61,7 +59,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const playCheckoutSuccess = useUISound('checkout_success');
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-  const deliveryFee = totalDeliveryCost || 500; // Use calculated delivery cost or fallback
+  const deliveryFee = totalDeliveryCost || 500;
   const totalAmount = subtotal + deliveryFee;
 
   const formatPrice = (price: number) => {
@@ -73,14 +71,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }).format(price);
   };
 
-  // Fetch customer location on component mount
   useEffect(() => {
     if (user) {
       fetchCustomerLocation();
     }
   }, [user]);
 
-  // Calculate delivery costs when location or cart items change
   useEffect(() => {
     if (deliveryLocation.county && cartItems.length > 0) {
       calculateDeliveryCosts();
@@ -91,15 +87,15 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     try {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('county, constituency, ward')
+        .select('*')
         .eq('id', user?.id)
         .single();
 
       if (profile) {
         setDeliveryLocation({
-          county: profile.county || '',
-          constituency: profile.constituency || '',
-          ward: profile.ward || ''
+          county: (profile as any).county || '',
+          constituency: (profile as any).constituency || '',
+          ward: (profile as any).ward || ''
         });
       }
     } catch (error) {
@@ -112,7 +108,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     setDeliveryCostLoading(true);
     try {
-      // Use the new vendor-grouped delivery cost calculation
       const result = await DeliveryCostService.calculateVendorGroupedDeliveryCosts(
         cartItems,
         deliveryLocation
@@ -121,7 +116,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       setVendorDeliveryGroups(result.vendorGroups);
       setTotalDeliveryCost(result.totalDeliveryCost);
 
-      // Keep the old deliveryCosts for backward compatibility (flattened)
       const allCosts = result.vendorGroups.map(group => group.deliveryCost);
       setDeliveryCosts(allCosts);
     } catch (error) {
@@ -134,7 +128,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const handleLocationChange = (county: string, constituency: string, ward?: string) => {
     setDeliveryLocation({ county, constituency, ward: ward || '' });
   };
-
 
   const handleNextStep = () => {
     if (currentStep === 'delivery') {
@@ -174,7 +167,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
         customer_email: contactInfo.email,
         customer_phone: contactInfo.phone,
         notes: `MyPlug Delivery - WhatsApp: ${contactInfo.whatsapp}\nDelivery Address: ${deliveryAddress}\n${isGift ? 'This is a gift order' : ''}\n${notes}`,
-        payment_method: 'isa_pay',
+        payment_method: 'pesapal',
         delivery_type: 'delivery',
         delivery_location_lat: null,
         delivery_location_lng: null,
@@ -184,18 +177,33 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       });
   };
 
-  const handlePayWithIsa = async () => {
+  const handlePayWithPesaPal = async () => {
     try {
       const order = await createOrder();
       setOrderNumber(order.order_number);
-      setShowIsaPay(true);
+      setShowPesaPal(true);
     } catch (error: any) {
       toast({ title: 'Order Failed', description: error?.message ?? 'Unable to create order', variant: 'destructive' });
     }
   };
 
+  const handlePaymentSuccess = async (tx: { transaction_id: string; provider: string }) => {
+    playCheckoutSuccess();
+    setCurrentStep('complete');
+    setShowPesaPal(false);
+    onOrderComplete();
+  };
+
+  const handlePaymentFailure = () => {
+    toast({ 
+      title: 'Payment Failed', 
+      description: 'Please try again or contact support', 
+      variant: 'destructive' 
+    });
+  };
+
   const downloadReceipt = () => {
-    const receiptContent = `Order Receipt\nOrder #: ${orderNumber}\nDate: ${new Date().toLocaleDateString()}\nCustomer: ${contactInfo.email}\nPhone: ${contactInfo.phone}\nWhatsApp: ${contactInfo.whatsapp}\n\nItems:\n${cartItems.map(item => `${item.product.name} x${item.quantity} - ${formatPrice(item.product.price * item.quantity)}`).join('\n')}\n\nSubtotal: ${formatPrice(subtotal)}\nDelivery Fee: ${formatPrice(deliveryFee)}\nTotal: ${formatPrice(totalAmount)}\n\nDelivery Address: ${deliveryAddress}\nDelivery Method: MyPlug Delivery\nPayment Method: MyPlug Pay\n    `;
+    const receiptContent = `Order Receipt\nOrder #: ${orderNumber}\nDate: ${new Date().toLocaleDateString()}\nCustomer: ${contactInfo.email}\nPhone: ${contactInfo.phone}\nWhatsApp: ${contactInfo.whatsapp}\n\nItems:\n${cartItems.map(item => `${item.product.name} x${item.quantity} - ${formatPrice(item.product.price * item.quantity)}`).join('\n')}\n\nSubtotal: ${formatPrice(subtotal)}\nDelivery Fee: ${formatPrice(deliveryFee)}\nTotal: ${formatPrice(totalAmount)}\n\nDelivery Address: ${deliveryAddress}\nDelivery Method: MyPlug Delivery\nPayment Method: PesaPal\n    `;
     const blob = new Blob([receiptContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -279,7 +287,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <LocationSelect 
                         onLocationChange={handleLocationChange} 
                         required 
-                        initialLocation={deliveryLocation}
                       />
                     ) : (
                       <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-md">
@@ -392,16 +399,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         </span>
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 bg-green-50 dark:bg-green-900/20 p-2 rounded">
-                        💡 Delivery fee is charged once per vendor, regardless of how many products you buy from them
+                        <strong>Delivery Method:</strong> MyPlug Delivery - Your items will be delivered within 2-3 business days
                       </div>
                     </div>
                   ) : (
-                    <div className="text-center py-4">
-                      <p className="text-sm text-gray-500">Delivery costs will be calculated based on your location</p>
+                    <div className="text-sm text-gray-500 text-center py-3">
+                      Select a delivery location to calculate costs
                     </div>
                   )}
-                  
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Estimated delivery: 1-2 business days</p>
                 </div>
               </div>
               <Separator />
@@ -464,32 +469,29 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <Button onClick={handleNextStep}>Review & Pay</Button>
               )}
               {currentStep === 'pay' && (
-                <Button onClick={handlePayWithIsa} disabled={isProcessing} className="bg-green-600 hover:bg-green-700">
-                  {isProcessing ? 'Processing...' : `Pay with MyPlug Pay (${formatPrice(totalAmount)})`}
+                <Button onClick={handlePayWithPesaPal} disabled={isProcessing} className="bg-green-600 hover:bg-green-700">
+                  {isProcessing ? 'Processing...' : `Pay Securely (${formatPrice(totalAmount)})`}
                 </Button>
               )}
             </div>
           </div>
         </CardContent>
       </Card>
-      {showIsaPay && (
-        <IsaPayModal
-          open={showIsaPay}
-          onOpenChange={setShowIsaPay}
+      {showPesaPal && (
+        <PesaPalPayment
+          open={showPesaPal}
+          onOpenChange={setShowPesaPal}
           userId={user.id}
           amount={totalAmount}
           currency={'KES'}
           orderId={orderNumber}
-          description={`MyPlug Order #${orderNumber}`}
-          onSuccess={() => {
-            setCurrentStep('complete');
-            onOrderComplete();
-            try { playCheckoutSuccess(); } catch {}
-          }}
+          description={`Order ${orderNumber}`}
+          onSuccess={handlePaymentSuccess}
+          onFailure={handlePaymentFailure}
         />
       )}
     </div>
   );
 };
 
-export default CheckoutModal; 
+export default CheckoutModal;

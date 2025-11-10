@@ -39,14 +39,16 @@ const TrackingCodeDisplay: React.FC<TrackingCodeDisplayProps> = ({
       }
 
       // Extract tracking code from tracking updates
-      const trackingUpdates = deliveryOrder?.tracking_updates || [];
+      const trackingUpdates = Array.isArray(deliveryOrder?.tracking_updates) 
+        ? deliveryOrder.tracking_updates 
+        : [];
       const fikishaUpdate = trackingUpdates.find((update: any) => 
-        update.type === 'sent_to_fikisha' && update.fikisha_tracking_code
+        update && typeof update === 'object' && update.type === 'sent_to_fikisha' && update.fikisha_tracking_code
       );
 
-      if (fikishaUpdate?.fikisha_tracking_code) {
-        setTrackingCode(fikishaUpdate.fikisha_tracking_code);
-        onTrackingCodeGenerated?.(fikishaUpdate.fikisha_tracking_code);
+      if (fikishaUpdate && typeof fikishaUpdate === 'object' && (fikishaUpdate as any).fikisha_tracking_code) {
+        setTrackingCode((fikishaUpdate as any).fikisha_tracking_code);
+        onTrackingCodeGenerated?.((fikishaUpdate as any).fikisha_tracking_code);
       }
     } catch (error) {
       console.error('Error fetching tracking code:', error);

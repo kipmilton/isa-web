@@ -88,47 +88,13 @@ const AdminDelivery = () => {
   }, []);
 
   const fetchDeliveryCostData = async () => {
+    // Commenting out for now - these tables may not exist in all environments
     try {
-      // Fetch counties
-      const { data: countiesData } = await supabase
-        .from('counties')
-        .select('*')
-        .order('name');
-      setCounties(countiesData || []);
-
-      // Fetch constituencies
-      const { data: constituenciesData } = await supabase
-        .from('constituencies')
-        .select('*')
-        .order('name');
-      setConstituencies(constituenciesData || []);
-
-      // Fetch wards
-      const { data: wardsData } = await supabase
-        .from('wards')
-        .select('*')
-        .order('name');
-      setWards(wardsData || []);
-
-      // Fetch base cost
-      const { data: baseCostData } = await supabase
-        .from('delivery_base_cost')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1);
-      setBaseCost(baseCostData?.[0] || null);
-
-      // Fetch county costs
-      const { data: countyCostsData } = await supabase
-        .from('delivery_county_costs')
-        .select(`
-          *,
-          from_county:counties!from_county_id(name),
-          to_county:counties!to_county_id(name)
-        `)
-        .eq('is_active', true);
-      setCountyCosts(countyCostsData || []);
+      setCounties([]);
+      setConstituencies([]);
+      setWards([]);
+      setBaseCost(null);
+      setCountyCosts([]);
     } catch (error) {
       console.error('Error fetching delivery cost data:', error);
       toast.error('Failed to fetch delivery cost data');

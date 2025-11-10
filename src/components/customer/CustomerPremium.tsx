@@ -84,41 +84,14 @@ const CustomerPremium = () => {
     }
 
     setUpgrading(true);
-    try {
-      // Simulate premium upgrade
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Update user subscription in database
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .insert({
-          user_id: userId,
-          plan_type: 'premium',
-          billing_cycle: 'monthly',
-          price_kes: 299,
-          status: 'active',
-          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-          auto_renew: true
-        });
-
-      if (error) throw error;
-
-      setCurrentPlan('premium');
-      toast({
-        title: "Welcome to Premium!",
-        description: "You've successfully upgraded to Premium. Enjoy your exclusive benefits!",
-        variant: "default"
-      });
-    } catch (error) {
-      console.error('Error upgrading to premium:', error);
-      toast({
-        title: "Upgrade Failed",
-        description: "There was an error upgrading your plan. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setUpgrading(false);
-    }
+    // Show PesaPal payment modal for premium subscription
+    // TODO: Integrate with PesaPalPayment component for subscription upgrade
+    toast({
+      title: "Payment Integration",
+      description: "PesaPal payment integration for subscriptions is being set up",
+      variant: "default"
+    });
+    setUpgrading(false);
   };
 
   const premiumPlans = [
