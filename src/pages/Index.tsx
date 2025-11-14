@@ -354,11 +354,11 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="outline" className="bg-white text-orange-600 hover:bg-gray-50 border-0 hover-scale flex items-center">
               <Apple className="h-6 w-6 mr-2" />
-              Download for iOS
+              Download on the App Store
             </Button>
             <Button variant="outline" className="bg-white text-orange-600 hover:bg-gray-50 border-0 hover-scale flex items-center">
               <Play className="h-6 w-6 mr-2" />
-              Get on Android
+              Get it on Google Play Store
             </Button>
           </div>
         </div>
@@ -458,7 +458,7 @@ const Index = () => {
                   <span className="text-orange-700 font-bold">MK</span>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-800">Kiprop Arap Kirui</h4>
+                  <h4 className="font-semibold text-gray-800">Milton Kiprop</h4>
                   <p className="text-gray-500 text-sm">CTO & Co-founder</p>
                 </div>
               </div>
