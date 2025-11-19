@@ -6,6 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface LocationSelectProps {
   onLocationChange: (county: string, constituency: string, ward?: string) => void;
   required?: boolean;
+  initialLocation?: {
+    county: string;
+    constituency: string;
+    ward: string;
+  };
 }
 
 const locationData = {
@@ -115,10 +120,10 @@ const wardData = {
   }
 };
 
-const LocationSelect = ({ onLocationChange, required = false }: LocationSelectProps) => {
-  const [selectedCounty, setSelectedCounty] = useState<string>("");
-  const [selectedConstituency, setSelectedConstituency] = useState<string>("");
-  const [selectedWard, setSelectedWard] = useState<string>("");
+const LocationSelect = ({ onLocationChange, required = false, initialLocation }: LocationSelectProps) => {
+  const [selectedCounty, setSelectedCounty] = useState<string>(initialLocation?.county || "");
+  const [selectedConstituency, setSelectedConstituency] = useState<string>(initialLocation?.constituency || "");
+  const [selectedWard, setSelectedWard] = useState<string>(initialLocation?.ward || "");
 
   const handleCountyChange = (county: string) => {
     setSelectedCounty(county);

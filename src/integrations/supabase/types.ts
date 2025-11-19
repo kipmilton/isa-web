@@ -89,6 +89,33 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_conversations: {
+        Row: {
+          created_at: string | null
+          id: string
+          preview: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          preview?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          preview?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_history: {
         Row: {
           id: string
@@ -115,6 +142,214 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      constituencies: {
+        Row: {
+          county_id: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          county_id: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          county_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "constituencies_county_id_fkey"
+            columns: ["county_id"]
+            isOneToOne: false
+            referencedRelation: "counties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      counties: {
+        Row: {
+          created_at: string
+          id: string
+          is_hotspot: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_hotspot?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_hotspot?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      delivery_base_cost: {
+        Row: {
+          base_cost: number
+          created_at: string
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          base_cost?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          base_cost?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      delivery_constituency_costs: {
+        Row: {
+          cost: number
+          created_at: string
+          from_constituency_id: string
+          id: string
+          is_active: boolean
+          to_constituency_id: string
+          updated_at: string
+        }
+        Insert: {
+          cost?: number
+          created_at?: string
+          from_constituency_id: string
+          id?: string
+          is_active?: boolean
+          to_constituency_id: string
+          updated_at?: string
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          from_constituency_id?: string
+          id?: string
+          is_active?: boolean
+          to_constituency_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_constituency_costs_from_constituency_id_fkey"
+            columns: ["from_constituency_id"]
+            isOneToOne: false
+            referencedRelation: "constituencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_constituency_costs_to_constituency_id_fkey"
+            columns: ["to_constituency_id"]
+            isOneToOne: false
+            referencedRelation: "constituencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_county_costs: {
+        Row: {
+          cost: number
+          created_at: string
+          from_county_id: string
+          id: string
+          is_active: boolean
+          to_county_id: string
+          updated_at: string
+        }
+        Insert: {
+          cost?: number
+          created_at?: string
+          from_county_id: string
+          id?: string
+          is_active?: boolean
+          to_county_id: string
+          updated_at?: string
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          from_county_id?: string
+          id?: string
+          is_active?: boolean
+          to_county_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_county_costs_from_county_id_fkey"
+            columns: ["from_county_id"]
+            isOneToOne: false
+            referencedRelation: "counties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_county_costs_to_county_id_fkey"
+            columns: ["to_county_id"]
+            isOneToOne: false
+            referencedRelation: "counties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       delivery_orders: {
         Row: {
@@ -355,6 +590,51 @@ export type Database = {
           },
         ]
       }
+      delivery_ward_costs: {
+        Row: {
+          cost: number
+          created_at: string
+          from_ward_id: string
+          id: string
+          is_active: boolean
+          to_ward_id: string
+          updated_at: string
+        }
+        Insert: {
+          cost?: number
+          created_at?: string
+          from_ward_id: string
+          id?: string
+          is_active?: boolean
+          to_ward_id: string
+          updated_at?: string
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          from_ward_id?: string
+          id?: string
+          is_active?: boolean
+          to_ward_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_ward_costs_from_ward_id_fkey"
+            columns: ["from_ward_id"]
+            isOneToOne: false
+            referencedRelation: "wards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_ward_costs_to_ward_id_fkey"
+            columns: ["to_ward_id"]
+            isOneToOne: false
+            referencedRelation: "wards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jumia_product_interactions: {
         Row: {
           created_at: string | null
@@ -398,6 +678,47 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      moderation_logs: {
+        Row: {
+          action_taken: string
+          created_at: string | null
+          id: string
+          moderated_message: string
+          order_id: string
+          original_message: string
+          user_id: string
+          violations: string[]
+        }
+        Insert: {
+          action_taken: string
+          created_at?: string | null
+          id?: string
+          moderated_message: string
+          order_id: string
+          original_message: string
+          user_id: string
+          violations?: string[]
+        }
+        Update: {
+          action_taken?: string
+          created_at?: string | null
+          id?: string
+          moderated_message?: string
+          order_id?: string
+          original_message?: string
+          user_id?: string
+          violations?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_logs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -1180,11 +1501,13 @@ export type Database = {
           cpu_manufacturer: string | null
           created_at: string | null
           currency: string | null
+          delivery_methods: Json | null
           description: string | null
           display_resolution: string | null
           display_size: string | null
           display_size_inch: number | null
           graphics_memory_gb: number | null
+          has_warranty: boolean | null
           hdd_size: string | null
           height_cm: number | null
           id: string
@@ -1205,9 +1528,12 @@ export type Database = {
           name: string
           original_price: number | null
           panel_type: string | null
+          pickup_constituency: string | null
+          pickup_county: string | null
           pickup_location: string | null
           pickup_phone: string | null
           pickup_phone_number: string | null
+          pickup_ward: string | null
           plug_type: string | null
           price: number
           processor: string | null
@@ -1249,11 +1575,13 @@ export type Database = {
           cpu_manufacturer?: string | null
           created_at?: string | null
           currency?: string | null
+          delivery_methods?: Json | null
           description?: string | null
           display_resolution?: string | null
           display_size?: string | null
           display_size_inch?: number | null
           graphics_memory_gb?: number | null
+          has_warranty?: boolean | null
           hdd_size?: string | null
           height_cm?: number | null
           id?: string
@@ -1274,9 +1602,12 @@ export type Database = {
           name: string
           original_price?: number | null
           panel_type?: string | null
+          pickup_constituency?: string | null
+          pickup_county?: string | null
           pickup_location?: string | null
           pickup_phone?: string | null
           pickup_phone_number?: string | null
+          pickup_ward?: string | null
           plug_type?: string | null
           price: number
           processor?: string | null
@@ -1318,11 +1649,13 @@ export type Database = {
           cpu_manufacturer?: string | null
           created_at?: string | null
           currency?: string | null
+          delivery_methods?: Json | null
           description?: string | null
           display_resolution?: string | null
           display_size?: string | null
           display_size_inch?: number | null
           graphics_memory_gb?: number | null
+          has_warranty?: boolean | null
           hdd_size?: string | null
           height_cm?: number | null
           id?: string
@@ -1343,9 +1676,12 @@ export type Database = {
           name?: string
           original_price?: number | null
           panel_type?: string | null
+          pickup_constituency?: string | null
+          pickup_county?: string | null
           pickup_location?: string | null
           pickup_phone?: string | null
           pickup_phone_number?: string | null
+          pickup_ward?: string | null
           plug_type?: string | null
           price?: number
           processor?: string | null
@@ -1399,6 +1735,8 @@ export type Database = {
           chat_count: number | null
           company: string | null
           company_website: string | null
+          constituency: string | null
+          county: string | null
           created_at: string | null
           date_of_birth: string | null
           email: string | null
@@ -1419,7 +1757,9 @@ export type Database = {
           updated_at: string | null
           user_type: string | null
           vendor_serial_number: string | null
+          ward: string | null
           website_url: string | null
+          whatsapp_number: string | null
         }
         Insert: {
           account_holder_name?: string | null
@@ -1434,6 +1774,8 @@ export type Database = {
           chat_count?: number | null
           company?: string | null
           company_website?: string | null
+          constituency?: string | null
+          county?: string | null
           created_at?: string | null
           date_of_birth?: string | null
           email?: string | null
@@ -1454,7 +1796,9 @@ export type Database = {
           updated_at?: string | null
           user_type?: string | null
           vendor_serial_number?: string | null
+          ward?: string | null
           website_url?: string | null
+          whatsapp_number?: string | null
         }
         Update: {
           account_holder_name?: string | null
@@ -1469,6 +1813,8 @@ export type Database = {
           chat_count?: number | null
           company?: string | null
           company_website?: string | null
+          constituency?: string | null
+          county?: string | null
           created_at?: string | null
           date_of_birth?: string | null
           email?: string | null
@@ -1489,7 +1835,9 @@ export type Database = {
           updated_at?: string | null
           user_type?: string | null
           vendor_serial_number?: string | null
+          ward?: string | null
           website_url?: string | null
+          whatsapp_number?: string | null
         }
         Relationships: []
       }
@@ -1540,7 +1888,7 @@ export type Database = {
           event_type: string
           id: string
           identifier: string
-          ip_address: unknown | null
+          ip_address: unknown
           metadata: Json | null
           success: boolean | null
           user_agent: string | null
@@ -1552,7 +1900,7 @@ export type Database = {
           event_type: string
           id?: string
           identifier: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           success?: boolean | null
           user_agent?: string | null
@@ -1564,10 +1912,46 @@ export type Database = {
           event_type?: string
           id?: string
           identifier?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           success?: boolean | null
           user_agent?: string | null
+        }
+        Relationships: []
+      }
+      shared_content: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          metadata: Json | null
+          share_code: string
+          user_id: string
+          view_count: number | null
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          share_code?: string
+          user_id: string
+          view_count?: number | null
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          share_code?: string
+          user_id?: string
+          view_count?: number | null
         }
         Relationships: []
       }
@@ -2318,6 +2702,39 @@ export type Database = {
           },
         ]
       }
+      user_violations: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_suspended: boolean
+          last_violation: string
+          updated_at: string | null
+          user_id: string
+          violation_count: number
+          violation_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_suspended?: boolean
+          last_violation?: string
+          updated_at?: string | null
+          user_id: string
+          violation_count?: number
+          violation_type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_suspended?: boolean
+          last_violation?: string
+          updated_at?: string | null
+          user_id?: string
+          violation_count?: number
+          violation_type?: string
+        }
+        Relationships: []
+      }
       vendor_application_steps: {
         Row: {
           completed_at: string | null
@@ -2613,6 +3030,38 @@ export type Database = {
         }
         Relationships: []
       }
+      wards: {
+        Row: {
+          constituency_id: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          constituency_id: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          constituency_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wards_constituency_id_fkey"
+            columns: ["constituency_id"]
+            isOneToOne: false
+            referencedRelation: "constituencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wishlist_groups: {
         Row: {
           created_at: string
@@ -2765,10 +3214,7 @@ export type Database = {
       }
     }
     Functions: {
-      approve_product: {
-        Args: { product_id: string }
-        Returns: boolean
-      }
+      approve_product: { Args: { product_id: string }; Returns: boolean }
       approve_vendor_application: {
         Args: { admin_notes?: string; application_id: string }
         Returns: boolean
@@ -2777,10 +3223,18 @@ export type Database = {
         Args: { amount_spent: number; user_id_param: string }
         Returns: undefined
       }
-      calculate_delivery_fee: {
-        Args: { distance_km: number }
+      calculate_delivery_cost: {
+        Args: {
+          from_constituency_name?: string
+          from_county_name: string
+          from_ward_name?: string
+          to_constituency_name?: string
+          to_county_name: string
+          to_ward_name?: string
+        }
         Returns: number
       }
+      calculate_delivery_fee: { Args: { distance_km: number }; Returns: number }
       calculate_distance_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
@@ -2802,10 +3256,7 @@ export type Database = {
           remaining_attempts: number
         }[]
       }
-      cleanup_old_security_records: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      cleanup_old_security_records: { Args: never; Returns: number }
       create_admin_user: {
         Args: { _created_by: string; _email: string; _role: string }
         Returns: Json
@@ -2820,22 +3271,10 @@ export type Database = {
           user_id: string
         }[]
       }
-      disable_customer_premium: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      enable_customer_premium: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      generate_completion_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_order_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      disable_customer_premium: { Args: never; Returns: undefined }
+      enable_customer_premium: { Args: never; Returns: undefined }
+      generate_completion_code: { Args: never; Returns: string }
+      generate_order_number: { Args: never; Returns: string }
       generate_product_sku: {
         Args: {
           p_brand: string
@@ -2845,16 +3284,15 @@ export type Database = {
         }
         Returns: string
       }
-      generate_vendor_serial: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
+      generate_share_code: { Args: never; Returns: string }
+      generate_vendor_serial: { Args: never; Returns: string }
+      get_current_user_role: { Args: never; Returns: string }
+      get_user_violation_count: {
+        Args: { user_uuid: string; violation_type_param: string }
+        Returns: number
       }
       get_vendor_applications_with_emails: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           business_type: string
           company: string
@@ -2872,34 +3310,26 @@ export type Database = {
         Returns: number
       }
       has_admin_role: {
-        Args: { check_user_id: string; required_role: string }
+        Args: { _role?: string; _user_id: string }
         Returns: boolean
       }
-      has_role: {
-        Args: { _role: string; _user_id: string }
-        Returns: boolean
-      }
-      is_admin: {
-        Args: Record<PropertyKey, never> | { user_id: string }
-        Returns: boolean
-      }
-      is_admin_user: {
-        Args: { _user_id?: string }
-        Returns: boolean
-      }
-      is_main_admin: {
-        Args: { _user_id?: string }
-        Returns: boolean
-      }
-      is_vendor_order: {
-        Args:
-          | { order_id: number }
-          | {
+      has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
+      is_admin:
+        | { Args: { user_id: string }; Returns: boolean }
+        | { Args: never; Returns: boolean }
+      is_admin_active: { Args: { _user_id?: string }; Returns: boolean }
+      is_admin_user: { Args: { _user_id?: string }; Returns: boolean }
+      is_main_admin: { Args: { _user_id?: string }; Returns: boolean }
+      is_user_suspended: { Args: { user_uuid: string }; Returns: boolean }
+      is_vendor_order:
+        | {
+            Args: {
               order_row: Database["public"]["Tables"]["orders"]["Row"]
               vendor: string
             }
-        Returns: boolean
-      }
+            Returns: boolean
+          }
+        | { Args: { order_id: number }; Returns: boolean }
       log_security_event: {
         Args: {
           p_action: string
@@ -2913,10 +3343,7 @@ export type Database = {
         }
         Returns: string
       }
-      mark_all_notifications_read: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      mark_all_notifications_read: { Args: never; Returns: number }
       mark_notification_read: {
         Args: { notification_id: string }
         Returns: boolean

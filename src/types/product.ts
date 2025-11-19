@@ -28,6 +28,9 @@ export interface Product {
   pickup_location?: string;
   pickup_phone_number?: string;
   pickup_phone?: string;
+  pickup_county?: string;
+  pickup_constituency?: string;
+  pickup_ward?: string;
   location_lat?: number;
   location_lng?: number;
   location_address?: string;
