@@ -92,7 +92,10 @@ export class ConversationService {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      return data || [];
+      return (data || []).map(msg => ({
+        ...msg,
+        role: msg.role as 'user' | 'myplug' | 'system'
+      }));
     } catch (error) {
       console.error('Error getting conversation messages:', error);
       throw error;
@@ -120,7 +123,10 @@ export class ConversationService {
         .single();
 
       if (error) throw error;
-      return data;
+      return {
+        ...data,
+        role: data.role as 'user' | 'myplug' | 'system'
+      };
     } catch (error) {
       console.error('Error adding message:', error);
       throw error;
