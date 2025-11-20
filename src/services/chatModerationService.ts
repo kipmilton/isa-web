@@ -339,7 +339,7 @@ export class ChatModerationService {
         .range(offset, offset + limit - 1);
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as any[];
     } catch (error) {
       console.error('Error fetching moderation logs:', error);
       return [];

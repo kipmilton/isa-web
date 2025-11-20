@@ -105,22 +105,22 @@ export class FikishaIntegrationService {
         `)
         .eq('order_id', orderId);
 
-      const vendor = orderItems?.[0]?.product?.vendor;
+      const vendor = (orderItems as any)?.[0]?.product?.vendor;
 
       // Prepare Fikisha task data
       const fikishaTask: FikishaDeliveryTask = {
         id: deliveryOrder.id,
         tracking_code: `ISA${deliveryOrder.id.substring(0, 8).toUpperCase()}`,
-        sender_id: deliveryOrder.order.vendor?.id || 'unknown',
-        receiver_name: deliveryOrder.order.customer?.full_name || 'Customer',
-        receiver_phone: deliveryOrder.order.customer_phone || deliveryOrder.order.customer?.phone_number || '',
+        sender_id: (deliveryOrder as any).order?.vendor?.id || 'unknown',
+        receiver_name: (deliveryOrder as any).order?.customer?.full_name || 'Customer',
+        receiver_phone: deliveryOrder.order_id ? ((deliveryOrder as any).order?.customer_phone || (deliveryOrder as any).order?.customer?.phone_number || '') : '',
         pickup_address: deliveryOrder.pickup_location_address,
         pickup_latitude: deliveryOrder.pickup_location_lat,
         pickup_longitude: deliveryOrder.pickup_location_lng,
         delivery_address: deliveryOrder.delivery_location_address,
         delivery_latitude: deliveryOrder.delivery_location_lat,
         delivery_longitude: deliveryOrder.delivery_location_lng,
-        package_description: `Order #${deliveryOrder.order.order_number}`,
+        package_description: `Order #${(deliveryOrder as any).order?.order_number || ''}`,
         delivery_amount: deliveryOrder.delivery_fee,
         status: 'pending',
         confirmation_code: this.generateConfirmationCode(),
@@ -129,14 +129,14 @@ export class FikishaIntegrationService {
         updated_at: deliveryOrder.updated_at,
         
         // Additional integration fields
-        vendor_whatsapp: vendor?.phone_number || deliveryOrder.order.vendor?.phone_number,
-        customer_whatsapp: deliveryOrder.order.customer_phone || deliveryOrder.order.customer?.phone_number,
-        vendor_county: vendor?.county || deliveryOrder.order.vendor?.county,
-        vendor_constituency: vendor?.constituency || deliveryOrder.order.vendor?.constituency,
-        vendor_ward: vendor?.ward || deliveryOrder.order.vendor?.ward,
-        customer_county: deliveryOrder.order.customer?.county,
-        customer_constituency: deliveryOrder.order.customer?.constituency,
-        customer_ward: deliveryOrder.order.customer?.ward,
+        vendor_whatsapp: vendor?.phone_number || (deliveryOrder as any).order?.vendor?.phone_number,
+        customer_whatsapp: (deliveryOrder as any).order?.customer_phone || (deliveryOrder as any).order?.customer?.phone_number,
+        vendor_county: vendor?.county || (deliveryOrder as any).order?.vendor?.county,
+        vendor_constituency: vendor?.constituency || (deliveryOrder as any).order?.vendor?.constituency,
+        vendor_ward: vendor?.ward || (deliveryOrder as any).order?.vendor?.ward,
+        customer_county: (deliveryOrder as any).order?.customer?.county,
+        customer_constituency: (deliveryOrder as any).order?.customer?.constituency,
+        customer_ward: (deliveryOrder as any).order?.customer?.ward,
         distance_km: deliveryOrder.distance_km,
         original_order_id: orderId
       };
@@ -175,8 +175,7 @@ export class FikishaIntegrationService {
 
       return { 
         success: true, 
-        fikishaOrderId: result.id,
-        trackingCode: result.trackingCode
+        fikishaOrderId: result.id
       };
 
     } catch (error) {

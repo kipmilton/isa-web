@@ -101,18 +101,32 @@ export class DeliveryCostService {
       if (fromLocation.ward && toLocation.ward && 
           fromLocation.constituency === toLocation.constituency) {
         // Get ward IDs
+        const { data: fromConstituencyData } = await supabase
+          .from('constituencies')
+          .select('id')
+          .eq('name', fromLocation.constituency)
+          .eq('county_id', fromCounty?.id)
+          .single();
+
+        const { data: toConstituencyData } = await supabase
+          .from('constituencies')
+          .select('id')
+          .eq('name', toLocation.constituency)
+          .eq('county_id', toCounty?.id)
+          .single();
+
         const { data: fromWard } = await supabase
           .from('wards')
           .select('id')
           .eq('name', fromLocation.ward)
-          .eq('constituency_id', fromConstituency?.id)
+          .eq('constituency_id', fromConstituencyData?.id)
           .single();
 
         const { data: toWard } = await supabase
           .from('wards')
           .select('id')
           .eq('name', toLocation.ward)
-          .eq('constituency_id', toConstituency?.id)
+          .eq('constituency_id', toConstituencyData?.id)
           .single();
 
         if (fromWard?.id && toWard?.id && fromWard.id !== toWard.id) {

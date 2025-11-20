@@ -35,17 +35,21 @@ export class ShoppingChatService {
       .eq('id', userId)
       .single();
 
-    // Query cart items count directly
-    const { data: cartItems } = await supabase
-      .from('cart_items')
-      .select('id')
-      .eq('user_id', userId);
+    // Query cart items count - these tables need to be created
+    // For now, return empty arrays as placeholders
+    const cartItems: any[] = [];
+    const wishlistItems: any[] = [];
+    
+    // TODO: Query actual cart_items and wishlist_items tables once created
+    // const { data: cartItems } = await supabase
+    //   .from('cart_items')
+    //   .select('id')
+    //   .eq('user_id', userId);
 
-    // Query wishlist items count directly
-    const { data: wishlistItems } = await supabase
-      .from('wishlist_items')
-      .select('id')
-      .eq('user_id', userId);
+    // const { data: wishlistItems } = await supabase
+    //   .from('wishlist_items')
+    //   .select('id')
+    //   .eq('user_id', userId);
 
     const firstName = profile?.first_name?.split(' ')[0] || 'Customer';
     const baseAge = profile?.age || 25;
