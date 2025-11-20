@@ -27,8 +27,8 @@ export const generateConversationShareUrl = (conversationId: string): string => 
 
 export const trackShareEvent = (contentType: string, contentId: string, platform: string) => {
   // Track share events for analytics
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'share', {
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    (window as any).gtag('event', 'share', {
       content_type: contentType,
       item_id: contentId,
       method: platform

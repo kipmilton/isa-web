@@ -266,10 +266,10 @@ const ProductDetail = () => {
     if (!productId) return;
     try {
       const products = await ProductService.getSimilarProducts(productId);
-      setSimilarProducts(products);
+      setSimilarProducts(products as any);
       
       if (user) {
-        checkSimilarProductsInteractions(products);
+        checkSimilarProductsInteractions(products as any);
       }
     } catch (error) {
       console.error("Error loading similar products:", error);

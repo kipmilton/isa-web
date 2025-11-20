@@ -84,7 +84,7 @@ export class SharedContentService {
         .update({ view_count: data.view_count + 1 })
         .eq('id', data.id);
 
-      return data;
+      return data as any;
     } catch (error) {
       console.error('Error getting shared content:', error);
       throw error;
@@ -100,7 +100,7 @@ export class SharedContentService {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as any[];
     } catch (error) {
       console.error('Error getting user shares:', error);
       throw error;
