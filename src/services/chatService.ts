@@ -17,20 +17,23 @@ interface ChatResponse {
 }
 
 export class ChatService {
-  private static API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
   static async sendMessage(customerId: string, message: string): Promise<ChatResponse> {
     try {
-      const response = await fetch(`${this.API_BASE_URL}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerId,
-          message
-        })
-      });
+      // Call Supabase Edge Function
+      const response = await fetch(
+        'https://cwaeldxeuqxzcohnflun.supabase.co/functions/v1/chat',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3YWVsZHhldXF4emNvaG5mbHVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4NTQyNjYsImV4cCI6MjA2NjQzMDI2Nn0.Mq1BIhsvpT78f5TNqXaejRSnERehVfo9teJ_lk-UllY`
+          },
+          body: JSON.stringify({
+            customerId,
+            message
+          })
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
