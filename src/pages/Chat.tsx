@@ -297,35 +297,37 @@ const Chat = () => {
                 ) : (
                   chatHistory.map((chat) => (
                     <SidebarMenuItem key={chat.id}>
-                      <SidebarMenuButton 
-                        className="w-full text-left p-2 md:p-3 hover:bg-gray-100 rounded-lg"
-                        onClick={() => selectConversation(chat.id)}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-xs md:text-sm text-gray-800 truncate">
-                            {chat.title}
-                          </div>
-                          <div className="text-xs text-gray-500 truncate mt-1">
-                            {chat.preview}
-                          </div>
-                          <div className="text-xs text-gray-400 mt-1">
-                            {formatTime(new Date(chat.updated_at))}
+                      <div className="flex items-center w-full gap-1">
+                        <div 
+                          className="flex-1 p-2 md:p-3 hover:bg-gray-100 rounded-lg cursor-pointer"
+                          onClick={() => selectConversation(chat.id)}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-xs md:text-sm text-gray-800 truncate">
+                              {chat.title}
+                            </div>
+                            <div className="text-xs text-gray-500 truncate mt-1">
+                              {chat.preview}
+                            </div>
+                            <div className="text-xs text-gray-400 mt-1">
+                              {formatTime(new Date(chat.updated_at))}
+                            </div>
                           </div>
                         </div>
-                      </SidebarMenuButton>
-                      {currentConversationId === chat.id && (
-                        <SidebarMenuAction>
-                          <EnhancedShareButton
-                            contentType="conversation"
-                            contentId={chat.id}
-                            contentTitle={chat.title}
-                            contentData={chat}
-                            variant="ghost"
-                            size="sm"
-                            showText={false}
-                          />
-                        </SidebarMenuAction>
-                      )}
+                        {currentConversationId === chat.id && (
+                          <div className="flex-shrink-0">
+                            <EnhancedShareButton
+                              contentType="conversation"
+                              contentId={chat.id}
+                              contentTitle={chat.title}
+                              contentData={chat}
+                              variant="ghost"
+                              size="sm"
+                              showText={false}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </SidebarMenuItem>
                   ))
                 )}
