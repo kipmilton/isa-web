@@ -12,12 +12,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { ConversationService, ChatConversation, ChatMessage } from "@/services/conversationService";
 import EnhancedShareButton from "@/components/sharing/EnhancedShareButton";
 import { toast } from "sonner";
+import { ChatService } from "@/services/chatService";
 
-  interface Message {
+interface Message {
   id: number;
   type: 'user' | 'isa';
   content: string;
   timestamp: Date;
+  products?: Array<{
+    product_id: string;
+    name: string;
+    price: number;
+    image_url: string;
+    main_category: string;
+    sub_category: string;
+    sub_sub_category: string;
+    brand?: string;
+    attributes?: any;
+  }>;
 }
 
 interface ChatHistory {
@@ -137,36 +149,72 @@ const Chat = () => {
       }
     }
 
-    // Simulate MyPlug AI response
-    setTimeout(async () => {
-      const responses = [
-        "I'd be happy to help you find the perfect products! Let me search through our curated selection...",
-        "Great question! Based on your preferences, I can recommend several options that match your style and budget.",
-        "I've found some amazing deals that I think you'll love! Here are my top recommendations...",
-        "Let me help you discover products that are trending and perfect for your needs...",
-        "I can definitely assist with that! I've curated some fantastic options just for you..."
-      ];
-      
+    // Clear input immediately for better UX
+    const messageToSend = currentMessage;
+    setCurrentMessage("");
+
+    // Show typing indicator
+    const typingMessage: Message = {
+      id: Date.now() + 1,
+      type: 'isa',
+      content: '...',
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, typingMessage]);
+
+    try {
+      // ⭐ CALL ACTUAL GEMINI API BACKEND ⭐
+      const response = await ChatService.sendMessage(user.id, messageToSend);
+
+      // Remove typing indicator and add real response
+      setMessages(prev => prev.filter(m => m.id !== typingMessage.id));
+
       const isaResponse: Message = {
-        id: Date.now() + 1,
+        id: Date.now() + 2,
         type: 'isa',
-        content: responses[Math.floor(Math.random() * responses.length)],
+        content: response.message,
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, isaResponse]);
 
       // Save MyPlug AI response to database
-      if (conversationId) {
+      if (conversationId && response.success) {
         try {
-          await ConversationService.addMessage(conversationId, user.id, 'myplug', isaResponse.content);
+          await ConversationService.addMessage(conversationId, user.id, 'myplug', response.message);
         } catch (error) {
           console.error('Error saving MyPlug AI message:', error);
         }
       }
-    }, 1500);
 
-    setCurrentMessage("");
+      // Handle products if returned
+      if (response.hasProducts && response.products && response.products.length > 0) {
+        const productsMessage: Message = {
+          id: Date.now() + 3,
+          type: 'isa',
+          content: `I found ${response.products.length} products for you!`,
+          timestamp: new Date(),
+          products: response.products
+        };
+        
+        setMessages(prev => [...prev, productsMessage]);
+      }
+
+    } catch (error) {
+      // Remove typing indicator
+      setMessages(prev => prev.filter(m => m.id !== typingMessage.id));
+      
+      // Show error message
+      const errorMessage: Message = {
+        id: Date.now() + 4,
+        type: 'isa',
+        content: "I'm having trouble right now. Please try again in a moment.",
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+      toast.error('Failed to get response from MyPlug');
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -373,6 +421,63 @@ const Chat = () => {
                         <div className="text-xs opacity-70 mt-1 md:mt-2">
                           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
+                        
+                        {/* Product Cards Display */}
+                        {message.products && message.products.length > 0 && (
+                          <div className="mt-3 space-y-2">
+                            {message.products.map((product) => (
+                              <div 
+                                key={product.product_id} 
+                                className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+                                onClick={() => navigate(`/product/${product.product_id}`)}
+                              >
+                                <div className="flex gap-3">
+                                  <img 
+                                    src={product.image_url} 
+                                    alt={product.name}
+                                    className="w-16 h-16 object-cover rounded flex-shrink-0"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-medium text-sm text-gray-900 truncate">
+                                      {product.name}
+                                    </h4>
+                                    <p className="text-xs text-gray-600">
+                                      {product.brand && `${product.brand} • `}
+                                      {product.sub_sub_category}
+                                    </p>
+                                    <p className="text-base font-bold text-orange-600 mt-1">
+                                      KES {product.price.toLocaleString()}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex gap-2 mt-2">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    className="flex-1 text-xs"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toast.success('Added to cart!');
+                                    }}
+                                  >
+                                    🛒 Add to Cart
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    className="flex-1 text-xs"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toast.success('Added to favorites!');
+                                    }}
+                                  >
+                                    ❤️ Like
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
