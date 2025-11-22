@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { Send, Plus, History, Menu, Home, Share2 } from "lucide-react";
@@ -48,6 +48,7 @@ const Chat = () => {
   const [chatHistory, setChatHistory] = useState<ChatConversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load conversations when user is available
   useEffect(() => {
@@ -55,6 +56,11 @@ const Chat = () => {
       loadConversations();
     }
   }, [user]);
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   // Check for rejected vendors on page load
   useEffect(() => {
@@ -481,11 +487,12 @@ const Chat = () => {
                           </div>
                         )}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </ScrollArea>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+          </ScrollArea>
 
             {/* Input Area */}
             <div className="p-3 md:p-4 border-t border-gray-200 bg-white">
